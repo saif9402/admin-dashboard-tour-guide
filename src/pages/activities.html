@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="../output.css" rel="stylesheet" />
+    <title>Tour Guide Admin Panel</title>
+  </head>
+  <body class="bg-gray-100 font-sans">
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-white border-r p-4">
+        <h2 class="text-xl font-bold mb-4 text-center">Tour Admin</h2>
+        <nav class="space-y-2">
+          <a href="home.html" class="block px-4 py-2 rounded hover:bg-gray-200"
+            >Trips</a
+          >
+          <a
+            href="categories.html"
+            class="block px-4 py-2 rounded hover:bg-gray-200"
+            >Categories</a
+          >
+          <a
+            href="includes.html"
+            class="block px-4 py-2 rounded hover:bg-gray-200"
+            >Includes</a
+          >
+          <a
+            href="Languages.html"
+            class="block px-4 py-2 rounded hover:bg-gray-200"
+            >Languages</a
+          >
+          <a
+            href="activities.html"
+            class="block px-4 py-2 rounded hover:bg-gray-200 font-bold"
+            >Activities</a
+          >
+          <a href="#" class="block px-4 py-2 rounded hover:bg-gray-200"
+            >Bookings</a
+          >
+          <a href="#" class="block px-4 py-2 rounded hover:bg-gray-200"
+            >Logout</a
+          >
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-2xl font-bold">Manage Activities</h1>
+          <button
+            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            id="addActBtn"
+          >
+            Add Activity
+          </button>
+        </div>
+
+        <!-- <div class="mb-4">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search Language"
+            class="w-full border border-gray-300 rounded px-3 py-2"
+          />
+        </div> -->
+
+        <!-- Trip Table -->
+        <div class="bg-white rounded shadow overflow-x-auto">
+          <table class="min-w-full">
+            <thead class="bg-gray-200">
+              <tr>
+                <th class="text-left px-4 py-2">ID</th>
+                <th class="text-left px-4 py-2">Activity</th>
+                <th class="text-left px-4 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="actTable">
+              <!-- Trip rows go here -->
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal (hidden by default) -->
+    <div
+      id="actModel"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center overflow-y-auto px-4 py-8 hidden"
+    >
+      <div
+        class="bg-white p-6 rounded w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+      >
+        <h2 class="text-xl font-bold mb-4">Add Activity</h2>
+        <form id="actForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="hidden" id="actId" name="id" />
+
+          <input
+            type="text"
+            name="Name"
+            placeholder="Activity"
+            class="border px-3 py-2 rounded"
+            required
+          />
+
+          <!-- Buttons -->
+          <div class="flex justify-end space-x-2 md:col-span-2">
+            <button
+              type="button"
+              id="cancelBtn"
+              class="px-4 py-2 bg-gray-400 text-white rounded"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 bg-blue-600 text-white rounded"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const modal = document.getElementById("actModel");
+      const form = document.getElementById("actForm");
+      const tableBody = document.getElementById("actTable");
+      const searchInput = document.getElementById("searchInput");
+
+      // Listen to search input
+      // searchInput.addEventListener("input", () => {
+      //   const query = searchInput.value.trim();
+      //   loadLanguages(query);
+      // });
+
+      const API_BASE = "https://tourguidehurghda.runasp.net";
+
+      // Load categories on page load
+      async function loadActivities(searchQuery = "") {
+        try {
+          let url = `${API_BASE}/api/Activity/GetAllActivities`;
+
+          //   if (searchQuery) {
+          //     url += `&Search=${encodeURIComponent(searchQuery)}`;
+          //   }
+
+          const res = await fetch(url);
+          const data = await res.json();
+          console.log("API response:", data);
+
+          if (res.ok && data.succeeded) {
+            const activities = data.data;
+            tableBody.innerHTML = "";
+
+            activities.forEach((act) => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+            <td class="px-4 py-2">${act.id}</td>
+            <td class="px-4 py-2">${act.name}</td>
+            <td class="px-4 py-2">
+                  <button class="text-blue-500 mr-3 hover:underline" onclick="editAct(${
+                    act.id
+                  }, '${act.name.replace(/'/g, "\\'")}')">Edit</button>
+
+              <button class="text-red-500 ml-3 hover:underline" onclick="deleteAct(${
+                act.id
+              })">Delete</button>
+            </td>
+          `;
+              tableBody.appendChild(row);
+            });
+          } else {
+            alert("Failed to load Activities");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error loading Activities");
+        }
+      }
+
+      function editAct(id, name) {
+        form.elements["Name"].value = name;
+        form.elements["id"].value = id;
+        modal.classList.remove("hidden");
+      }
+
+      // Add a new Lang
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const id = form.elements["id"].value;
+        const name = form.elements["Name"].value;
+        const formData = { name };
+
+        const isEdit = Boolean(id);
+
+        const endpoint = isEdit
+          ? `${API_BASE}/api/Activity/UpdateActivity/${id}`
+          : `${API_BASE}/api/Activity/AddActivity`;
+
+        const method = isEdit ? "PUT" : "POST";
+
+        try {
+          const res = await fetch(endpoint, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          });
+
+          const data = await res.json();
+          if (res.ok && data.succeeded) {
+            alert(isEdit ? "Activity updated!" : "Activity added!");
+            form.reset();
+            modal.classList.add("hidden");
+            loadActivities();
+          } else {
+            alert("Failed: " + (data.message || "Unknown error"));
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error while saving Activity.");
+        }
+      });
+
+      // Delete Lang
+      async function deleteAct(id) {
+        if (!confirm("Are you sure you want to delete this Activity?")) return;
+
+        try {
+          const res = await fetch(
+            `${API_BASE}/api/Activity/DeleteActivity/${id}`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          const data = await res.json();
+          if (res.ok && data.succeeded) {
+            alert("Activity deleted");
+            loadActivities();
+          } else {
+            alert("Failed to delete Activity");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error deleting Activity");
+        }
+      }
+
+      // Show modal
+      document.getElementById("addActBtn").addEventListener("click", () => {
+        modal.classList.remove("hidden");
+      });
+
+      // Hide modal
+      document.getElementById("cancelBtn").addEventListener("click", () => {
+        modal.classList.add("hidden");
+        form.reset();
+      });
+
+      // Initial load
+      loadActivities();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="../output.css" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <title>Tour Guide Admin Panel</title>
+  </head>
+  <body class="bg-gray-100 font-sans">
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-white border-r shadow-md">
+        <div class="p-6 border-b">
+          <h2 class="text-2xl font-bold text-blue-600 text-center">
+            Tour Admin
+          </h2>
+        </div>
+        <nav class="p-4 space-y-3">
+          <a
+            href="home.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="map"></i> <span>Trips</span>
+          </a>
+          <a
+            href="categories.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="folder"></i> <span>Categories</span>
+          </a>
+          <a
+            href="includes.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 bg-blue-100 shadow-inner font-medium"
+          >
+            <i data-lucide="check-square"></i> <span>Includes</span>
+          </a>
+          <a
+            href="Languages.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="languages"></i> <span>Languages</span>
+          </a>
+          <a
+            href="activities.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="activity"></i> <span>Activities</span>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="calendar-check"></i> <span>Bookings</span>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-red-600 hover:bg-red-100"
+          >
+            <i data-lucide="log-out"></i> <span>Logout</span>
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-8">
+        <div
+          class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
+        >
+          <h1 class="text-3xl font-bold text-gray-900">Manage Includes</h1>
+          <button
+            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow"
+            id="addIncludeBtn"
+          >
+            <i data-lucide="plus"></i>
+            Add Include
+          </button>
+        </div>
+
+        <div class="mb-6">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search Include..."
+            class="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-4 py-2"
+          />
+        </div>
+
+        <div
+          class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4"
+        >
+          <div class="w-full md:w-1/3">
+            <label class="block mb-1 text-sm font-medium text-gray-700"
+              >Filter by Language</label
+            >
+            <select
+              title="Select Language"
+              id="languageSelect"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            ></select>
+          </div>
+        </div>
+
+        <!-- Trip Table -->
+        <div class="bg-white rounded-xl shadow overflow-x-auto">
+          <table class="min-w-full text-sm text-left">
+            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+              <tr>
+                <th class="px-6 py-4">ID</th>
+                <th class="px-6 py-4">Include</th>
+                <th class="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="includeTable" class="divide-y divide-gray-200 bg-white">
+              <!-- Trip rows go here -->
+            </tbody>
+          </table>
+        </div>
+        <div
+          id="pagination"
+          class="mt-6 flex justify-center items-center gap-3 text-sm font-medium"
+        ></div>
+      </main>
+    </div>
+
+    <!-- Modal (hidden by default) -->
+    <div
+      id="includeModel"
+      class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out hidden"
+    >
+      <div class="p-6 flex flex-col h-full">
+        <div class="flex items-center justify-between mb-4">
+          <h2 id="modelTitle" class="text-xl font-semibold text-gray-800">
+            Add include
+          </h2>
+          <button
+            type="button"
+            id="cancelBtn"
+            class="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+          >
+            &times;
+          </button>
+        </div>
+
+        <form id="includeForm" class="flex flex-col flex-1 gap-6 overflow-auto">
+          <input type="hidden" id="includeId" name="id" />
+
+          <div id="languageFields" class="flex flex-col gap-4"></div>
+
+          <div class="mt-auto flex justify-end space-x-3">
+            <button
+              type="button"
+              id="cancelBtn"
+              class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script>
+      lucide.createIcons();
+
+      const modal = document.getElementById("includeModel");
+      const form = document.getElementById("includeForm");
+      const tableBody = document.getElementById("includeTable");
+      const searchInput = document.getElementById("searchInput");
+
+      const API_BASE = "https://tourguidehurghda.runasp.net";
+      let currentPage = 1;
+      const pageSize = 8;
+
+      const languageSelect = document.getElementById("languageSelect");
+      let selectedLanguageId = "";
+      let availableLanguages = [];
+
+      async function fetchLanguages() {
+        try {
+          const res = await fetch(`${API_BASE}/api/Language/GetAllLanguages`);
+          const data = await res.json();
+
+          if (res.ok && data.succeeded) {
+            availableLanguages = data.data;
+
+            // Populate dropdown
+            data.data.forEach((lang) => {
+              const option = document.createElement("option");
+              option.value = lang.id;
+              option.textContent = lang.name;
+              languageSelect.appendChild(option);
+            });
+
+            // Optional: default to English
+            const defaultLang = data.data.find(
+              (l) => l.name.toLowerCase() === "english"
+            );
+            if (defaultLang) {
+              selectedLanguageId = defaultLang.id;
+              languageSelect.value = defaultLang.id;
+            }
+
+            loadIncludes(searchInput.value.trim(), currentPage);
+          } else {
+            console.error("Failed to fetch languages");
+          }
+        } catch (err) {
+          console.error("Error fetching languages:", err);
+        }
+      }
+
+      async function loadIncludes(searchQuery = "", pageNumber = 1) {
+        try {
+          let url = `${API_BASE}/api/Includes/GetAllIncludes/${selectedLanguageId}?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+
+          if (searchQuery) {
+            url += `&Search=${encodeURIComponent(searchQuery)}`;
+          }
+
+          const res = await fetch(url);
+          const data = await res.json();
+          console.log("API response:", data);
+
+          if (res.ok && data.succeeded) {
+            const includes = data.data.data;
+            renderPagination(data.data.pageNumber, data.data.count);
+            tableBody.innerHTML = "";
+
+            includes.forEach((inc) => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                <td class="px-6 py-3">${inc.id}</td>
+                <td class="px-6 py-3">${inc.name}</td>
+                <td class="px-6 py-3">
+                  <button class="text-blue-400 hover:text-blue-900" title="Edit" onclick="editInclude(${inc.id})"
+      >
+                    <i data-lucide="pencil"></i>
+                  </button>
+                  <button class="text-red-400 hover:text-red-900" title="Delete" onclick="deleteInclude(${inc.id})">
+                    <i data-lucide="trash-2"></i>
+                  </button>
+                </td>
+              `;
+              tableBody.appendChild(row);
+            });
+
+            lucide.createIcons();
+          } else {
+            alert("Failed to load Includes");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error loading Includes");
+        }
+      }
+
+      // 👇 Re-fetch includes when language is changed
+      languageSelect.addEventListener("change", () => {
+        selectedLanguageId = languageSelect.value;
+        currentPage = 1;
+        loadIncludes(searchInput.value.trim(), currentPage);
+      });
+
+      function renderPagination(current, totalCount) {
+        const paginationContainer = document.getElementById("pagination");
+        const totalPages = Math.ceil(totalCount / pageSize);
+        paginationContainer.innerHTML = "";
+
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "Previous";
+        prevBtn.disabled = current === 1;
+        prevBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+        prevBtn.onclick = () => {
+          if (current > 1) {
+            currentPage--;
+            loadIncludes(searchInput.value.trim(), currentPage); // ✅ Fixed
+          }
+        };
+
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "Next";
+        nextBtn.disabled = current === totalPages;
+        nextBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+        nextBtn.onclick = () => {
+          if (current < totalPages) {
+            currentPage++;
+            loadIncludes(searchInput.value.trim(), currentPage); // ✅ Fixed
+          }
+        };
+
+        paginationContainer.appendChild(prevBtn);
+        paginationContainer.append(` Page ${current} of ${totalPages} `);
+        paginationContainer.appendChild(nextBtn);
+      }
+
+      // Update this to pass `currentPage`
+      searchInput.addEventListener("input", () => {
+        currentPage = 1;
+        loadIncludes(searchInput.value.trim(), currentPage);
+      });
+
+      async function editInclude(id) {
+        try {
+          const res = await fetch(
+            `${API_BASE}/api/Includes/GetIncludeById/${id}`
+          );
+          const data = await res.json();
+          console.log("data: ", data);
+
+          if (!res.ok || !data.succeeded) {
+            alert("Failed to load include for editing");
+            return;
+          }
+
+          const include = data.data;
+          console.log("data.data: ", include.id);
+          form.elements["id"].value = include.id;
+
+          // Clear and populate language fields
+          document.getElementById("modelTitle").innerText = "Update Include";
+          const languageFieldsContainer =
+            document.getElementById("languageFields");
+          languageFieldsContainer.innerHTML = "";
+
+          availableLanguages.forEach((lang) => {
+            const existingTranslation = include.name.find(
+              (n) => n.languageId === lang.id
+            );
+
+            const field = document.createElement("div");
+            field.className = "space-y-1";
+            field.innerHTML = `
+              <label class="block font-medium">${lang.name}</label>
+              <input
+              required
+                type="text"
+                name="lang-${lang.id}"
+                placeholder="Translation in ${lang.name}"
+                class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                value="${
+                  existingTranslation ? existingTranslation.translation : ""
+                }"
+              />
+              <input type="hidden" name="lang-nameid-${lang.id}" value="${
+              existingTranslation ? existingTranslation.id : ""
+            }" />
+            `;
+            languageFieldsContainer.appendChild(field);
+          });
+
+          modal.classList.remove("hidden");
+          setTimeout(() => modal.classList.remove("translate-x-full"), 10);
+        } catch (err) {
+          console.error("Error fetching include for edit:", err);
+          alert("Error loading include");
+        }
+      }
+
+      // Add a new Include
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const id = form.elements["id"].value;
+        const isEdit = Boolean(id);
+
+        try {
+          if (!isEdit) {
+            // ADD mode: send full array of translations
+            const name = availableLanguages.map((lang) => ({
+              languageId: lang.id,
+              translation: form.elements[`lang-${lang.id}`].value.trim(),
+            }));
+
+            const res = await fetch(`${API_BASE}/api/Includes/AddInclude`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name }),
+            });
+
+            const data = await res.json();
+            if (res.ok && data.succeeded) {
+              alert("Include added!");
+              form.reset();
+              modal.classList.add("hidden");
+              loadIncludes(searchInput.value.trim(), currentPage);
+            } else {
+              alert("Failed: " + (data.message || "Unknown error"));
+            }
+          } else {
+            // EDIT mode: update each name[id] individually
+            const updatePromises = availableLanguages.map(async (lang) => {
+              const translation = form.elements[`lang-${lang.id}`].value.trim();
+              const nameId = form.elements[`lang-nameid-${lang.id}`].value;
+
+              if (nameId && translation) {
+                const response = await fetch(
+                  `${API_BASE}/api/Includes/UpdateInclude/${nameId}`,
+                  {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: translation }),
+                  }
+                );
+
+                if (!response.ok) {
+                  const errorText = await response.text();
+                  console.error(
+                    `Update failed for nameId ${nameId}:`,
+                    response.status,
+                    errorText
+                  );
+                }
+
+                return response;
+              } else {
+                console.warn(
+                  `Skipping update for lang ${lang.id} — missing nameId or translation`
+                );
+                return null;
+              }
+
+              return null;
+            });
+
+            const results = await Promise.all(updatePromises);
+            const allSucceeded = results.every((res) => res && res.ok);
+
+            if (allSucceeded) {
+              // alert("Include updated!");
+              form.reset();
+              modal.classList.add("hidden");
+              loadIncludes(searchInput.value.trim(), currentPage);
+            } else {
+              alert("Some translations failed to update.");
+            }
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error while saving Include.");
+        }
+      });
+
+      // Delete Include
+      async function deleteInclude(id) {
+        if (!confirm("Are you sure you want to delete this include?")) return;
+
+        try {
+          const res = await fetch(
+            `${API_BASE}/api/Includes/DeleteInclude/${id}`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          const data = await res.json();
+          if (res.ok && data.succeeded) {
+            alert("Include deleted");
+            loadIncludes(searchInput.value.trim(), currentPage);
+          } else {
+            alert("Failed to delete Include");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error deleting include");
+        }
+      }
+
+      // Show modal
+      document.getElementById("addIncludeBtn").addEventListener("click", () => {
+        document.getElementById("modelTitle").innerText = "Add Include";
+        const languageFieldsContainer =
+          document.getElementById("languageFields");
+        languageFieldsContainer.innerHTML = ""; // Clear previous fields
+        form.elements["id"].value = ""; // ✅ Clear edit mode
+
+        availableLanguages.forEach((lang) => {
+          const field = document.createElement("div");
+          field.className = "space-y-1";
+          field.innerHTML = `
+          <label class="block font-medium">${lang.name}</label>
+          <input
+            type="text"
+            name="lang-${lang.id}"
+            placeholder="Translation in ${lang.name}"
+            class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        `;
+          languageFieldsContainer.appendChild(field);
+        });
+
+        modal.classList.remove("hidden");
+        setTimeout(() => modal.classList.remove("translate-x-full"), 10);
+      });
+
+      document.querySelectorAll("#cancelBtn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          modal.classList.add("translate-x-full");
+          setTimeout(() => modal.classList.add("hidden"), 300);
+          form.reset();
+        });
+      });
+
+      // Initial load
+      fetchLanguages();
+      loadIncludes(searchInput.value.trim(), currentPage);
+    </script>
+  </body>
+</html>

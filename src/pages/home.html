@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="../output.css" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <title>Tour Guide Admin Panel</title>
+  </head>
+  <body class="bg-gray-50 text-gray-800 font-sans">
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-white border-r shadow-md">
+        <div class="p-6 border-b">
+          <h2 class="text-2xl font-bold text-blue-600 text-center">
+            Tour Admin
+          </h2>
+        </div>
+        <nav class="p-4 space-y-3">
+          <a
+            href="home.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 bg-blue-100 shadow-inner font-medium"
+          >
+            <i data-lucide="map"></i> <span>Trips</span>
+          </a>
+          <a
+            href="categories.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="folder"></i> <span>Categories</span>
+          </a>
+          <a
+            href="includes.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="check-square"></i> <span>Includes</span>
+          </a>
+          <a
+            href="Languages.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="languages"></i> <span>Languages</span>
+          </a>
+          <a
+            href="activities.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="activity"></i> <span>Activities</span>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="calendar-check"></i> <span>Bookings</span>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-red-600 hover:bg-red-100"
+          >
+            <i data-lucide="log-out"></i> <span>Logout</span>
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-8">
+        <div
+          class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
+        >
+          <h1 class="text-3xl font-bold text-gray-900">Manage Trips</h1>
+          <button
+            id="addTripBtn"
+            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow"
+          >
+            <i data-lucide="plus"></i>
+            <span>Add Trip</span>
+          </button>
+        </div>
+
+        <div class="mb-6">
+          <input
+            type="text"
+            placeholder="Search trips..."
+            class="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-4 py-2"
+          />
+        </div>
+
+        <!-- Trip Table -->
+        <div class="bg-white rounded-xl shadow overflow-x-auto">
+          <table class="min-w-full text-sm text-left">
+            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+              <tr>
+                <th class="px-6 py-4">Name</th>
+                <th class="px-6 py-4">Category</th>
+                <th class="px-6 py-4">Price</th>
+                <th class="px-6 py-4">Date</th>
+                <th class="px-6 py-4">Duration</th>
+                <th class="px-6 py-4">Available</th>
+                <th class="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tripTable" class="divide-y divide-gray-200 bg-white">
+              <!-- Trip rows go here -->
+            </tbody>
+          </table>
+        </div>
+        <div
+          id="pagination"
+          class="mt-6 flex justify-center items-center gap-3 text-sm font-medium"
+        ></div>
+      </main>
+    </div>
+
+    <!-- Modal (hidden by default) -->
+    <div
+      id="tripModal"
+      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-lg backdrop-filter flex items-center justify-center px-4 py-8 hidden transition-opacity duration-300"
+    >
+      <div
+        class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl p-6 transform transition-all duration-300"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-semibold text-gray-800">Add Trip</h2>
+          <button
+            type="button"
+            id="cancelBtn"
+            class="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+          >
+            &times;
+          </button>
+        </div>
+
+        <form id="tripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <input type="hidden" id="tripId" name="id" />
+
+          <div class="space-y-1">
+            <label class="block font-medium">Trip Name</label>
+            <input
+              type="text"
+              name="Name"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Price</label>
+            <input
+              type="number"
+              name="Price"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Duration</label>
+            <input
+              type="text"
+              name="Duration"
+              placeholder="e.g. 2h"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Date & Time</label>
+            <input
+              type="datetime-local"
+              name="DateTime"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Meeting Point Address</label>
+            <input
+              type="text"
+              name="MeetingPointAddress"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Meeting Point URL</label>
+            <input
+              type="url"
+              name="MeetingPointURL"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div class="md:col-span-2 space-y-2">
+            <label class="block font-medium">Main Image</label>
+            <input
+              type="file"
+              name="MainImage"
+              accept="image/*"
+              class="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              required
+            />
+          </div>
+
+          <div class="md:col-span-2 space-y-2">
+            <label class="block font-medium">Gallery Images</label>
+            <input
+              type="file"
+              name="Images"
+              accept="image/*"
+              multiple
+              class="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Category</label>
+            <select
+              name="CategoryId"
+              id="categorySelect"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Loading...</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Activities</label>
+            <select
+              id="activitiesSelect"
+              name="Activities"
+              multiple
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            ></select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Languages</label>
+            <select
+              id="languagesSelect"
+              name="Languages"
+              multiple
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            ></select>
+          </div>
+
+          <!-- Includes -->
+          <div class="space-y-1">
+            <label class="block font-medium">Includes</label>
+            <select
+              name="Includes"
+              id="includesSelect"
+              multiple
+              class="w-full border rounded-lg px-4 py-2"
+              required
+            ></select>
+          </div>
+
+          <!-- Not Includes -->
+          <div class="space-y-1">
+            <label class="block font-medium">Not Included</label>
+            <select
+              name="NotIncludes"
+              id="notIncludesSelect"
+              multiple
+              class="w-full border rounded-lg px-4 py-2"
+            ></select>
+          </div>
+
+          <div class="flex items-center space-x-2 md:col-span-2">
+            <input
+              type="checkbox"
+              name="IsAvailable"
+              class="form-checkbox text-blue-600"
+            />
+            <label class="text-sm">Is Available</label>
+          </div>
+
+          <div class="md:col-span-2 space-y-1">
+            <label class="block font-medium">Description</label>
+            <textarea
+              name="Description"
+              rows="4"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            ></textarea>
+          </div>
+
+          <div class="flex justify-end md:col-span-2 space-x-3">
+            <button
+              type="button"
+              id="cancelBtn2"
+              class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      lucide.createIcons();
+      const baseUrl =
+        "https://tourguidehurghda.runasp.net/api/Trip/GetAllTrips";
+      const tripTable = document.getElementById("tripTable");
+      let currentPage = 1;
+      const pageSize = 8;
+
+      async function fetchTrips(page = 1) {
+        const response = await fetch(
+          `${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`
+        );
+        const result = await response.json();
+
+        if (result.succeeded) {
+          renderTrips(result.data.data);
+          renderPagination(result.data.pageNumber, result.data.count);
+        } else {
+          tripTable.innerHTML = `<tr><td colspan="7" class="text-center text-red-500 py-4">Failed to load trips</td></tr>`;
+        }
+      }
+
+      function renderTrips(trips) {
+        tripTable.innerHTML = "";
+
+        if (trips.length === 0) {
+          tripTable.innerHTML = `<tr><td colspan="7" class="text-center py-4">No trips found</td></tr>`;
+          return;
+        }
+
+        trips.forEach((trip) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td class="px-6 py-3">${trip.name}</td>
+            <td class="px-6 py-3">${trip.category}</td>
+            <td class="px-6 py-3">$${trip.price.toFixed(2)}</td>
+            <td class="px-6 py-3">${new Date(
+              trip.dateTime
+            ).toLocaleString()}</td>
+            <td class="px-6 py-3">${trip.duration}</td>
+            <td class="px-6 py-3">${trip.isAvailable ? "Yes" : "No"}</td>
+            <td class="px-6 py-3 flex items-center gap-2">
+              <button class="text-blue-400 hover:text-blue-900 shadow-inner" title="Edit">
+                <i data-lucide="pencil"></i>  
+              </button>
+              <button class="text-red-400 hover:text-red-900" title="Delete">
+                <i data-lucide="trash-2"></i>
+              </button>
+            </td>
+          `;
+          tripTable.appendChild(row);
+        });
+        lucide.createIcons();
+      }
+
+      function renderPagination(current, totalCount) {
+        const paginationContainer = document.getElementById("pagination");
+        const totalPages = Math.ceil(totalCount / pageSize);
+        paginationContainer.innerHTML = "";
+
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "Previous";
+        prevBtn.disabled = current === 1;
+        prevBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+        prevBtn.onclick = () => {
+          if (current > 1) {
+            currentPage--;
+            fetchTrips(currentPage);
+          }
+        };
+
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "Next";
+        nextBtn.disabled = current === totalPages;
+        nextBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+        nextBtn.onclick = () => {
+          if (current < totalPages) {
+            currentPage++;
+            fetchTrips(currentPage);
+          }
+        };
+
+        paginationContainer.appendChild(prevBtn);
+        paginationContainer.append(` Page ${current} of ${totalPages} `);
+        paginationContainer.appendChild(nextBtn);
+      }
+
+      fetchTrips(currentPage);
+      document.getElementById("addTripBtn").addEventListener("click", () => {
+        document.getElementById("tripModal").classList.remove("hidden");
+      });
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        //Activities
+        const activitiesSelect = document.getElementById("activitiesSelect");
+        const choicesActivities = new Choices(activitiesSelect, {
+          removeItemButton: true,
+          placeholderValue: "Select activities",
+          searchEnabled: true,
+        });
+
+        try {
+          const response = await fetch(
+            "https://tourguidehurghda.runasp.net/api/Activity/GetAllActivities"
+          );
+          const result = await response.json();
+          const activities = result.data?.data || [];
+
+          choicesActivities.setChoices(
+            activities.map((act) => ({ value: act.name, label: act.name })),
+            "value",
+            "label",
+            true
+          );
+        } catch (err) {
+          console.error("Failed to load activities", err);
+        }
+
+        //Languages
+        const languagesSelect = document.getElementById("languagesSelect");
+        const choicesLanguages = new Choices(languagesSelect, {
+          removeItemButton: true,
+          placeholderValue: "Select languages",
+          searchEnabled: true,
+        });
+
+        try {
+          const response = await fetch(
+            "https://tourguidehurghda.runasp.net/api/Language/GetAllLanguages"
+          );
+          const result = await response.json();
+          const languages = result?.data || [];
+
+          choicesLanguages.setChoices(
+            languages.map((lang) => ({ value: lang.name, label: lang.name })),
+            "value",
+            "label",
+            true
+          );
+        } catch (err) {
+          console.error("Failed to load languages", err);
+        }
+
+        // Category (single)
+        const categorySelect = document.getElementById("categorySelect");
+        const choicesCategory = new Choices(categorySelect, {
+          searchEnabled: true,
+          placeholderValue: "Select a category",
+        });
+
+        try {
+          const response = await fetch(
+            "https://tourguidehurghda.runasp.net/api/Category/GetAllCategories"
+          );
+          const result = await response.json();
+          const categories = result.data?.data || [];
+
+          const options = categories.map((cat) => ({
+            value: cat.id,
+            label: cat.name,
+          }));
+
+          choicesCategory.setChoices(options, "value", "label", true);
+        } catch (err) {
+          console.error("Failed to load categories", err);
+        }
+
+        // Includes / NotIncludes
+        const includesSelect = document.getElementById("includesSelect");
+        const notIncludesSelect = document.getElementById("notIncludesSelect");
+
+        const choicesIncludes = new Choices(includesSelect, {
+          removeItemButton: true,
+          placeholderValue: "Select includes",
+          searchEnabled: true,
+        });
+
+        const choicesNotIncludes = new Choices(notIncludesSelect, {
+          removeItemButton: true,
+          placeholderValue: "Remaining will appear here",
+          searchEnabled: true,
+        });
+
+        let allIncludes = [];
+
+        try {
+          const response = await fetch(
+            "https://tourguidehurghda.runasp.net/api/Includes/GetAllIncludes"
+          );
+          const result = await response.json();
+          allIncludes = result.data?.data || [];
+
+          choicesIncludes.setChoices(
+            allIncludes.map((i) => ({ value: i.name, label: i.name })),
+            "value",
+            "label",
+            true
+          );
+        } catch (err) {
+          console.error("Failed to load includes", err);
+        }
+
+        // Auto-populate NotIncludes
+        includesSelect.addEventListener("change", () => {
+          const selected = Array.from(includesSelect.selectedOptions).map(
+            (opt) => opt.value
+          );
+          const remaining = allIncludes
+            .filter((item) => !selected.includes(item.name))
+            .map((item) => ({ value: item.name, label: item.name }));
+
+          choicesNotIncludes.clearChoices();
+          choicesNotIncludes.setChoices(remaining, "value", "label", true);
+        });
+      });
+      document.getElementById("cancelBtn").addEventListener("click", () => {
+        document.getElementById("tripModal").classList.add("hidden");
+        document.getElementById("tripForm").reset();
+      });
+
+      document.getElementById("cancelBtn2").addEventListener("click", () => {
+        document.getElementById("tripModal").classList.add("hidden");
+        document.getElementById("tripForm").reset();
+      });
+    </script>
+  </body>
+</html>
