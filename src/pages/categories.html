@@ -26,13 +26,13 @@
           </a>
           <a
             href="categories.html"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 bg-blue-100 shadow-inner font-medium"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
           >
             <i data-lucide="folder"></i> <span>Categories</span>
           </a>
           <a
             href="includes.html"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 bg-blue-100 shadow-inner font-medium"
           >
             <i data-lucide="check-square"></i> <span>Includes</span>
           </a>
@@ -74,7 +74,7 @@
             id="addCategoryBtn"
           >
             <i data-lucide="plus"></i>
-            Add Categories
+            Add Category
           </button>
         </div>
 
@@ -85,6 +85,21 @@
             placeholder="Search Category..."
             class="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-4 py-2"
           />
+        </div>
+
+        <div
+          class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4"
+        >
+          <div class="w-full md:w-1/3">
+            <label class="block mb-1 text-sm font-medium text-gray-700"
+              >Filter by Language</label
+            >
+            <select
+              title="Select Language"
+              id="languageSelect"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            ></select>
+          </div>
         </div>
 
         <!-- Trip Table -->
@@ -110,14 +125,15 @@
     </div>
 
     <!-- Modal (hidden by default) -->
-    <!-- Floating Drawer Modal -->
     <div
-      id="categoryModal"
+      id="categoryModel"
       class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out hidden"
     >
       <div class="p-6 flex flex-col h-full">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-semibold text-gray-800">Add Category</h2>
+          <h2 id="modelTitle" class="text-xl font-semibold text-gray-800">
+            Add Category
+          </h2>
           <button
             type="button"
             id="cancelBtn"
@@ -131,18 +147,9 @@
           id="categoryForm"
           class="flex flex-col flex-1 gap-6 overflow-auto"
         >
-          <input type="hidden" id="categoryId" name="id" />
+          <input type="hidden" id="includeId" name="id" />
 
-          <div class="space-y-1">
-            <label class="block font-medium">Category Name</label>
-            <input
-              title="Name"
-              type="text"
-              name="Name"
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+          <div id="languageFields" class="flex flex-col gap-4"></div>
 
           <div class="mt-auto flex justify-end space-x-3">
             <button
@@ -162,64 +169,106 @@
         </form>
       </div>
     </div>
-
     <script>
       lucide.createIcons();
 
-      const modal = document.getElementById("categoryModal");
+      const modal = document.getElementById("categoryModel");
       const form = document.getElementById("categoryForm");
       const tableBody = document.getElementById("categoryTable");
       const searchInput = document.getElementById("searchInput");
 
-      const API_BASE = "https://tourguidehurghda.runasp.net";
       let currentPage = 1;
       const pageSize = 8;
 
+      const languageSelect = document.getElementById("languageSelect");
+      let selectedLanguageId = "";
+      let availableLanguages = [];
+
+      async function fetchLanguages() {
+        try {
+          const res = await fetch("/api/Language/GetAllLanguages");
+          const data = await res.json();
+
+          if (res.ok && data.succeeded) {
+            availableLanguages = data.data;
+
+            // Populate dropdown
+            data.data.forEach((lang) => {
+              const option = document.createElement("option");
+              option.value = lang.id;
+              option.textContent = lang.name;
+              languageSelect.appendChild(option);
+            });
+
+            // default to English
+            const defaultLang = data.data.find(
+              (l) => l.name.toLowerCase() === "english"
+            );
+            if (defaultLang) {
+              selectedLanguageId = defaultLang.id;
+              languageSelect.value = defaultLang.id;
+            }
+
+            loadCategories(searchInput.value.trim(), currentPage);
+          } else {
+            console.error("Failed to fetch languages");
+          }
+        } catch (err) {
+          console.error("Error fetching languages:", err);
+        }
+      }
+
       async function loadCategories(searchQuery = "", pageNumber = 1) {
         try {
-          let url = `${API_BASE}/api/Category/GetAllCategories?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+          let url = `/api/Category/GetAllCategories/${selectedLanguageId}?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+
           if (searchQuery) {
             url += `&Search=${encodeURIComponent(searchQuery)}`;
           }
 
           const res = await fetch(url);
           const data = await res.json();
+          console.log("API response:", data);
 
           if (res.ok && data.succeeded) {
             const categories = data.data.data;
             renderPagination(data.data.pageNumber, data.data.count);
-
             tableBody.innerHTML = "";
 
             categories.forEach((cat) => {
               const row = document.createElement("tr");
               row.innerHTML = `
-            <td class="px-6 py-3">${cat.id}</td>
-            <td class="px-6 py-3">${cat.name}</td>
-            <td class="px-6 py-3 flex items-center gap-2">
-              <button class="text-blue-400 hover:text-blue-900" title="Edit" onclick="editCategory(${
-                cat.id
-              }, '${cat.name.replace(/'/g, "\\'")}')">
-                <i data-lucide="pencil"></i>
-              </button>
-              <button class="text-red-400 hover:text-red-900" title="Delete" onclick="deleteCategory(${
-                cat.id
-              })">
-                <i data-lucide="trash-2"></i>
-              </button>
-            </td>
-          `;
+                <td class="px-6 py-3">${cat.id}</td>
+                <td class="px-6 py-3">${cat.name}</td>
+                <td class="px-6 py-3">
+                  <button class="text-blue-400 hover:text-blue-900" title="Edit" onclick="editCategory(${cat.id})"
+      >
+                    <i data-lucide="pencil"></i>
+                  </button>
+                  <button class="text-red-400 hover:text-red-900" title="Delete" onclick="deleteCategory(${cat.id})">
+                    <i data-lucide="trash-2"></i>
+                  </button>
+                </td>
+              `;
               tableBody.appendChild(row);
             });
+
             lucide.createIcons();
           } else {
-            alert("Failed to load categories");
+            alert("Failed to load Categories");
           }
         } catch (err) {
           console.error(err);
-          alert("Error loading categories");
+          alert("Error loading Categories");
         }
       }
+
+      // 👇 Re-fetch includes when language is changed
+      languageSelect.addEventListener("change", () => {
+        selectedLanguageId = languageSelect.value;
+        currentPage = 1;
+        loadCategories(searchInput.value.trim(), currentPage);
+      });
 
       function renderPagination(current, totalCount) {
         const paginationContainer = document.getElementById("pagination");
@@ -233,7 +282,7 @@
         prevBtn.onclick = () => {
           if (current > 1) {
             currentPage--;
-            fetchTrips(currentPage);
+            loadCategories(searchInput.value.trim(), currentPage);
           }
         };
 
@@ -244,7 +293,7 @@
         nextBtn.onclick = () => {
           if (current < totalPages) {
             currentPage++;
-            fetchTrips(currentPage);
+            loadCategories(searchInput.value.trim(), currentPage);
           }
         };
 
@@ -253,83 +302,199 @@
         paginationContainer.appendChild(nextBtn);
       }
 
+      // Update this to pass `currentPage`
       searchInput.addEventListener("input", () => {
         currentPage = 1;
         loadCategories(searchInput.value.trim(), currentPage);
       });
 
-      function editCategory(id, name) {
-        form.elements["Name"].value = name;
-        form.elements["id"].value = id;
-        modal.classList.remove("hidden");
-        modal.classList.remove("translate-x-full");
+      async function editCategory(id) {
+        try {
+          const res = await fetch(`/api/Category/GetCategoryById/${id}`);
+          const data = await res.json();
+          console.log("data: ", data);
+
+          if (!res.ok || !data.succeeded) {
+            alert("Failed to load Category for editing");
+            return;
+          }
+
+          const category = data.data;
+          console.log("data.data: ", category.id);
+          form.elements["id"].value = category.id;
+
+          // Clear and populate language fields
+          document.getElementById("modelTitle").innerText = "Update Category";
+          const languageFieldsContainer =
+            document.getElementById("languageFields");
+          languageFieldsContainer.innerHTML = "";
+
+          availableLanguages.forEach((lang) => {
+            const existingTranslation = category.name.find(
+              (n) => n.languageId === lang.id
+            );
+
+            const field = document.createElement("div");
+            field.className = "space-y-1";
+            field.innerHTML = `
+              <label class="block font-medium">${lang.name}</label>
+              <input
+              required
+                type="text"
+                name="lang-${lang.id}"
+                placeholder="Translation in ${lang.name}"
+                class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                value="${
+                  existingTranslation ? existingTranslation.translation : ""
+                }"
+              />
+              <input type="hidden" name="lang-nameid-${lang.id}" value="${
+              existingTranslation ? existingTranslation.id : ""
+            }" />
+            `;
+            languageFieldsContainer.appendChild(field);
+          });
+
+          modal.classList.remove("hidden");
+          setTimeout(() => modal.classList.remove("translate-x-full"), 10);
+        } catch (err) {
+          console.error("Error fetching category for edit:", err);
+          alert("Error loading category");
+        }
       }
 
+      // Add a new category
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const id = form.elements["id"].value;
-        const name = form.elements["Name"].value;
-        const formData = { name };
-
         const isEdit = Boolean(id);
 
-        const endpoint = isEdit
-          ? `${API_BASE}/api/Category/UpdateCategory/${id}`
-          : `${API_BASE}/api/Category/AddCategory`;
-
-        const method = isEdit ? "PUT" : "POST";
-
         try {
-          const res = await fetch(endpoint, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-          });
+          if (!isEdit) {
+            // ADD mode: send full array of translations
+            const name = availableLanguages.map((lang) => ({
+              languageId: lang.id,
+              translation: form.elements[`lang-${lang.id}`].value.trim(),
+            }));
 
-          const data = await res.json();
-          if (res.ok && data.succeeded) {
-            alert(isEdit ? "Category updated!" : "Category added!");
-            form.reset();
-            modal.classList.add("translate-x-full");
-            setTimeout(() => modal.classList.add("hidden"), 300);
-            loadCategories();
+            const res = await fetch(`/api/Category/AddCategory`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name }),
+            });
+
+            const data = await res.json();
+            if (res.ok && data.succeeded) {
+              alert("Category added!");
+              form.reset();
+              modal.classList.add("hidden");
+              loadCategories(searchInput.value.trim(), currentPage);
+            } else {
+              alert("Failed: " + (data.message || "Unknown error"));
+            }
           } else {
-            alert("Failed: " + (data.message || "Unknown error"));
+            // EDIT mode: update each name[id] individually
+            const updatePromises = availableLanguages.map(async (lang) => {
+              const translation = form.elements[`lang-${lang.id}`].value.trim();
+              const nameId = form.elements[`lang-nameid-${lang.id}`].value;
+
+              if (nameId && translation) {
+                const response = await fetch(
+                  `/api/Category/UpdateCategory/${nameId}`,
+                  {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: translation }),
+                  }
+                );
+
+                if (!response.ok) {
+                  const errorText = await response.text();
+                  console.error(
+                    `Update failed for nameId ${nameId}:`,
+                    response.status,
+                    errorText
+                  );
+                }
+
+                return response;
+              } else {
+                console.warn(
+                  `Skipping update for lang ${lang.id} — missing nameId or translation`
+                );
+                return null;
+              }
+
+              return null;
+            });
+
+            const results = await Promise.all(updatePromises);
+            const allSucceeded = results.every((res) => res && res.ok);
+
+            if (allSucceeded) {
+              // alert("Include updated!");
+              form.reset();
+              modal.classList.add("hidden");
+              loadCategories(searchInput.value.trim(), currentPage);
+            } else {
+              alert("Some translations failed to update.");
+            }
           }
         } catch (err) {
           console.error(err);
-          alert("Error while saving category.");
+          alert("Error while saving Category.");
         }
       });
 
+      // Delete Category
       async function deleteCategory(id) {
-        if (!confirm("Are you sure you want to delete this category?")) return;
+        if (!confirm("Are you sure you want to delete this Category?")) return;
 
         try {
-          const res = await fetch(
-            `${API_BASE}/api/Category/DeleteCategory/${id}`,
-            {
-              method: "DELETE",
-            }
-          );
+          const res = await fetch(`/api/Category/DeleteCategory/${id}`, {
+            method: "DELETE",
+          });
 
           const data = await res.json();
           if (res.ok && data.succeeded) {
             alert("Category deleted");
             loadCategories(searchInput.value.trim(), currentPage);
           } else {
-            alert("Failed to delete category");
+            alert("Failed to delete Category");
           }
         } catch (err) {
           console.error(err);
-          alert("Error deleting category");
+          alert("Error deleting Category");
         }
       }
 
+      // Show modal
       document
         .getElementById("addCategoryBtn")
         .addEventListener("click", () => {
+          document.getElementById("modelTitle").innerText = "Add Category";
+          const languageFieldsContainer =
+            document.getElementById("languageFields");
+          languageFieldsContainer.innerHTML = ""; // Clear previous fields
+          form.elements["id"].value = ""; // ✅ Clear edit mode
+
+          availableLanguages.forEach((lang) => {
+            const field = document.createElement("div");
+            field.className = "space-y-1";
+            field.innerHTML = `
+          <label class="block font-medium">${lang.name}</label>
+          <input
+            type="text"
+            name="lang-${lang.id}"
+            placeholder="Translation in ${lang.name}"
+            class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        `;
+            languageFieldsContainer.appendChild(field);
+          });
+
           modal.classList.remove("hidden");
           setTimeout(() => modal.classList.remove("translate-x-full"), 10);
         });
@@ -342,7 +507,8 @@
         });
       });
 
-      loadCategories(searchInput.value.trim(), currentPage);
+      // Initial load
+      fetchLanguages();
     </script>
   </body>
 </html>
