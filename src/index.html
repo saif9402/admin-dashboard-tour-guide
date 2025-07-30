@@ -68,16 +68,13 @@
           errorMsg.classList.add("hidden");
 
           try {
-            const response = await fetch(
-              "https://tourguidehurghda.runasp.net/api/Auth/Login",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email, password }),
-              }
-            );
+            const response = await fetch("/api/Auth/Login", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ email, password }),
+            });
 
             if (!response.ok) {
               throw new Error("Invalid login");

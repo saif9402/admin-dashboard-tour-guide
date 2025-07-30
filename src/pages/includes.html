@@ -174,7 +174,6 @@
       const tableBody = document.getElementById("includeTable");
       const searchInput = document.getElementById("searchInput");
 
-      const API_BASE = "https://tourguidehurghda.runasp.net";
       let currentPage = 1;
       const pageSize = 8;
 
@@ -184,7 +183,7 @@
 
       async function fetchLanguages() {
         try {
-          const res = await fetch(`${API_BASE}/api/Language/GetAllLanguages`);
+          const res = await fetch("/api/Language/GetAllLanguages");
           const data = await res.json();
 
           if (res.ok && data.succeeded) {
@@ -218,7 +217,7 @@
 
       async function loadIncludes(searchQuery = "", pageNumber = 1) {
         try {
-          let url = `${API_BASE}/api/Includes/GetAllIncludes/${selectedLanguageId}?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+          let url = `/api/Includes/GetAllIncludes/${selectedLanguageId}?pageNumber=${pageNumber}&pageSize=${pageSize}`;
 
           if (searchQuery) {
             url += `&Search=${encodeURIComponent(searchQuery)}`;
@@ -308,9 +307,7 @@
 
       async function editInclude(id) {
         try {
-          const res = await fetch(
-            `${API_BASE}/api/Includes/GetIncludeById/${id}`
-          );
+          const res = await fetch(`/api/Includes/GetIncludeById/${id}`);
           const data = await res.json();
           console.log("data: ", data);
 
@@ -378,7 +375,7 @@
               translation: form.elements[`lang-${lang.id}`].value.trim(),
             }));
 
-            const res = await fetch(`${API_BASE}/api/Includes/AddInclude`, {
+            const res = await fetch(`/api/Includes/AddInclude`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ name }),
@@ -401,7 +398,7 @@
 
               if (nameId && translation) {
                 const response = await fetch(
-                  `${API_BASE}/api/Includes/UpdateInclude/${nameId}`,
+                  `/api/Includes/UpdateInclude/${nameId}`,
                   {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
