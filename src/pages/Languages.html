@@ -15,7 +15,6 @@
         <div class="p-6 border-b">
           <img src="../img/Vector.png" alt="main logo" />
         </div>
-        </div>
         <nav class="p-4 space-y-3">
           <a
             href="home.html"
@@ -161,7 +160,6 @@
       const form = document.getElementById("langForm");
       const tableBody = document.getElementById("langTable");
 
-
       // Load categories on page load
       async function loadLanguages(searchQuery = "") {
         try {
@@ -257,12 +255,9 @@
         if (!confirm("Are you sure you want to delete this Language?")) return;
 
         try {
-          const res = await fetch(
-            `/api/Language/DeleteLanguage/${id}`,
-            {
-              method: "DELETE",
-            }
-          );
+          const res = await fetch(`/api/Language/DeleteLanguage/${id}`, {
+            method: "DELETE",
+          });
 
           const data = await res.json();
           if (res.ok && data.succeeded) {
