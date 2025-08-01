@@ -161,12 +161,11 @@
       const form = document.getElementById("langForm");
       const tableBody = document.getElementById("langTable");
 
-      const API_BASE = "https://tourguidehurghda.runasp.net";
 
       // Load categories on page load
       async function loadLanguages(searchQuery = "") {
         try {
-          let url = `${API_BASE}/api/Language/GetAllLanguages`;
+          let url = `/api/Language/GetAllLanguages`;
 
           const res = await fetch(url);
           const data = await res.json();
@@ -226,8 +225,8 @@
         const isEdit = Boolean(id);
 
         const endpoint = isEdit
-          ? `${API_BASE}/api/Language/UpdateLanguage/${id}`
-          : `${API_BASE}/api/Language/AddLanguage`;
+          ? `/api/Language/UpdateLanguage/${id}`
+          : `/api/Language/AddLanguage`;
 
         const method = isEdit ? "PUT" : "POST";
 
@@ -259,7 +258,7 @@
 
         try {
           const res = await fetch(
-            `${API_BASE}/api/Language/DeleteLanguage/${id}`,
+            `/api/Language/DeleteLanguage/${id}`,
             {
               method: "DELETE",
             }
