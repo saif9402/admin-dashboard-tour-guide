@@ -321,11 +321,20 @@
       const pageSize = 8;
 
       async function fetchTrips(page = 1) {
+        const token = localStorage.getItem("accessToken");
+      
         const response = await fetch(
-          `${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`
+          `${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            }
+          }
         );
+      
         const result = await response.json();
-
+      
         if (result.succeeded) {
           renderTrips(result.data.data);
           renderPagination(result.data.pageNumber, result.data.count);
@@ -333,6 +342,7 @@
           tripTable.innerHTML = `<tr><td colspan="7" class="text-center text-red-500 py-4">Failed to load trips</td></tr>`;
         }
       }
+      
 
       function formatDuration(minutes) {
         const hrs = Math.floor(minutes / 60);
