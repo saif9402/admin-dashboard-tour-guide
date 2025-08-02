@@ -334,24 +334,29 @@
         }
       }
 
+      function formatDuration(minutes) {
+        const hrs = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return `${hrs}h ${mins}m`;
+      }
+      
+
       function renderTrips(trips) {
         tripTable.innerHTML = "";
-
+      
         if (trips.length === 0) {
           tripTable.innerHTML = `<tr><td colspan="7" class="text-center py-4">No trips found</td></tr>`;
           return;
         }
-
+      
         trips.forEach((trip) => {
           const row = document.createElement("tr");
           row.innerHTML = `
             <td class="px-6 py-3">${trip.name}</td>
             <td class="px-6 py-3">${trip.category}</td>
             <td class="px-6 py-3">$${trip.price.toFixed(2)}</td>
-            <td class="px-6 py-3">${new Date(
-              trip.dateTime
-            ).toLocaleString()}</td>
-            <td class="px-6 py-3">${trip.duration}</td>
+            <td class="px-6 py-3">${new Date(trip.dateTime).toLocaleString()}</td>
+            <td class="px-6 py-3">${formatDuration(trip.duration)}</td>
             <td class="px-6 py-3">${trip.isAvailable ? "Yes" : "No"}</td>
             <td class="px-6 py-3 flex items-center gap-2">
               <button class="text-blue-400 hover:text-blue-900 shadow-inner" title="Edit">
@@ -366,6 +371,7 @@
         });
         lucide.createIcons();
       }
+      
 
       function renderPagination(current, totalCount) {
         const paginationContainer = document.getElementById("pagination");
