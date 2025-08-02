@@ -97,7 +97,6 @@
                 <th class="px-6 py-4">Name</th>
                 <th class="px-6 py-4">Category</th>
                 <th class="px-6 py-4">Price</th>
-                <th class="px-6 py-4">Date</th>
                 <th class="px-6 py-4">Duration</th>
                 <th class="px-6 py-4">Available</th>
                 <th class="px-6 py-4">Actions</th>
@@ -339,7 +338,7 @@
           renderTrips(result.data.data);
           renderPagination(result.data.pageNumber, result.data.count);
         } else {
-          tripTable.innerHTML = `<tr><td colspan="7" class="text-center text-red-500 py-4">Failed to load trips</td></tr>`;
+          tripTable.innerHTML = `<tr><td colspan="6" class="text-center text-red-500 py-4">Failed to load trips</td></tr>`;
         }
       }
       
@@ -355,7 +354,7 @@
         tripTable.innerHTML = "";
       
         if (trips.length === 0) {
-          tripTable.innerHTML = `<tr><td colspan="7" class="text-center py-4">No trips found</td></tr>`;
+          tripTable.innerHTML = `<tr><td colspan="6" class="text-center py-4">No trips found</td></tr>`;
           return;
         }
       
@@ -365,7 +364,6 @@
             <td class="px-6 py-3">${trip.name}</td>
             <td class="px-6 py-3">${trip.category}</td>
             <td class="px-6 py-3">$${trip.price.toFixed(2)}</td>
-            <td class="px-6 py-3">${new Date(trip.dateTime).toLocaleString()}</td>
             <td class="px-6 py-3">${formatDuration(trip.duration)}</td>
             <td class="px-6 py-3">${trip.isAvailable ? "Yes" : "No"}</td>
             <td class="px-6 py-3 flex items-center gap-2">
@@ -381,6 +379,7 @@
         });
         lucide.createIcons();
       }
+      
       
 
       function renderPagination(current, totalCount) {
