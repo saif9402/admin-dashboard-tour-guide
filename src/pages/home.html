@@ -291,6 +291,10 @@
       });
 
       document.addEventListener("DOMContentLoaded", async () => {
+        await fetchLanguages();
+document.getElementById("addNameTranslation").click(); // Add one default row
+document.getElementById("addDescriptionTranslation").click(); // Add one default row
+
         //Activities
         const activitiesSelect = document.getElementById("activitiesSelect");
         const choicesActivities = new Choices(activitiesSelect, {
@@ -413,6 +417,66 @@
           choicesNotIncludes.setChoices(remaining, "value", "label", true);
         });
       });
+
+// Example language list (you should fetch this from /api/Language/GetAllLanguages)
+let availableLanguages = [];
+
+async function fetchLanguages() {
+  try {
+    const res = await fetch("/api/Language/GetAllLanguages");
+    const result = await res.json();
+    availableLanguages = result.data || [];
+  } catch (err) {
+    console.error("Failed to load languages for translations", err);
+  }
+}
+
+// Dynamic translation row creator
+function createTranslationRow(type) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "flex items-center gap-2";
+
+  const select = document.createElement("select");
+  select.name = `${type}LangId`;
+  select.required = true;
+  select.className = "border rounded px-2 py-1";
+
+  availableLanguages.forEach((lang) => {
+    const opt = document.createElement("option");
+    opt.value = lang.id;
+    opt.textContent = lang.name;
+    select.appendChild(opt);
+  });
+
+  const input = document.createElement(type === "name" ? "input" : "textarea");
+  input.name = `${type}Value`;
+  input.required = true;
+  input.className = "border rounded px-2 py-1 flex-1";
+  if (type === "description") input.rows = 2;
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.textContent = "✕";
+  removeBtn.className = "text-red-500 text-lg font-bold";
+  removeBtn.onclick = () => wrapper.remove();
+
+  wrapper.appendChild(select);
+  wrapper.appendChild(input);
+  wrapper.appendChild(removeBtn);
+
+  return wrapper;
+}
+
+// Add handlers
+document.getElementById("addNameTranslation").addEventListener("click", () => {
+  document.getElementById("nameTranslations").appendChild(createTranslationRow("name"));
+});
+
+document.getElementById("addDescriptionTranslation").addEventListener("click", () => {
+  document.getElementById("descriptionTranslations").appendChild(createTranslationRow("description"));
+});
+
+
       document.getElementById("cancelBtn").addEventListener("click", () => {
         document.getElementById("tripModal").classList.add("hidden");
         document.getElementById("tripForm").reset();
@@ -425,11 +489,33 @@
 
       document.getElementById("tripForm").addEventListener("submit", async (e) => {
         e.preventDefault();
-    
         const form = e.target;
+      
+        // Build Name Translations
+        const nameTranslations = [];
+        const nameLangs = form.querySelectorAll('select[name="nameLangId"]');
+        const nameVals = form.querySelectorAll('input[name="nameValue"]');
+        nameLangs.forEach((select, i) => {
+          nameTranslations.push({
+            languageId: parseInt(select.value),
+            translation: nameVals[i].value,
+          });
+        });
+      
+        // Build Description Translations
+        const descTranslations = [];
+        const descLangs = form.querySelectorAll('select[name="descriptionLangId"]');
+        const descVals = form.querySelectorAll('textarea[name="descriptionValue"]');
+        descLangs.forEach((select, i) => {
+          descTranslations.push({
+            languageId: parseInt(select.value),
+            translation: descVals[i].value,
+          });
+        });
+      
         const tripDto = {
-          Name: [{ language: "en", text: form.Name_en.value }],
-          Description: [{ language: "en", text: form.Description_en.value }],
+          Name: nameTranslations,
+          Description: descTranslations,
           Price: parseFloat(form.Price.value),
           Duration: parseInt(form.Duration.value),
           TripDates: [new Date(form["TripDates[]"].value).toISOString()],
@@ -440,14 +526,14 @@
           Includes: Array.from(form.Includes.selectedOptions).map((opt) => parseInt(opt.value)),
           NotIncludes: Array.from(form.NotIncludes.selectedOptions).map((opt) => parseInt(opt.value)),
         };
-    
+      
         try {
           const response = await fetch("/api/Trip/AddTrip", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(tripDto),
           });
-    
+      
           const result = await response.json();
           if (response.ok && result.succeeded) {
             alert("Trip added successfully");
@@ -462,6 +548,7 @@
           alert("Something went wrong.");
         }
       });
+      
     </script>
   </body>
 </html>
