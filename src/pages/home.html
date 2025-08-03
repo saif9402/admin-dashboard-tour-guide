@@ -371,6 +371,7 @@ async function handleTripSubmit(e) {
       body: JSON.stringify(tripDto)
     });
     const result = await res.json();
+    console.log(result);
     if (res.ok && result.succeeded) {
       alert("Trip added successfully");
       form.reset();
