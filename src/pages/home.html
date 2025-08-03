@@ -469,12 +469,12 @@
 
 
     </script>
-
     <script>
       async function openEditModal(tripId) {
         const token = localStorage.getItem("accessToken");
+    
         try {
-          const response = await fetch(`/api/Trip/GetTripById?id=${tripId}`, {
+          const response = await fetch(`/api/Trip/GetTripByIdForAdmin?id=${tripId}`, {
             headers: {
               "Authorization": `Bearer ${token}`,
               "Content-Type": "application/json",
@@ -489,40 +489,48 @@
     
           const trip = result.data;
     
-          // Fill form fields
-          document.getElementById("tripId").value = trip.id;
+          // Set ID
+          document.getElementById("tripId").value = tripId;
+    
+          // Price and Duration
           document.getElementById("tripPrice").value = trip.price;
           document.getElementById("tripDuration").value = trip.duration;
-          document.getElementById("tripAvailable").checked = trip.isAvailable;
     
-          // Select category
-          const categorySelect = document.getElementById("categorySelect");
-          const categoryChoice = Array.from(categorySelect.options).find(option => option.value == trip.categoryId);
-          if (categoryChoice) categoryChoice.selected = true;
-          categorySelect.dispatchEvent(new Event("change"));
+          // Availability
+          document.getElementById("tripAvailable").checked = trip.isAvailable ?? false;
+    
+          // Category
+          document.getElementById("categorySelect").value = trip.categoryId;
+          document.getElementById("categorySelect").dispatchEvent(new Event("change"));
     
           // Activities
           const activitiesSelect = document.getElementById("activitiesSelect");
-          const actChoices = new Choices(activitiesSelect);
-          actChoices.setChoiceByValue(trip.activities || []);
+          const activitiesInstance = new Choices(activitiesSelect);
+          activitiesInstance.removeActiveItems();
+          activitiesInstance.setChoiceByValue(trip.activities);
     
           // Languages
           const languagesSelect = document.getElementById("languagesSelect");
-          const langChoices = new Choices(languagesSelect);
-          langChoices.setChoiceByValue(trip.languages || []);
+          const langInstance = new Choices(languagesSelect);
+          langInstance.removeActiveItems();
+          langInstance.setChoiceByValue(trip.languages);
     
-          // Includes & NotIncludes
+          // Includes
           const includesSelect = document.getElementById("includesSelect");
+          const includesInstance = new Choices(includesSelect);
+          includesInstance.removeActiveItems();
+          includesInstance.setChoiceByValue(trip.includes);
+    
+          // NotIncludes
           const notIncludesSelect = document.getElementById("notIncludesSelect");
-          const incChoices = new Choices(includesSelect);
-          const notChoices = new Choices(notIncludesSelect);
-          incChoices.setChoiceByValue(trip.includes || []);
-          notChoices.setChoiceByValue(trip.notIncludes || []);
+          const notInstance = new Choices(notIncludesSelect);
+          notInstance.removeActiveItems();
+          notInstance.setChoiceByValue(trip.notIncludes);
     
           // Trip Dates
           const tripDatesWrapper = document.getElementById("tripDatesWrapper");
-          tripDatesWrapper.innerHTML = ""; // Clear existing
-          (trip.dates || []).forEach(date => {
+          tripDatesWrapper.innerHTML = "";
+          trip.tripDates.forEach((date) => {
             const input = document.createElement("input");
             input.type = "date";
             input.name = "TripDates";
@@ -531,38 +539,51 @@
             tripDatesWrapper.appendChild(input);
           });
     
-          // Show modal
+          // Multilingual Fields (Name & Description)
+          const translationsSection = document.getElementById("translationsSection");
+          translationsSection.innerHTML = "";
+    
+          const makeInputGroup = (label, name, value, lang) => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "space-y-1";
+    
+            wrapper.innerHTML = `
+              <label class="block font-medium">${label} (${lang})</label>
+              <input 
+                type="text" 
+                name="${name}_${lang}" 
+                value="${value}" 
+                class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500" 
+                required 
+              />
+            `;
+            return wrapper;
+          };
+    
+          // Name translations
+          trip.name.forEach((t) => {
+            translationsSection.appendChild(
+              makeInputGroup("Name", "Name", t.translation, t.language)
+            );
+          });
+    
+          // Description translations
+          trip.description.forEach((t) => {
+            translationsSection.appendChild(
+              makeInputGroup("Description", "Description", t.translation, t.language)
+            );
+          });
+    
+          // Show the modal
           document.getElementById("tripModal").classList.remove("hidden");
     
         } catch (error) {
           console.error("Error loading trip:", error);
-          alert("Error loading trip details.");
+          alert("Error loading trip.");
         }
       }
-
-
-
-      const tabInfo = document.getElementById("tabInfo");
-      const tabImages = document.getElementById("tabImages");
-      const tripInfoSection = document.getElementById("tripInfoSection");
-      const tripImagesSection = document.getElementById("tripImagesSection");
-      
-      tabInfo.addEventListener("click", () => {
-        tabInfo.classList.add("text-blue-600", "border-b-2", "border-blue-500");
-        tabImages.classList.remove("text-blue-600", "border-b-2", "border-blue-500");
-        tripInfoSection.classList.remove("hidden");
-        tripImagesSection.classList.add("hidden");
-      });
-      
-      tabImages.addEventListener("click", () => {
-        tabImages.classList.add("text-blue-600", "border-b-2", "border-blue-500");
-        tabInfo.classList.remove("text-blue-600", "border-b-2", "border-blue-500");
-        tripImagesSection.classList.remove("hidden");
-        tripInfoSection.classList.add("hidden");
-      });
-      
-
     </script>
+    
     
 
 
