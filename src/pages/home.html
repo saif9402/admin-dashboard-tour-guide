@@ -331,6 +331,16 @@
       });
 
       document.addEventListener("DOMContentLoaded", async () => {
+        choicesActivities = new Choices(activitiesSelect, { removeItemButton: true, placeholderValue: "Select activities", searchEnabled: true });
+        choicesLanguages = new Choices(languagesSelect, { removeItemButton: true, placeholderValue: "Select languages", searchEnabled: true });
+        choicesCategory = new Choices(categorySelect, { searchEnabled: true, placeholderValue: "Select a category" });
+        choicesIncludes = new Choices(includesSelect, { removeItemButton: true, placeholderValue: "Select includes", searchEnabled: true });
+        choicesNotIncludes = new Choices(notIncludesSelect, { removeItemButton: true, placeholderValue: "Remaining will appear here", searchEnabled: true });
+        
+
+
+
+
         //Activities
         const activitiesSelect = document.getElementById("activitiesSelect");
         const choicesActivities = new Choices(activitiesSelect, {
@@ -472,7 +482,7 @@
     <script>
       async function openEditModal(tripId) {
         const token = localStorage.getItem("accessToken");
-    
+      
         try {
           const response = await fetch(`/api/Trip/GetTripByIdForAdmin?id=${tripId}`, {
             headers: {
@@ -480,53 +490,38 @@
               "Content-Type": "application/json",
             },
           });
-    
+      
           const result = await response.json();
           if (!result.succeeded) {
             alert("Failed to load trip details.");
             return;
           }
-    
+      
           const trip = result.data;
-    
-          // Set ID
+      
+          // Fill basic inputs
           document.getElementById("tripId").value = tripId;
-    
-          // Price and Duration
           document.getElementById("tripPrice").value = trip.price;
           document.getElementById("tripDuration").value = trip.duration;
-    
-          // Availability
           document.getElementById("tripAvailable").checked = trip.isAvailable ?? false;
-    
-          // Category
+      
+          // Set category
           document.getElementById("categorySelect").value = trip.categoryId;
           document.getElementById("categorySelect").dispatchEvent(new Event("change"));
-    
-          // Activities
-          const activitiesSelect = document.getElementById("activitiesSelect");
-          const activitiesInstance = new Choices(activitiesSelect);
-          activitiesInstance.removeActiveItems();
-          activitiesInstance.setChoiceByValue(trip.activities);
-    
-          // Languages
-          const languagesSelect = document.getElementById("languagesSelect");
-          const langInstance = new Choices(languagesSelect);
-          langInstance.removeActiveItems();
-          langInstance.setChoiceByValue(trip.languages);
-    
-          // Includes
-          const includesSelect = document.getElementById("includesSelect");
-          const includesInstance = new Choices(includesSelect);
-          includesInstance.removeActiveItems();
-          includesInstance.setChoiceByValue(trip.includes);
-    
-          // NotIncludes
-          const notIncludesSelect = document.getElementById("notIncludesSelect");
-          const notInstance = new Choices(notIncludesSelect);
-          notInstance.removeActiveItems();
-          notInstance.setChoiceByValue(trip.notIncludes);
-    
+      
+          // Set multi-select values
+          choicesActivities.removeActiveItems();
+          choicesActivities.setChoiceByValue(trip.activities);
+      
+          choicesLanguages.removeActiveItems();
+          choicesLanguages.setChoiceByValue(trip.languages);
+      
+          choicesIncludes.removeActiveItems();
+          choicesIncludes.setChoiceByValue(trip.includes);
+      
+          choicesNotIncludes.removeActiveItems();
+          choicesNotIncludes.setChoiceByValue(trip.notIncludes);
+      
           // Trip Dates
           const tripDatesWrapper = document.getElementById("tripDatesWrapper");
           tripDatesWrapper.innerHTML = "";
@@ -538,15 +533,14 @@
             input.className = "border rounded px-3 py-2 w-full";
             tripDatesWrapper.appendChild(input);
           });
-    
-          // Multilingual Fields (Name & Description)
+      
+          // Multilingual Translations
           const translationsSection = document.getElementById("translationsSection");
           translationsSection.innerHTML = "";
-    
+      
           const makeInputGroup = (label, name, value, lang) => {
             const wrapper = document.createElement("div");
             wrapper.className = "space-y-1";
-    
             wrapper.innerHTML = `
               <label class="block font-medium">${label} (${lang})</label>
               <input 
@@ -559,29 +553,24 @@
             `;
             return wrapper;
           };
-    
-          // Name translations
-          trip.name.forEach((t) => {
-            translationsSection.appendChild(
-              makeInputGroup("Name", "Name", t.translation, t.language)
-            );
+      
+          trip.name.forEach((n) => {
+            translationsSection.appendChild(makeInputGroup("Name", "Name", n.translation, n.language));
           });
-    
-          // Description translations
-          trip.description.forEach((t) => {
-            translationsSection.appendChild(
-              makeInputGroup("Description", "Description", t.translation, t.language)
-            );
+      
+          trip.description.forEach((d) => {
+            translationsSection.appendChild(makeInputGroup("Description", "Description", d.translation, d.language));
           });
-    
-          // Show the modal
+      
+          // Show modal
           document.getElementById("tripModal").classList.remove("hidden");
-    
+      
         } catch (error) {
           console.error("Error loading trip:", error);
-          alert("Error loading trip.");
+          alert("Error loading trip details.\nCheck console for more information.");
         }
       }
+      
     </script>
     
     
