@@ -1,3 +1,4 @@
+<!-- ✅ COMPLETE HTML FILE WITH MULTI-LANGUAGE TRIP FORM -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -5,12 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="../output.css" rel="stylesheet" />
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-
     <title>Tour Guide Admin Panel</title>
   </head>
   <body class="bg-gray-50 text-gray-800 font-sans">
@@ -68,25 +65,12 @@
 
       <!-- Main Content -->
       <main class="flex-1 p-8">
-        <div
-          class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
-        >
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
           <h1 class="text-3xl font-bold text-gray-900">Manage Trips</h1>
-          <button
-            id="addTripBtn"
-            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow"
-          >
+          <button id="addTripBtn" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow">
             <i data-lucide="plus"></i>
             <span>Add Trip</span>
           </button>
-        </div>
-
-        <div class="mb-6">
-          <input
-            type="text"
-            placeholder="Search trips..."
-            class="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-4 py-2"
-          />
         </div>
 
         <!-- Trip Table -->
@@ -102,103 +86,96 @@
                 <th class="px-6 py-4">Actions</th>
               </tr>
             </thead>
-            <tbody id="tripTable" class="divide-y divide-gray-200 bg-white">
-              <!-- Trip rows go here -->
-            </tbody>
+            <tbody id="tripTable" class="divide-y divide-gray-200 bg-white"></tbody>
           </table>
         </div>
-        <div
-          id="pagination"
-          class="mt-6 flex justify-center items-center gap-3 text-sm font-medium"
-        ></div>
+
+        <div id="pagination" class="mt-6 flex justify-center items-center gap-3 text-sm font-medium"></div>
       </main>
     </div>
 
-    <!-- Modal (hidden by default) -->
-    <div
-      id="tripModal"
-      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-lg backdrop-filter flex items-center justify-center px-4 py-8 hidden transition-opacity duration-300"
-    >
-      <div
-        class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl p-6 transform transition-all duration-300"
-      >
+    <!-- Modal -->
+    <div id="tripModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-lg flex items-center justify-center px-4 py-8 hidden">
+      <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl p-6">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-semibold text-gray-800">Add Trip</h2>
-          <button
-            type="button"
-            id="cancelBtn"
-            class="text-gray-500 hover:text-gray-700 text-2xl leading-none"
-          >
-            &times;
-          </button>
+          <h2 class="text-2xl font-semibold">Add Trip</h2>
+          <button id="cancelBtn" type="button" class="text-2xl text-gray-500 hover:text-gray-700">&times;</button>
         </div>
 
         <form id="tripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <input type="hidden" id="tripId" name="id" />
-        
-          <div class="space-y-1">
-            <label class="block font-medium">Trip Name (EN)</label>
-            <input type="text" name="Name_en" required class="w-full border rounded-lg px-4 py-2" />
+          <!-- Multi-language Name -->
+          <div class="md:col-span-2">
+            <label class="block font-medium mb-1">Trip Names (multi-language)</label>
+            <div id="nameTranslations" class="space-y-2"></div>
+            <button type="button" id="addNameTranslation" class="text-sm text-blue-600 hover:underline mt-2">+ Add Name</button>
           </div>
-        
-          <div class="space-y-1">
-            <label class="block font-medium">Trip Description (EN)</label>
-            <textarea name="Description_en" required class="w-full border rounded-lg px-4 py-2"></textarea>
+
+          <!-- Multi-language Description -->
+          <div class="md:col-span-2">
+            <label class="block font-medium mb-1">Trip Descriptions (multi-language)</label>
+            <div id="descriptionTranslations" class="space-y-2"></div>
+            <button type="button" id="addDescriptionTranslation" class="text-sm text-blue-600 hover:underline mt-2">+ Add Description</button>
           </div>
-        
+
+          <!-- Other fields -->
           <div class="space-y-1">
             <label class="block font-medium">Price</label>
             <input type="number" name="Price" required class="w-full border rounded-lg px-4 py-2" />
           </div>
-        
+
           <div class="space-y-1">
             <label class="block font-medium">Duration</label>
             <input type="number" name="Duration" required class="w-full border rounded-lg px-4 py-2" />
           </div>
-        
-          <div class="space-y-1 md:col-span-2">
+
+          <div class="md:col-span-2">
             <label class="block font-medium">Trip Dates</label>
-            <input type="datetime-local" name="TripDates[]" multiple class="w-full border rounded-lg px-4 py-2" />
+            <input type="datetime-local" name="TripDates[]" required class="w-full border rounded-lg px-4 py-2" />
           </div>
-        
+
           <div class="space-y-1">
             <label class="block font-medium">Category</label>
             <select id="categorySelect" name="CategoryId" required class="w-full border rounded-lg px-4 py-2"></select>
           </div>
-        
+
           <div class="space-y-1">
             <label class="block font-medium">Activities</label>
             <select id="activitiesSelect" name="Activities" multiple class="w-full border rounded-lg px-4 py-2"></select>
           </div>
-        
+
           <div class="space-y-1">
             <label class="block font-medium">Languages</label>
             <select id="languagesSelect" name="Languages" multiple class="w-full border rounded-lg px-4 py-2"></select>
           </div>
-        
+
           <div class="space-y-1">
             <label class="block font-medium">Includes</label>
             <select id="includesSelect" name="Includes" multiple class="w-full border rounded-lg px-4 py-2"></select>
           </div>
-        
+
           <div class="space-y-1">
             <label class="block font-medium">Not Includes</label>
             <select id="notIncludesSelect" name="NotIncludes" multiple class="w-full border rounded-lg px-4 py-2"></select>
           </div>
-        
+
           <div class="flex items-center space-x-2 md:col-span-2">
             <input type="checkbox" name="IsAvailable" class="form-checkbox text-blue-600" />
             <label class="text-sm">Is Available</label>
           </div>
-        
+
           <div class="flex justify-end md:col-span-2 space-x-3">
             <button type="button" id="cancelBtn2" class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancel</button>
             <button type="submit" class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">Save</button>
           </div>
         </form>
-        
       </div>
     </div>
+
+    <!-- JS will be loaded separately -->
+    <script src="trip-page.js"></script>
+  </body>
+</html>
+
 
     <script>
       lucide.createIcons();
