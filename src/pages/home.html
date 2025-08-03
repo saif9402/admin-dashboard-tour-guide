@@ -274,11 +274,13 @@
             <td class="px-6 py-3">${formatDuration(trip.duration)}</td>
             <td class="px-6 py-3">${trip.isAvailable ? "Yes" : "No"}</td>
             <td class="px-6 py-3 flex items-center gap-2">
-            <button 
-  class="text-blue-400 hover:text-blue-900 shadow-inner" 
-  title="Edit"
-  onclick='openEditModal(${trip.id})'
->
+             <button 
+      class="text-blue-400 hover:text-blue-900 shadow-inner" 
+      title="Edit"
+      onclick='openEditModal(${trip.id})'
+    >
+      <i data-lucide="pencil"></i>
+    </button>
               <button class="text-red-400 hover:text-red-900" title="Delete">
                 <i data-lucide="trash-2"></i>
               </button>
