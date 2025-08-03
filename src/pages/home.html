@@ -453,7 +453,7 @@ document.getElementById("imageUploadForm").addEventListener("submit", async (e) 
   }
 
   try {
-    const res = await fetch(`/api/Trip/AddImagesToTrip/${currentTripId}`, {
+    const res = await fetch(`https://localhost:7134/api/Trip/AddImagesToTrip/${currentTripId}`, {
       method: "POST",
       body: formData
     });
