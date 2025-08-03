@@ -470,23 +470,27 @@ async function openEditModal(tripId) {
   const modal = document.getElementById("tripModal");
   const form = document.getElementById("tripForm");
 
-  // Clear previous content
+  // Reset and clear all previous data
   form.reset();
   document.getElementById("tripDatesWrapper").innerHTML = "";
   document.getElementById("translationsSection").innerHTML = "";
+
+  // Clear Choices selections if initialized
   window.choicesActivities?.removeActiveItems();
   window.choicesLanguages?.removeActiveItems();
   window.choicesIncludes?.removeActiveItems();
   window.choicesNotIncludes?.removeActiveItems();
+  window.choicesCategory?.removeActiveItems();
 
-  // Fetch trip data
+  // Fetch the trip data
   const res = await fetch(`/api/Trip/GetTripByIdForAdmin?Id=${tripId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  const result = await res.json();
-  const trip = result.data;
 
-  if (!result.succeeded) return alert("Failed to load trip");
+  const result = await res.json();
+  if (!result.succeeded || !result.data) return alert("Failed to load trip");
+
+  const trip = result.data;
 
   // Set basic fields
   form.tripId.value = tripId;
@@ -494,18 +498,26 @@ async function openEditModal(tripId) {
   form.tripDuration.value = trip.duration;
   form.tripAvailable.checked = trip.isAvailable;
 
-  // Set category
-  window.choicesCategory.setChoiceByValue(trip.categoryId);
+  // Set Category
+  window.choicesCategory?.setChoiceByValue(trip.categoryId?.toString());
 
-  // Set multiple selections
-  window.choicesActivities.setChoiceByValue(trip.activities);
-  window.choicesLanguages.setChoiceByValue(trip.languages);
-  window.choicesIncludes.setChoiceByValue(trip.includes);
-  window.choicesNotIncludes.setChoiceByValue(trip.notIncludes);
+  // Set Multi-select fields
+  const setMultiValue = (choicesInstance, items) => {
+    if (Array.isArray(items)) {
+      items.forEach((val) => {
+        choicesInstance?.setChoiceByValue(val.toString());
+      });
+    }
+  };
 
-  // Set Trip Dates
+  setMultiValue(window.choicesActivities, trip.activities || []);
+  setMultiValue(window.choicesLanguages, trip.languages || []);
+  setMultiValue(window.choicesIncludes, trip.includes || []);
+  setMultiValue(window.choicesNotIncludes, trip.notIncludes || []);
+
+  // Trip Dates
   const wrapper = document.getElementById("tripDatesWrapper");
-  trip.tripDates.forEach((date) => {
+  (trip.tripDates || []).forEach((date) => {
     const input = document.createElement("input");
     input.type = "date";
     input.name = "TripDates";
@@ -514,7 +526,7 @@ async function openEditModal(tripId) {
     wrapper.appendChild(input);
   });
 
-  // Add +Date button if missing
+  // Ensure add date button exists
   if (!document.getElementById("addDateBtn")) {
     const addBtn = document.createElement("button");
     addBtn.id = "addDateBtn";
@@ -531,15 +543,15 @@ async function openEditModal(tripId) {
     wrapper.parentNode.appendChild(addBtn);
   }
 
-  // Translations
+  // Load translation fields
   const langResponse = await fetch("/api/Language/GetAllLanguages");
   const langResult = await langResponse.json();
   const languages = langResult?.data || [];
 
   const transSection = document.getElementById("translationsSection");
   languages.forEach((lang, i) => {
-    const nameObj = trip.name.find((t) => t.languageCode === lang.code);
-    const descObj = trip.description.find((t) => t.languageCode === lang.code);
+    const nameObj = trip.name?.find((t) => t.languageCode === lang.code);
+    const descObj = trip.description?.find((t) => t.languageCode === lang.code);
 
     transSection.innerHTML += `
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -557,6 +569,7 @@ async function openEditModal(tripId) {
     `;
   });
 
+  // Show modal
   modal.classList.remove("hidden");
 }
 
