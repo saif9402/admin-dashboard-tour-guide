@@ -457,9 +457,10 @@ document.getElementById("imageUploadForm").addEventListener("submit", async (e) 
       method: "POST",
       body: formData
     });
+    console.log(res);
 
     const result = await res.json();
-    console.log(result);
+    console.log(res);
     if (res.ok && result.succeeded) {
       alert("Images uploaded successfully.");
       input.value = "";
@@ -471,6 +472,8 @@ document.getElementById("imageUploadForm").addEventListener("submit", async (e) 
     console.error("Upload error:", err);
     alert("An error occurred while uploading images.");
   }
+  console.log(res);
+
 });
 
 document.getElementById("tripImages").addEventListener("change", (e) => {
