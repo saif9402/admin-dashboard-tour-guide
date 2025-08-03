@@ -207,6 +207,8 @@ let currentPage = 1;
 const pageSize = 8;
 let availableLanguages = [];
 let allIncludes = [];
+let currentTripId = null;
+
 
 // === Fetch Trips ===
 async function fetchTrips(page = 1) {
@@ -396,10 +398,23 @@ async function handleTripSubmit(e) {
     const result = await res.json();
     console.log(result);
     if (res.ok && result.succeeded) {
-      alert("Trip added successfully");
-      form.reset();
-      document.getElementById("tripModal").classList.add("hidden");
-      fetchTrips();
+      const newTripId = result.data; // get the returned TripId
+
+  alert("Trip added successfully");
+
+  currentTripId = newTripId; // Store for image uploads
+
+  // Switch to Images tab if needed
+  document.getElementById("tabImages").click(); // Make sure this tab button exists
+
+  // Optionally reset only the trip form
+  form.reset();
+
+  // Optionally keep the modal open to upload images
+  // Or hide it if you want users to return later
+  // document.getElementById("tripModal").classList.add("hidden");
+
+  fetchTrips(); 
     } else {
       alert("Failed to add trip: " + result.errors);
     }
@@ -408,6 +423,65 @@ async function handleTripSubmit(e) {
     alert("Something went wrong.");
   }
 }
+
+// === Upload Images ===
+document.getElementById("imageUploadForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  if (!currentTripId) {
+    alert("No trip selected. Please create a trip first.");
+    return;
+  }
+
+  const input = document.getElementById("tripImages");
+  const files = input.files;
+
+  if (!files.length) {
+    alert("Please select at least one image.");
+    return;
+  }
+
+  const formData = new FormData();
+  for (const file of files) {
+    formData.append("images", file);
+  }
+
+  try {
+    const res = await fetch(`/api/Trip/AddImagesToTrip/${currentTripId}`, {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await res.json();
+    if (res.ok && result.succeeded) {
+      alert("Images uploaded successfully.");
+      input.value = "";
+      document.getElementById("imagePreview").innerHTML = "";
+    } else {
+      alert("Upload failed: " + (result.message || "Unknown error."));
+    }
+  } catch (err) {
+    console.error("Upload error:", err);
+    alert("An error occurred while uploading images.");
+  }
+});
+document.getElementById("tripImages").addEventListener("change", (e) => {
+  const previewContainer = document.getElementById("imagePreview");
+  previewContainer.innerHTML = "";
+
+  const files = e.target.files;
+  for (const file of files) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = document.createElement("img");
+      img.src = event.target.result;
+      img.className = "w-full h-32 object-cover rounded shadow";
+      previewContainer.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
 
 // === Event Listeners ===
 function setupEventListeners() {
@@ -441,12 +515,35 @@ function setupEventListeners() {
     input.className = "w-full border rounded-lg px-4 py-2";
     container.appendChild(input);
   });
+
+  document.getElementById("tabImages").addEventListener("click", () => {
+    document.getElementById("tabContentInfo").classList.add("hidden");
+    document.getElementById("tabContentImages").classList.remove("hidden");
+  
+    document.getElementById("tabInfo").classList.remove("border-b-2", "text-blue-600");
+    document.getElementById("tabImages").classList.add("border-b-2", "text-blue-600");
+  });
+  
+  document.getElementById("tabInfo").addEventListener("click", () => {
+    document.getElementById("tabContentImages").classList.add("hidden");
+    document.getElementById("tabContentInfo").classList.remove("hidden");
+  
+    document.getElementById("tabImages").classList.remove("border-b-2", "text-blue-600");
+    document.getElementById("tabInfo").classList.add("border-b-2", "text-blue-600");
+  });
+  
   
 }
 
 // === Initialization ===
 (async function init() {
   await fetchLanguages();
+ 
+
+// Add 1 name and 1 description row by default
+document.getElementById("nameTranslations").appendChild(createTranslationRow("name"));
+document.getElementById("descriptionTranslations").appendChild(createTranslationRow("description"));
+
   await populateSelect("activitiesSelect", "/api/Activity/GetAllActivities", "id", "name");
   await populateSelect("languagesSelect", "/api/Language/GetAllLanguages", "id", "name");
   await populateSelect("categorySelect", "/api/Category/GetAllCategories", "id", "name");
