@@ -452,6 +452,8 @@
           choicesNotIncludes.clearChoices();
           choicesNotIncludes.setChoices(remaining, "value", "label", true);
         });
+
+        
       });
       document.getElementById("cancelBtn").addEventListener("click", () => {
         document.getElementById("tripModal").classList.add("hidden");
@@ -464,123 +466,107 @@
       });
 
 
-// Update Trip
-async function openEditModal(tripId) {
-  const token = localStorage.getItem("accessToken");
-  const modal = document.getElementById("tripModal");
-  const form = document.getElementById("tripForm");
-
-  // Reset and clear all previous data
-  form.reset();
-  document.getElementById("tripDatesWrapper").innerHTML = "";
-  document.getElementById("translationsSection").innerHTML = "";
-
-  // Clear Choices selections if initialized
-  window.choicesActivities?.removeActiveItems();
-  window.choicesLanguages?.removeActiveItems();
-  window.choicesIncludes?.removeActiveItems();
-  window.choicesNotIncludes?.removeActiveItems();
-  window.choicesCategory?.removeActiveItems();
-
-  // Fetch the trip data
-  const res = await fetch(`/api/Trip/GetTripByIdForAdmin?Id=${tripId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  const result = await res.json();
-  if (!result.succeeded || !result.data) return alert("Failed to load trip");
-
-  const trip = result.data;
-
-  // Set basic fields
-  form.tripId.value = tripId;
-  form.tripPrice.value = trip.price;
-  form.tripDuration.value = trip.duration;
-  form.tripAvailable.checked = trip.isAvailable;
-
-  // Set Category
-  window.choicesCategory?.setChoiceByValue(trip.categoryId?.toString());
-
-  // Set Multi-select fields
-  const setMultiValue = (choicesInstance, items) => {
-    if (Array.isArray(items)) {
-      items.forEach((val) => {
-        choicesInstance?.setChoiceByValue(val.toString());
-      });
-    }
-  };
-
-  setMultiValue(window.choicesActivities, trip.activities || []);
-  setMultiValue(window.choicesLanguages, trip.languages || []);
-  setMultiValue(window.choicesIncludes, trip.includes || []);
-  setMultiValue(window.choicesNotIncludes, trip.notIncludes || []);
-
-  // Trip Dates
-  const wrapper = document.getElementById("tripDatesWrapper");
-  (trip.tripDates || []).forEach((date) => {
-    const input = document.createElement("input");
-    input.type = "date";
-    input.name = "TripDates";
-    input.value = new Date(date).toISOString().split("T")[0];
-    input.className = "border rounded px-3 py-2 w-full";
-    wrapper.appendChild(input);
-  });
-
-  // Ensure add date button exists
-  if (!document.getElementById("addDateBtn")) {
-    const addBtn = document.createElement("button");
-    addBtn.id = "addDateBtn";
-    addBtn.textContent = "+ Add Date";
-    addBtn.type = "button";
-    addBtn.className = "text-blue-600 text-sm";
-    addBtn.onclick = () => {
-      const input = document.createElement("input");
-      input.type = "date";
-      input.name = "TripDates";
-      input.className = "border rounded px-3 py-2 w-full";
-      wrapper.appendChild(input);
-    };
-    wrapper.parentNode.appendChild(addBtn);
-  }
-
-  // Load translation fields
-  const langResponse = await fetch("/api/Language/GetAllLanguages");
-  const langResult = await langResponse.json();
-  const languages = langResult?.data || [];
-
-  const transSection = document.getElementById("translationsSection");
-  languages.forEach((lang, i) => {
-    const nameObj = trip.name?.find((t) => t.languageCode === lang.code);
-    const descObj = trip.description?.find((t) => t.languageCode === lang.code);
-
-    transSection.innerHTML += `
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block font-medium">Name (${lang.code})</label>
-          <input type="text" name="Name[${i}].Value" value="${nameObj?.value || ""}" class="w-full border rounded-lg px-4 py-2" />
-          <input type="hidden" name="Name[${i}].LanguageCode" value="${lang.code}" />
-        </div>
-        <div>
-          <label class="block font-medium">Description (${lang.code})</label>
-          <textarea name="Description[${i}].Value" class="w-full border rounded-lg px-4 py-2">${descObj?.value || ""}</textarea>
-          <input type="hidden" name="Description[${i}].LanguageCode" value="${lang.code}" />
-        </div>
-      </div>
-    `;
-  });
-
-  // Show modal
-  modal.classList.remove("hidden");
-}
-
-
-
-
-
-
-
 
 
     </script>
+
+    <script>
+      async function openEditModal(tripId) {
+        const token = localStorage.getItem("accessToken");
+        try {
+          const response = await fetch(`/api/Trip/GetTripById?id=${tripId}`, {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+    
+          const result = await response.json();
+          if (!result.succeeded) {
+            alert("Failed to load trip details.");
+            return;
+          }
+    
+          const trip = result.data;
+    
+          // Fill form fields
+          document.getElementById("tripId").value = trip.id;
+          document.getElementById("tripPrice").value = trip.price;
+          document.getElementById("tripDuration").value = trip.duration;
+          document.getElementById("tripAvailable").checked = trip.isAvailable;
+    
+          // Select category
+          const categorySelect = document.getElementById("categorySelect");
+          const categoryChoice = Array.from(categorySelect.options).find(option => option.value == trip.categoryId);
+          if (categoryChoice) categoryChoice.selected = true;
+          categorySelect.dispatchEvent(new Event("change"));
+    
+          // Activities
+          const activitiesSelect = document.getElementById("activitiesSelect");
+          const actChoices = new Choices(activitiesSelect);
+          actChoices.setChoiceByValue(trip.activities || []);
+    
+          // Languages
+          const languagesSelect = document.getElementById("languagesSelect");
+          const langChoices = new Choices(languagesSelect);
+          langChoices.setChoiceByValue(trip.languages || []);
+    
+          // Includes & NotIncludes
+          const includesSelect = document.getElementById("includesSelect");
+          const notIncludesSelect = document.getElementById("notIncludesSelect");
+          const incChoices = new Choices(includesSelect);
+          const notChoices = new Choices(notIncludesSelect);
+          incChoices.setChoiceByValue(trip.includes || []);
+          notChoices.setChoiceByValue(trip.notIncludes || []);
+    
+          // Trip Dates
+          const tripDatesWrapper = document.getElementById("tripDatesWrapper");
+          tripDatesWrapper.innerHTML = ""; // Clear existing
+          (trip.dates || []).forEach(date => {
+            const input = document.createElement("input");
+            input.type = "date";
+            input.name = "TripDates";
+            input.value = new Date(date).toISOString().split("T")[0];
+            input.className = "border rounded px-3 py-2 w-full";
+            tripDatesWrapper.appendChild(input);
+          });
+    
+          // Show modal
+          document.getElementById("tripModal").classList.remove("hidden");
+    
+        } catch (error) {
+          console.error("Error loading trip:", error);
+          alert("Error loading trip details.");
+        }
+      }
+
+
+
+      const tabInfo = document.getElementById("tabInfo");
+      const tabImages = document.getElementById("tabImages");
+      const tripInfoSection = document.getElementById("tripInfoSection");
+      const tripImagesSection = document.getElementById("tripImagesSection");
+      
+      tabInfo.addEventListener("click", () => {
+        tabInfo.classList.add("text-blue-600", "border-b-2", "border-blue-500");
+        tabImages.classList.remove("text-blue-600", "border-b-2", "border-blue-500");
+        tripInfoSection.classList.remove("hidden");
+        tripImagesSection.classList.add("hidden");
+      });
+      
+      tabImages.addEventListener("click", () => {
+        tabImages.classList.add("text-blue-600", "border-b-2", "border-blue-500");
+        tabInfo.classList.remove("text-blue-600", "border-b-2", "border-blue-500");
+        tripImagesSection.classList.remove("hidden");
+        tripInfoSection.classList.add("hidden");
+      });
+      
+
+    </script>
+    
+
+
+
+
   </body>
 </html>
