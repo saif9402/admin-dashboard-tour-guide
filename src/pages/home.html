@@ -558,77 +558,77 @@
         }
       }
       document.getElementById("tripForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData();
-      
-        // Get trip ID for update
-        const tripId = document.getElementById("tripId").value;
-      
-        // Gather translations
-        const nameInputs = document.querySelectorAll('input[name^="Name_"]');
-        const descInputs = document.querySelectorAll('input[name^="Description_"]');
-      
-        const nameTranslations = [];
-        const descTranslations = [];
-      
-        nameInputs.forEach(input => {
-          const lang = input.name.split("_")[1];
-          nameTranslations.push({ language: lang, translation: input.value });
-        });
-      
-        descInputs.forEach(input => {
-          const lang = input.name.split("_")[1];
-          descTranslations.push({ language: lang, translation: input.value });
-        });
-      
-        formData.append("Name", JSON.stringify(nameTranslations));
-        formData.append("Description", JSON.stringify(descTranslations));
-      
-        formData.append("Duration", document.getElementById("tripDuration").value);
-        formData.append("Price", document.getElementById("tripPrice").value);
-        formData.append("IsAvailable", document.getElementById("tripAvailable").checked);
-        formData.append("CategoryId", document.getElementById("categorySelect").value);
-      
-        // Multi-select fields (must be int arrays)
-        const getChoicesValues = (choicesInstance) =>
-          choicesInstance.getValue().map((choice) => parseInt(choice.value));
-      
-        formData.append("Activities", JSON.stringify(getChoicesValues(choicesActivities)));
-        formData.append("Languages", JSON.stringify(getChoicesValues(choicesLanguages)));
-        formData.append("Includes", JSON.stringify(getChoicesValues(choicesIncludes)));
-        formData.append("NotIncludes", JSON.stringify(getChoicesValues(choicesNotIncludes)));
-      
-        // Trip Dates
-        const tripDates = Array.from(document.querySelectorAll('input[name="TripDates"]'))
-          .map(input => input.value);
-        formData.append("TripDates", JSON.stringify(tripDates));
-      
-        try {
-          const token = localStorage.getItem("accessToken");
-          const response = await fetch(`/api/Trip/UpdateTrip/${tripId}`, {
-            method: "PUT",
-            headers: {
-              Authorization: `Bearer ${token}`
-            },
-            body: formData
-          });
-      
-          const result = await response.json();
-          if (result.succeeded) {
-            alert("Trip updated successfully!");
-            document.getElementById("tripModal").classList.add("hidden");
-            fetchTrips(currentPage);
-          } else {
-            alert(`Update failed: ${result.message || "Unknown error"}`);
-          }
-      
-        } catch (error) {
-          console.error("Update error:", error);
-          alert("An error occurred while updating the trip.");
-        }
-      });
-      
+  e.preventDefault();
+  
+  const formData = new FormData();
+
+  // Get trip ID for update
+  const tripId = document.getElementById("tripId").value;
+
+  // Gather translations
+  const nameInputs = document.querySelectorAll('input[name^="Name_"]');
+  const descInputs = document.querySelectorAll('input[name^="Description_"]');
+
+  const nameTranslations = [];
+  const descTranslations = [];
+
+  nameInputs.forEach(input => {
+    const lang = input.name.split("_")[1];
+    nameTranslations.push({ language: lang, translation: input.value });
+  });
+
+  descInputs.forEach(input => {
+    const lang = input.name.split("_")[1];
+    descTranslations.push({ language: lang, translation: input.value });
+  });
+
+  formData.append("Name", JSON.stringify(nameTranslations));
+  formData.append("Description", JSON.stringify(descTranslations));
+
+  formData.append("Duration", document.getElementById("tripDuration").value);
+  formData.append("Price", document.getElementById("tripPrice").value);
+  formData.append("IsAvailable", document.getElementById("tripAvailable").checked);
+  formData.append("CategoryId", document.getElementById("categorySelect").value);
+
+  // Multi-select fields (must be int arrays)
+  const getChoicesValues = (choicesInstance) =>
+    choicesInstance.getValue().map((choice) => parseInt(choice.value));
+
+  formData.append("Activities", JSON.stringify(getChoicesValues(choicesActivities)));
+  formData.append("Languages", JSON.stringify(getChoicesValues(choicesLanguages)));
+  formData.append("Includes", JSON.stringify(getChoicesValues(choicesIncludes)));
+  formData.append("NotIncludes", JSON.stringify(getChoicesValues(choicesNotIncludes)));
+
+  // Trip Dates
+  const tripDates = Array.from(document.querySelectorAll('input[name="TripDates"]'))
+    .map(input => input.value);
+  formData.append("TripDates", JSON.stringify(tripDates));
+
+  try {
+    const token = localStorage.getItem("accessToken");
+    const response = await fetch(`/api/Trip/UpdateTrip/${tripId}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    const result = await response.json();
+    if (result.succeeded) {
+      alert("Trip updated successfully!");
+      document.getElementById("tripModal").classList.add("hidden");
+      fetchTrips(currentPage);
+    } else {
+      alert(`Update failed: ${result.message || "Unknown error"}`);
+    }
+
+  } catch (error) {
+    console.error("Update error:", error);
+    alert("An error occurred while updating the trip.");
+  }
+});
+
       
     </script>
     
