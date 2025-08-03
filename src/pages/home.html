@@ -462,7 +462,7 @@ files.forEach((file, index) => {
     console.log(res);
     if (res.ok && result.succeeded) {
       alert("Images uploaded successfully.");
-      input.value = "";
+      fileInput.value = "";
       document.getElementById("imagePreview").innerHTML = "";
     } else {
       alert("Upload failed: " + (result.message || "Unknown error."));
