@@ -135,179 +135,68 @@
 
         <form id="tripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <input type="hidden" id="tripId" name="id" />
-
+        
           <div class="space-y-1">
-            <label class="block font-medium">Trip Name</label>
-            <input
-              type="text"
-              name="Name"
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <label class="block font-medium">Trip Name (EN)</label>
+            <input type="text" name="Name_en" required class="w-full border rounded-lg px-4 py-2" />
           </div>
-
+        
+          <div class="space-y-1">
+            <label class="block font-medium">Trip Description (EN)</label>
+            <textarea name="Description_en" required class="w-full border rounded-lg px-4 py-2"></textarea>
+          </div>
+        
           <div class="space-y-1">
             <label class="block font-medium">Price</label>
-            <input
-              type="number"
-              name="Price"
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <input type="number" name="Price" required class="w-full border rounded-lg px-4 py-2" />
           </div>
-
+        
           <div class="space-y-1">
             <label class="block font-medium">Duration</label>
-            <input
-              type="text"
-              name="Duration"
-              placeholder="e.g. 2h"
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <input type="number" name="Duration" required class="w-full border rounded-lg px-4 py-2" />
           </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Date & Time</label>
-            <input
-              type="datetime-local"
-              name="DateTime"
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              required
-            />
+        
+          <div class="space-y-1 md:col-span-2">
+            <label class="block font-medium">Trip Dates</label>
+            <input type="datetime-local" name="TripDates[]" multiple class="w-full border rounded-lg px-4 py-2" />
           </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Meeting Point Address</label>
-            <input
-              type="text"
-              name="MeetingPointAddress"
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Meeting Point URL</label>
-            <input
-              type="url"
-              name="MeetingPointURL"
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div class="md:col-span-2 space-y-2">
-            <label class="block font-medium">Main Image</label>
-            <input
-              type="file"
-              name="MainImage"
-              accept="image/*"
-              class="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              required
-            />
-          </div>
-
-          <div class="md:col-span-2 space-y-2">
-            <label class="block font-medium">Gallery Images</label>
-            <input
-              type="file"
-              name="Images"
-              accept="image/*"
-              multiple
-              class="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
-          </div>
-
+        
           <div class="space-y-1">
             <label class="block font-medium">Category</label>
-            <select
-              name="CategoryId"
-              id="categorySelect"
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value="">Loading...</option>
-            </select>
+            <select id="categorySelect" name="CategoryId" required class="w-full border rounded-lg px-4 py-2"></select>
           </div>
-
+        
           <div class="space-y-1">
             <label class="block font-medium">Activities</label>
-            <select
-              id="activitiesSelect"
-              name="Activities"
-              multiple
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-            ></select>
+            <select id="activitiesSelect" name="Activities" multiple class="w-full border rounded-lg px-4 py-2"></select>
           </div>
-
+        
           <div class="space-y-1">
             <label class="block font-medium">Languages</label>
-            <select
-              id="languagesSelect"
-              name="Languages"
-              multiple
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-            ></select>
+            <select id="languagesSelect" name="Languages" multiple class="w-full border rounded-lg px-4 py-2"></select>
           </div>
-
-          <!-- Includes -->
+        
           <div class="space-y-1">
             <label class="block font-medium">Includes</label>
-            <select
-              name="Includes"
-              id="includesSelect"
-              multiple
-              class="w-full border rounded-lg px-4 py-2"
-              required
-            ></select>
+            <select id="includesSelect" name="Includes" multiple class="w-full border rounded-lg px-4 py-2"></select>
           </div>
-
-          <!-- Not Includes -->
+        
           <div class="space-y-1">
-            <label class="block font-medium">Not Included</label>
-            <select
-              name="NotIncludes"
-              id="notIncludesSelect"
-              multiple
-              class="w-full border rounded-lg px-4 py-2"
-            ></select>
+            <label class="block font-medium">Not Includes</label>
+            <select id="notIncludesSelect" name="NotIncludes" multiple class="w-full border rounded-lg px-4 py-2"></select>
           </div>
-
+        
           <div class="flex items-center space-x-2 md:col-span-2">
-            <input
-              type="checkbox"
-              name="IsAvailable"
-              class="form-checkbox text-blue-600"
-            />
+            <input type="checkbox" name="IsAvailable" class="form-checkbox text-blue-600" />
             <label class="text-sm">Is Available</label>
           </div>
-
-          <div class="md:col-span-2 space-y-1">
-            <label class="block font-medium">Description</label>
-            <textarea
-              name="Description"
-              rows="4"
-              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-              required
-            ></textarea>
-          </div>
-
+        
           <div class="flex justify-end md:col-span-2 space-x-3">
-            <button
-              type="button"
-              id="cancelBtn2"
-              class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Save
-            </button>
+            <button type="button" id="cancelBtn2" class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancel</button>
+            <button type="submit" class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">Save</button>
           </div>
         </form>
+        
       </div>
     </div>
 
@@ -532,6 +421,46 @@
       document.getElementById("cancelBtn2").addEventListener("click", () => {
         document.getElementById("tripModal").classList.add("hidden");
         document.getElementById("tripForm").reset();
+      });
+
+      document.getElementById("tripForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+    
+        const form = e.target;
+        const tripDto = {
+          Name: [{ language: "en", text: form.Name_en.value }],
+          Description: [{ language: "en", text: form.Description_en.value }],
+          Price: parseFloat(form.Price.value),
+          Duration: parseInt(form.Duration.value),
+          TripDates: [new Date(form["TripDates[]"].value).toISOString()],
+          IsAvailable: form.IsAvailable.checked,
+          CategoryId: parseInt(form.CategoryId.value),
+          Activities: Array.from(form.Activities.selectedOptions).map((opt) => parseInt(opt.value)),
+          Languages: Array.from(form.Languages.selectedOptions).map((opt) => parseInt(opt.value)),
+          Includes: Array.from(form.Includes.selectedOptions).map((opt) => parseInt(opt.value)),
+          NotIncludes: Array.from(form.NotIncludes.selectedOptions).map((opt) => parseInt(opt.value)),
+        };
+    
+        try {
+          const response = await fetch("/api/Trip/AddTrip", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(tripDto),
+          });
+    
+          const result = await response.json();
+          if (response.ok && result.succeeded) {
+            alert("Trip added successfully");
+            form.reset();
+            document.getElementById("tripModal").classList.add("hidden");
+            fetchTrips();
+          } else {
+            alert("Failed to add trip: " + result.message);
+          }
+        } catch (error) {
+          console.error("Error submitting trip:", error);
+          alert("Something went wrong.");
+        }
       });
     </script>
   </body>
