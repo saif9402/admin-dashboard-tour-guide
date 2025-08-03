@@ -377,7 +377,7 @@ async function handleTripSubmit(e) {
       document.getElementById("tripModal").classList.add("hidden");
       fetchTrips();
     } else {
-      alert("Failed to add trip: " + result.message);
+      alert("Failed to add trip: " + result.errors);
     }
   } catch (err) {
     console.error("Error:", err);
