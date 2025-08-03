@@ -274,9 +274,11 @@
             <td class="px-6 py-3">${formatDuration(trip.duration)}</td>
             <td class="px-6 py-3">${trip.isAvailable ? "Yes" : "No"}</td>
             <td class="px-6 py-3 flex items-center gap-2">
-              <button class="text-blue-400 hover:text-blue-900 shadow-inner" title="Edit">
-                <i data-lucide="pencil"></i>  
-              </button>
+            <button 
+  class="text-blue-400 hover:text-blue-900 shadow-inner" 
+  title="Edit"
+  onclick='openEditModal(${trip.id})'
+>
               <button class="text-red-400 hover:text-red-900" title="Delete">
                 <i data-lucide="trash-2"></i>
               </button>
@@ -458,6 +460,112 @@
         document.getElementById("tripModal").classList.add("hidden");
         document.getElementById("tripForm").reset();
       });
+
+
+// Update Trip
+async function openEditModal(tripId) {
+  const token = localStorage.getItem("accessToken");
+  const modal = document.getElementById("tripModal");
+  const form = document.getElementById("tripForm");
+
+  // Clear previous content
+  form.reset();
+  document.getElementById("tripDatesWrapper").innerHTML = "";
+  document.getElementById("translationsSection").innerHTML = "";
+  window.choicesActivities?.removeActiveItems();
+  window.choicesLanguages?.removeActiveItems();
+  window.choicesIncludes?.removeActiveItems();
+  window.choicesNotIncludes?.removeActiveItems();
+
+  // Fetch trip data
+  const res = await fetch(`/api/Trip/GetTripByIdForAdmin?Id=${tripId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const result = await res.json();
+  const trip = result.data;
+
+  if (!result.succeeded) return alert("Failed to load trip");
+
+  // Set basic fields
+  form.tripId.value = tripId;
+  form.tripPrice.value = trip.price;
+  form.tripDuration.value = trip.duration;
+  form.tripAvailable.checked = trip.isAvailable;
+
+  // Set category
+  window.choicesCategory.setChoiceByValue(trip.categoryId);
+
+  // Set multiple selections
+  window.choicesActivities.setChoiceByValue(trip.activities);
+  window.choicesLanguages.setChoiceByValue(trip.languages);
+  window.choicesIncludes.setChoiceByValue(trip.includes);
+  window.choicesNotIncludes.setChoiceByValue(trip.notIncludes);
+
+  // Set Trip Dates
+  const wrapper = document.getElementById("tripDatesWrapper");
+  trip.tripDates.forEach((date) => {
+    const input = document.createElement("input");
+    input.type = "date";
+    input.name = "TripDates";
+    input.value = new Date(date).toISOString().split("T")[0];
+    input.className = "border rounded px-3 py-2 w-full";
+    wrapper.appendChild(input);
+  });
+
+  // Add +Date button if missing
+  if (!document.getElementById("addDateBtn")) {
+    const addBtn = document.createElement("button");
+    addBtn.id = "addDateBtn";
+    addBtn.textContent = "+ Add Date";
+    addBtn.type = "button";
+    addBtn.className = "text-blue-600 text-sm";
+    addBtn.onclick = () => {
+      const input = document.createElement("input");
+      input.type = "date";
+      input.name = "TripDates";
+      input.className = "border rounded px-3 py-2 w-full";
+      wrapper.appendChild(input);
+    };
+    wrapper.parentNode.appendChild(addBtn);
+  }
+
+  // Translations
+  const langResponse = await fetch("/api/Language/GetAllLanguages");
+  const langResult = await langResponse.json();
+  const languages = langResult?.data || [];
+
+  const transSection = document.getElementById("translationsSection");
+  languages.forEach((lang, i) => {
+    const nameObj = trip.name.find((t) => t.languageCode === lang.code);
+    const descObj = trip.description.find((t) => t.languageCode === lang.code);
+
+    transSection.innerHTML += `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block font-medium">Name (${lang.code})</label>
+          <input type="text" name="Name[${i}].Value" value="${nameObj?.value || ""}" class="w-full border rounded-lg px-4 py-2" />
+          <input type="hidden" name="Name[${i}].LanguageCode" value="${lang.code}" />
+        </div>
+        <div>
+          <label class="block font-medium">Description (${lang.code})</label>
+          <textarea name="Description[${i}].Value" class="w-full border rounded-lg px-4 py-2">${descObj?.value || ""}</textarea>
+          <input type="hidden" name="Description[${i}].LanguageCode" value="${lang.code}" />
+        </div>
+      </div>
+    `;
+  });
+
+  modal.classList.remove("hidden");
+}
+
+
+
+
+
+
+
+
+
     </script>
   </body>
 </html>
