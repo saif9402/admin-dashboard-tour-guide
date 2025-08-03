@@ -219,6 +219,8 @@
   
 
     <script>
+      let choicesActivities, choicesLanguages, choicesCategory, choicesIncludes, choicesNotIncludes;
+
       lucide.createIcons();
       const baseUrl =
         "/api/Trip/GetAllTrips";
@@ -330,32 +332,51 @@
         document.getElementById("tripModal").classList.remove("hidden");
       });
 
+      
+
       document.addEventListener("DOMContentLoaded", async () => {
-        choicesActivities = new Choices(activitiesSelect, { removeItemButton: true, placeholderValue: "Select activities", searchEnabled: true });
-        choicesLanguages = new Choices(languagesSelect, { removeItemButton: true, placeholderValue: "Select languages", searchEnabled: true });
-        choicesCategory = new Choices(categorySelect, { searchEnabled: true, placeholderValue: "Select a category" });
-        choicesIncludes = new Choices(includesSelect, { removeItemButton: true, placeholderValue: "Select includes", searchEnabled: true });
-        choicesNotIncludes = new Choices(notIncludesSelect, { removeItemButton: true, placeholderValue: "Remaining will appear here", searchEnabled: true });
-        
-
-
-
-
-        //Activities
         const activitiesSelect = document.getElementById("activitiesSelect");
-        const choicesActivities = new Choices(activitiesSelect, {
+        const languagesSelect = document.getElementById("languagesSelect");
+        const categorySelect = document.getElementById("categorySelect");
+        const includesSelect = document.getElementById("includesSelect");
+        const notIncludesSelect = document.getElementById("notIncludesSelect");
+      
+        // Initialize Choices once globally
+        choicesActivities = new Choices(activitiesSelect, {
           removeItemButton: true,
           placeholderValue: "Select activities",
           searchEnabled: true,
         });
-
+      
+        choicesLanguages = new Choices(languagesSelect, {
+          removeItemButton: true,
+          placeholderValue: "Select languages",
+          searchEnabled: true,
+        });
+      
+        choicesCategory = new Choices(categorySelect, {
+          searchEnabled: true,
+          placeholderValue: "Select a category",
+        });
+      
+        choicesIncludes = new Choices(includesSelect, {
+          removeItemButton: true,
+          placeholderValue: "Select includes",
+          searchEnabled: true,
+        });
+      
+        choicesNotIncludes = new Choices(notIncludesSelect, {
+          removeItemButton: true,
+          placeholderValue: "Remaining will appear here",
+          searchEnabled: true,
+        });
+      
+        // Load activities
         try {
-          const response = await fetch(
-            "/api/Activity/GetAllActivities"
-          );
+          const response = await fetch("/api/Activity/GetAllActivities");
           const result = await response.json();
           const activities = result.data?.data || [];
-
+      
           choicesActivities.setChoices(
             activities.map((act) => ({ value: act.name, label: act.name })),
             "value",
@@ -365,22 +386,13 @@
         } catch (err) {
           console.error("Failed to load activities", err);
         }
-
-        //Languages
-        const languagesSelect = document.getElementById("languagesSelect");
-        const choicesLanguages = new Choices(languagesSelect, {
-          removeItemButton: true,
-          placeholderValue: "Select languages",
-          searchEnabled: true,
-        });
-
+      
+        // Load languages
         try {
-          const response = await fetch(
-            "/api/Language/GetAllLanguages"
-          );
+          const response = await fetch("/api/Language/GetAllLanguages");
           const result = await response.json();
           const languages = result?.data || [];
-
+      
           choicesLanguages.setChoices(
             languages.map((lang) => ({ value: lang.name, label: lang.name })),
             "value",
@@ -390,56 +402,31 @@
         } catch (err) {
           console.error("Failed to load languages", err);
         }
-
-        // Category (single)
-        const categorySelect = document.getElementById("categorySelect");
-        const choicesCategory = new Choices(categorySelect, {
-          searchEnabled: true,
-          placeholderValue: "Select a category",
-        });
-
+      
+        // Load categories
         try {
-          const response = await fetch(
-            "/api/Category/GetAllCategories"
-          );
+          const response = await fetch("/api/Category/GetAllCategories");
           const result = await response.json();
           const categories = result.data?.data || [];
-
-          const options = categories.map((cat) => ({
-            value: cat.id,
-            label: cat.name,
-          }));
-
-          choicesCategory.setChoices(options, "value", "label", true);
+      
+          choicesCategory.setChoices(
+            categories.map((cat) => ({ value: cat.id, label: cat.name })),
+            "value",
+            "label",
+            true
+          );
         } catch (err) {
           console.error("Failed to load categories", err);
         }
-
-        // Includes / NotIncludes
-        const includesSelect = document.getElementById("includesSelect");
-        const notIncludesSelect = document.getElementById("notIncludesSelect");
-
-        const choicesIncludes = new Choices(includesSelect, {
-          removeItemButton: true,
-          placeholderValue: "Select includes",
-          searchEnabled: true,
-        });
-
-        const choicesNotIncludes = new Choices(notIncludesSelect, {
-          removeItemButton: true,
-          placeholderValue: "Remaining will appear here",
-          searchEnabled: true,
-        });
-
+      
+        // Load includes
         let allIncludes = [];
-
+      
         try {
-          const response = await fetch(
-            "/api/Includes/GetAllIncludes"
-          );
+          const response = await fetch("/api/Includes/GetAllIncludes");
           const result = await response.json();
           allIncludes = result.data?.data || [];
-
+      
           choicesIncludes.setChoices(
             allIncludes.map((i) => ({ value: i.name, label: i.name })),
             "value",
@@ -449,22 +436,19 @@
         } catch (err) {
           console.error("Failed to load includes", err);
         }
-
-        // Auto-populate NotIncludes
+      
+        // Auto-calculate NotIncludes
         includesSelect.addEventListener("change", () => {
-          const selected = Array.from(includesSelect.selectedOptions).map(
-            (opt) => opt.value
-          );
+          const selected = Array.from(includesSelect.selectedOptions).map((opt) => opt.value);
           const remaining = allIncludes
             .filter((item) => !selected.includes(item.name))
             .map((item) => ({ value: item.name, label: item.name }));
-
+      
           choicesNotIncludes.clearChoices();
           choicesNotIncludes.setChoices(remaining, "value", "label", true);
         });
-
-        
       });
+      
       document.getElementById("cancelBtn").addEventListener("click", () => {
         document.getElementById("tripModal").classList.add("hidden");
         document.getElementById("tripForm").reset();
@@ -480,6 +464,7 @@
 
     </script>
     <script>
+
       async function openEditModal(tripId) {
         const token = localStorage.getItem("accessToken");
       
