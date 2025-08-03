@@ -459,6 +459,7 @@ document.getElementById("imageUploadForm").addEventListener("submit", async (e) 
     });
 
     const result = await res.json();
+    console.log(result);
     if (res.ok && result.succeeded) {
       alert("Images uploaded successfully.");
       input.value = "";
