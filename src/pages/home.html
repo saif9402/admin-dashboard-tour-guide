@@ -214,7 +214,15 @@ let mainImageName = null;
 
 // === Fetch Trips ===
 async function fetchTrips(page = 1) {
-  const response = await fetch(`${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`);
+  const token = localStorage.getItem("accessToken"); // Or wherever you store the token
+
+  const response = await fetch(`${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
   const result = await response.json();
 
   if (result.succeeded) {
@@ -224,6 +232,7 @@ async function fetchTrips(page = 1) {
     tripTable.innerHTML = '<tr><td colspan="7" class="text-center text-red-500 py-4">Failed to load trips</td></tr>';
   }
 }
+
 
 // === Render Trips ===
 function renderTrips(trips) {
