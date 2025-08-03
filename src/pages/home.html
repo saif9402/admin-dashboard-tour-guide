@@ -266,13 +266,18 @@ async function populateSelect(id, url, valueField, labelField) {
 
   const res = await fetch(url);
   const result = await res.json();
-  const data = result.data || [];
+  const data = result.data?.data || [];
 
-  const mapped = data.map((item) => ({ value: item[valueField], label: item[labelField] }));
+  const mapped = data.map((item) => ({
+    value: item[valueField],
+    label: item[labelField]
+  }));
+
   choices.setChoices(mapped, "value", "label", true);
 
   return { element, choices, data };
 }
+
 
 // === Languages (for translations) ===
 async function fetchLanguages() {
