@@ -291,10 +291,6 @@
       });
 
       document.addEventListener("DOMContentLoaded", async () => {
-        await fetchLanguages();
-document.getElementById("addNameTranslation").click(); // Add one default row
-document.getElementById("addDescriptionTranslation").click(); // Add one default row
-
         //Activities
         const activitiesSelect = document.getElementById("activitiesSelect");
         const choicesActivities = new Choices(activitiesSelect, {
@@ -489,33 +485,11 @@ document.getElementById("addDescriptionTranslation").addEventListener("click", (
 
       document.getElementById("tripForm").addEventListener("submit", async (e) => {
         e.preventDefault();
+    
         const form = e.target;
-      
-        // Build Name Translations
-        const nameTranslations = [];
-        const nameLangs = form.querySelectorAll('select[name="nameLangId"]');
-        const nameVals = form.querySelectorAll('input[name="nameValue"]');
-        nameLangs.forEach((select, i) => {
-          nameTranslations.push({
-            languageId: parseInt(select.value),
-            translation: nameVals[i].value,
-          });
-        });
-      
-        // Build Description Translations
-        const descTranslations = [];
-        const descLangs = form.querySelectorAll('select[name="descriptionLangId"]');
-        const descVals = form.querySelectorAll('textarea[name="descriptionValue"]');
-        descLangs.forEach((select, i) => {
-          descTranslations.push({
-            languageId: parseInt(select.value),
-            translation: descVals[i].value,
-          });
-        });
-      
         const tripDto = {
-          Name: nameTranslations,
-          Description: descTranslations,
+          Name: [{ language: "en", text: form.Name_en.value }],
+          Description: [{ language: "en", text: form.Description_en.value }],
           Price: parseFloat(form.Price.value),
           Duration: parseInt(form.Duration.value),
           TripDates: [new Date(form["TripDates[]"].value).toISOString()],
@@ -526,14 +500,14 @@ document.getElementById("addDescriptionTranslation").addEventListener("click", (
           Includes: Array.from(form.Includes.selectedOptions).map((opt) => parseInt(opt.value)),
           NotIncludes: Array.from(form.NotIncludes.selectedOptions).map((opt) => parseInt(opt.value)),
         };
-      
+    
         try {
           const response = await fetch("/api/Trip/AddTrip", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(tripDto),
           });
-      
+    
           const result = await response.json();
           if (response.ok && result.succeeded) {
             alert("Trip added successfully");
@@ -548,7 +522,6 @@ document.getElementById("addDescriptionTranslation").addEventListener("click", (
           alert("Something went wrong.");
         }
       });
-      
     </script>
   </body>
 </html>
