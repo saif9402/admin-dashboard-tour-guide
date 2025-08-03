@@ -221,250 +221,178 @@
   </div>
   
 
-    <script>
-
+  <script>
+    lucide.createIcons();
+    const baseUrl = "/api/Trip/GetAllTrips";
+    const tripTable = document.getElementById("tripTable");
+    let currentPage = 1;
+    const pageSize = 8;
+  
+    async function fetchTrips(page = 1) {
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch(`${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+  
+      const result = await response.json();
+  
+      if (result.succeeded) {
+        renderTrips(result.data.data);
+        renderPagination(result.data.pageNumber, result.data.count);
+      } else {
+        tripTable.innerHTML = `<tr><td colspan="6" class="text-center text-red-500 py-4">Failed to load trips</td></tr>`;
+      }
+    }
+  
+    function formatDuration(minutes) {
+      const hrs = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hrs}h ${mins}m`;
+    }
+  
+    function renderTrips(trips) {
+      tripTable.innerHTML = "";
+  
+      if (trips.length === 0) {
+        tripTable.innerHTML = `<tr><td colspan="6" class="text-center py-4">No trips found</td></tr>`;
+        return;
+      }
+  
+      trips.forEach((trip) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="px-6 py-3">${trip.name}</td>
+          <td class="px-6 py-3">${trip.category}</td>
+          <td class="px-6 py-3">$${trip.price.toFixed(2)}</td>
+          <td class="px-6 py-3">${formatDuration(trip.duration)}</td>
+          <td class="px-6 py-3">${trip.isAvailable ? "Yes" : "No"}</td>
+          <td class="px-6 py-3 flex items-center gap-2">
+            <button class="text-blue-400 hover:text-blue-900 shadow-inner" title="Edit" onclick='openEditModal(${trip.id})'>
+              <i data-lucide="pencil"></i>
+            </button>
+            <button class="text-red-400 hover:text-red-900" title="Delete">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </td>
+        `;
+        tripTable.appendChild(row);
+      });
+  
       lucide.createIcons();
-      const baseUrl =
-        "/api/Trip/GetAllTrips";
-      const tripTable = document.getElementById("tripTable");
-      let currentPage = 1;
-      const pageSize = 8;
-
-      async function fetchTrips(page = 1) {
-        const token = localStorage.getItem("accessToken");
-      
-        const response = await fetch(
-          `${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-            }
-          }
-        );
-      
-        const result = await response.json();
-      
-        if (result.succeeded) {
-          renderTrips(result.data.data);
-          renderPagination(result.data.pageNumber, result.data.count);
-        } else {
-          tripTable.innerHTML = `<tr><td colspan="6" class="text-center text-red-500 py-4">Failed to load trips</td></tr>`;
+    }
+  
+    function renderPagination(current, totalCount) {
+      const paginationContainer = document.getElementById("pagination");
+      const totalPages = Math.ceil(totalCount / pageSize);
+      paginationContainer.innerHTML = "";
+  
+      const prevBtn = document.createElement("button");
+      prevBtn.textContent = "Previous";
+      prevBtn.disabled = current === 1;
+      prevBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+      prevBtn.onclick = () => {
+        if (current > 1) {
+          currentPage--;
+          fetchTrips(currentPage);
         }
-      }
-      
-
-      function formatDuration(minutes) {
-        const hrs = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return `${hrs}h ${mins}m`;
-      }
-      
-
-      function renderTrips(trips) {
-        tripTable.innerHTML = "";
-      
-        if (trips.length === 0) {
-          tripTable.innerHTML = `<tr><td colspan="6" class="text-center py-4">No trips found</td></tr>`;
-          return;
+      };
+  
+      const nextBtn = document.createElement("button");
+      nextBtn.textContent = "Next";
+      nextBtn.disabled = current === totalPages;
+      nextBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+      nextBtn.onclick = () => {
+        if (current < totalPages) {
+          currentPage++;
+          fetchTrips(currentPage);
         }
-      
-        trips.forEach((trip) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td class="px-6 py-3">${trip.name}</td>
-            <td class="px-6 py-3">${trip.category}</td>
-            <td class="px-6 py-3">$${trip.price.toFixed(2)}</td>
-            <td class="px-6 py-3">${formatDuration(trip.duration)}</td>
-            <td class="px-6 py-3">${trip.isAvailable ? "Yes" : "No"}</td>
-            <td class="px-6 py-3 flex items-center gap-2">
-  <button 
-    class="text-blue-400 hover:text-blue-900 shadow-inner" 
-    title="Edit"
-    onclick='openEditModal(${trip.id})'
-  >
-    <i data-lucide="pencil"></i>
-  </button>
-  <button class="text-red-400 hover:text-red-900" title="Delete">
-    <i data-lucide="trash-2"></i>
-  </button>
-</td>
-          `;
-          tripTable.appendChild(row);
-        });
-        lucide.createIcons();
-      }
-      
-      
-
-      function renderPagination(current, totalCount) {
-        const paginationContainer = document.getElementById("pagination");
-        const totalPages = Math.ceil(totalCount / pageSize);
-        paginationContainer.innerHTML = "";
-
-        const prevBtn = document.createElement("button");
-        prevBtn.textContent = "Previous";
-        prevBtn.disabled = current === 1;
-        prevBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
-        prevBtn.onclick = () => {
-          if (current > 1) {
-            currentPage--;
-            fetchTrips(currentPage);
-          }
-        };
-
-        const nextBtn = document.createElement("button");
-        nextBtn.textContent = "Next";
-        nextBtn.disabled = current === totalPages;
-        nextBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
-        nextBtn.onclick = () => {
-          if (current < totalPages) {
-            currentPage++;
-            fetchTrips(currentPage);
-          }
-        };
-
-        paginationContainer.appendChild(prevBtn);
-        paginationContainer.append(` Page ${current} of ${totalPages} `);
-        paginationContainer.appendChild(nextBtn);
-      }
-
-      fetchTrips(currentPage);
-      document.getElementById("addTripBtn").addEventListener("click", () => {
-        document.getElementById("tripModal").classList.remove("hidden");
+      };
+  
+      paginationContainer.appendChild(prevBtn);
+      paginationContainer.append(` Page ${current} of ${totalPages} `);
+      paginationContainer.appendChild(nextBtn);
+    }
+  
+    document.addEventListener("DOMContentLoaded", async () => {
+      const activitiesSelect = document.getElementById("activitiesSelect");
+      const languagesSelect = document.getElementById("languagesSelect");
+      const categorySelect = document.getElementById("categorySelect");
+      const includesSelect = document.getElementById("includesSelect");
+      const notIncludesSelect = document.getElementById("notIncludesSelect");
+  
+      // Init Choices
+      choicesActivities = new Choices(activitiesSelect, { removeItemButton: true, placeholderValue: "Select activities", searchEnabled: true });
+      choicesLanguages = new Choices(languagesSelect, { removeItemButton: true, placeholderValue: "Select languages", searchEnabled: true });
+      choicesCategory = new Choices(categorySelect, { searchEnabled: true, placeholderValue: "Select a category" });
+      choicesIncludes = new Choices(includesSelect, { removeItemButton: true, placeholderValue: "Select includes", searchEnabled: true });
+      choicesNotIncludes = new Choices(notIncludesSelect, { removeItemButton: true, placeholderValue: "Remaining will appear here", searchEnabled: true });
+  
+      let allIncludes = [];
+  
+      // Fetch data
+      try {
+        const resAct = await fetch("/api/Activity/GetAllActivities");
+        const act = await resAct.json();
+        choicesActivities.setChoices((act.data?.data || []).map(i => ({ value: i.id.toString(), label: i.name })), "value", "label", true);
+      } catch {}
+  
+      try {
+        const resLang = await fetch("/api/Language/GetAllLanguages");
+        const lang = await resLang.json();
+        choicesLanguages.setChoices((lang.data || []).map(i => ({ value: i.id.toString(), label: i.name })), "value", "label", true);
+      } catch {}
+  
+      try {
+        const resCat = await fetch("/api/Category/GetAllCategories");
+        const cat = await resCat.json();
+        choicesCategory.setChoices((cat.data?.data || []).map(i => ({ value: i.id.toString(), label: i.name })), "value", "label", true);
+      } catch {}
+  
+      try {
+        const resInc = await fetch("/api/Includes/GetAllIncludes");
+        const inc = await resInc.json();
+        allIncludes = inc.data?.data || [];
+        choicesIncludes.setChoices(allIncludes.map(i => ({ value: i.id.toString(), label: i.name })), "value", "label", true);
+      } catch {}
+  
+      includesSelect.addEventListener("change", () => {
+        const selected = Array.from(includesSelect.selectedOptions).map((opt) => parseInt(opt.value));
+        const remaining = allIncludes.filter((item) => !selected.includes(item.id)).map(item => ({ value: item.id.toString(), label: item.name }));
+        choicesNotIncludes.clearChoices();
+        choicesNotIncludes.setChoices(remaining, "value", "label", true);
       });
-
-      
-
-      document.addEventListener("DOMContentLoaded", async () => {
-        const activitiesSelect = document.getElementById("activitiesSelect");
-        const languagesSelect = document.getElementById("languagesSelect");
-        const categorySelect = document.getElementById("categorySelect");
-        const includesSelect = document.getElementById("includesSelect");
-        const notIncludesSelect = document.getElementById("notIncludesSelect");
-      
-        // Initialize Choices once globally
-        choicesActivities = new Choices(activitiesSelect, {
-          removeItemButton: true,
-          placeholderValue: "Select activities",
-          searchEnabled: true,
-        });
-      
-        choicesLanguages = new Choices(languagesSelect, {
-          removeItemButton: true,
-          placeholderValue: "Select languages",
-          searchEnabled: true,
-        });
-      
-        choicesCategory = new Choices(categorySelect, {
-          searchEnabled: true,
-          placeholderValue: "Select a category",
-        });
-      
-        choicesIncludes = new Choices(includesSelect, {
-          removeItemButton: true,
-          placeholderValue: "Select includes",
-          searchEnabled: true,
-        });
-      
-        choicesNotIncludes = new Choices(notIncludesSelect, {
-          removeItemButton: true,
-          placeholderValue: "Remaining will appear here",
-          searchEnabled: true,
-        });
-      
-        // Load activities
-        try {
-          const response = await fetch("/api/Activity/GetAllActivities");
-          const result = await response.json();
-          const activities = result.data?.data || [];
-      
-          choicesActivities.setChoices(
-            activities.map((act) => ({ value: act.name, label: act.name })),
-            "value",
-            "label",
-            true
-          );
-        } catch (err) {
-          console.error("Failed to load activities", err);
-        }
-      
-        // Load languages
-        try {
-          const response = await fetch("/api/Language/GetAllLanguages");
-          const result = await response.json();
-          const languages = result?.data || [];
-      
-          choicesLanguages.setChoices(
-            languages.map((lang) => ({ value: lang.name, label: lang.name })),
-            "value",
-            "label",
-            true
-          );
-        } catch (err) {
-          console.error("Failed to load languages", err);
-        }
-      
-        // Load categories
-        try {
-          const response = await fetch("/api/Category/GetAllCategories");
-          const result = await response.json();
-          const categories = result.data?.data || [];
-      
-          choicesCategory.setChoices(
-            categories.map((cat) => ({ value: cat.id, label: cat.name })),
-            "value",
-            "label",
-            true
-          );
-        } catch (err) {
-          console.error("Failed to load categories", err);
-        }
-      
-        // Load includes
-        let allIncludes = [];
-      
-        try {
-          const response = await fetch("/api/Includes/GetAllIncludes");
-          const result = await response.json();
-          allIncludes = result.data?.data || [];
-      
-          choicesIncludes.setChoices(
-            allIncludes.map((i) => ({ value: i.name, label: i.name })),
-            "value",
-            "label",
-            true
-          );
-        } catch (err) {
-          console.error("Failed to load includes", err);
-        }
-      
-        // Auto-calculate NotIncludes
-        includesSelect.addEventListener("change", () => {
-          const selected = Array.from(includesSelect.selectedOptions).map((opt) => opt.value);
-          const remaining = allIncludes
-            .filter((item) => !selected.includes(item.name))
-            .map((item) => ({ value: item.name, label: item.name }));
-      
-          choicesNotIncludes.clearChoices();
-          choicesNotIncludes.setChoices(remaining, "value", "label", true);
-        });
-      });
-      
-      document.getElementById("cancelBtn").addEventListener("click", () => {
-        document.getElementById("tripModal").classList.add("hidden");
-        document.getElementById("tripForm").reset();
-      });
-
-      document.getElementById("cancelBtn2").addEventListener("click", () => {
-        document.getElementById("tripModal").classList.add("hidden");
-        document.getElementById("tripForm").reset();
-      });
-
-
-
-
-    </script>
+  
+      // Initial trip load
+      await fetchTrips(currentPage);
+    });
+  
+    function clearFormAndChoices() {
+      document.getElementById("tripForm").reset();
+      choicesActivities.removeActiveItems();
+      choicesLanguages.removeActiveItems();
+      choicesIncludes.removeActiveItems();
+      choicesNotIncludes.removeActiveItems();
+    }
+  
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+      document.getElementById("tripModal").classList.add("hidden");
+      clearFormAndChoices();
+    });
+  
+    document.getElementById("cancelBtn2").addEventListener("click", () => {
+      document.getElementById("tripModal").classList.add("hidden");
+      clearFormAndChoices();
+    });
+  
+    document.getElementById("addTripBtn").addEventListener("click", () => {
+      document.getElementById("tripModal").classList.remove("hidden");
+      clearFormAndChoices();
+    });
+  </script>
+  
     <script>
 
       async function openEditModal(tripId) {
@@ -557,6 +485,78 @@
           alert("Error loading trip details.\nCheck console for more information.");
         }
       }
+      document.getElementById("tripForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData();
+      
+        // Get trip ID for update
+        const tripId = document.getElementById("tripId").value;
+      
+        // Gather translations
+        const nameInputs = document.querySelectorAll('input[name^="Name_"]');
+        const descInputs = document.querySelectorAll('input[name^="Description_"]');
+      
+        const nameTranslations = [];
+        const descTranslations = [];
+      
+        nameInputs.forEach(input => {
+          const lang = input.name.split("_")[1];
+          nameTranslations.push({ language: lang, translation: input.value });
+        });
+      
+        descInputs.forEach(input => {
+          const lang = input.name.split("_")[1];
+          descTranslations.push({ language: lang, translation: input.value });
+        });
+      
+        formData.append("Name", JSON.stringify(nameTranslations));
+        formData.append("Description", JSON.stringify(descTranslations));
+      
+        formData.append("Duration", document.getElementById("tripDuration").value);
+        formData.append("Price", document.getElementById("tripPrice").value);
+        formData.append("IsAvailable", document.getElementById("tripAvailable").checked);
+        formData.append("CategoryId", document.getElementById("categorySelect").value);
+      
+        // Multi-select fields (must be int arrays)
+        const getChoicesValues = (choicesInstance) =>
+          choicesInstance.getValue().map((choice) => parseInt(choice.value));
+      
+        formData.append("Activities", JSON.stringify(getChoicesValues(choicesActivities)));
+        formData.append("Languages", JSON.stringify(getChoicesValues(choicesLanguages)));
+        formData.append("Includes", JSON.stringify(getChoicesValues(choicesIncludes)));
+        formData.append("NotIncludes", JSON.stringify(getChoicesValues(choicesNotIncludes)));
+      
+        // Trip Dates
+        const tripDates = Array.from(document.querySelectorAll('input[name="TripDates"]'))
+          .map(input => input.value);
+        formData.append("TripDates", JSON.stringify(tripDates));
+      
+        try {
+          const token = localStorage.getItem("accessToken");
+          const response = await fetch(`/api/Trip/UpdateTrip/${tripId}`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`
+            },
+            body: formData
+          });
+      
+          const result = await response.json();
+          if (result.succeeded) {
+            alert("Trip updated successfully!");
+            document.getElementById("tripModal").classList.add("hidden");
+            fetchTrips(currentPage);
+          } else {
+            alert(`Update failed: ${result.message || "Unknown error"}`);
+          }
+      
+        } catch (error) {
+          console.error("Update error:", error);
+          alert("An error occurred while updating the trip.");
+        }
+      });
+      
       
     </script>
     
