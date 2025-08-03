@@ -444,14 +444,13 @@ document.getElementById("imageUploadForm").addEventListener("submit", async (e) 
   }
 
   const formData = new FormData();
-  for (const file of files) {
-    formData.append("images", file);
-  }
 
-  if (mainImageName) {
-    formData.append("mainImageName", mainImageName);
-  }
+files.forEach((file, index) => {
+  const isMain = file.name === mainImageName;
 
+  formData.append(`images[${index}].Image`, file);
+  formData.append(`images[${index}].IsMainImage`, isMain.toString());
+});
   try {
     const res = await fetch(`https://localhost:7134/api/Trip/AddImagesToTrip/${currentTripId}`, {
       method: "POST",
