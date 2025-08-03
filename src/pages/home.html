@@ -267,18 +267,24 @@ async function populateSelect(id, url, valueField, labelField) {
   const res = await fetch(url);
   const result = await res.json();
 
-  if (!Array.isArray(result.data)) {
+  // ✅ Fix: unwrap nested structure
+  let data = [];
+  if (Array.isArray(result.data)) {
+    data = result.data;
+  } else if (Array.isArray(result.data?.data)) {
+    data = result.data.data;
+  } else {
     console.error(`Invalid data for ${id}`, result.data);
     return;
   }
 
-  const mapped = result.data.map((item) => ({
+  const mapped = data.map((item) => ({
     value: item[valueField],
     label: item[labelField],
   }));
 
   choices.setChoices(mapped, "value", "label", true);
-  return { element, choices, data: result.data };
+  return { element, choices, data };
 }
 
 
