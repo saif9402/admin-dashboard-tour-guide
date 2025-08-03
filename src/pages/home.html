@@ -102,78 +102,101 @@
           <h2 class="text-2xl font-semibold">Add Trip</h2>
           <button id="cancelBtn" type="button" class="text-2xl text-gray-500 hover:text-gray-700">&times;</button>
         </div>
-
-        <form id="tripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Multi-language Name -->
-          <div class="md:col-span-2">
-            <label class="block font-medium mb-1">Trip Names (multi-language)</label>
-            <div id="nameTranslations" class="space-y-2"></div>
-            <button type="button" id="addNameTranslation" class="text-sm text-blue-600 hover:underline mt-2">+ Add Name</button>
-          </div>
-
-          <!-- Multi-language Description -->
-          <div class="md:col-span-2">
-            <label class="block font-medium mb-1">Trip Descriptions (multi-language)</label>
-            <div id="descriptionTranslations" class="space-y-2"></div>
-            <button type="button" id="addDescriptionTranslation" class="text-sm text-blue-600 hover:underline mt-2">+ Add Description</button>
-          </div>
-
-          <!-- Other fields -->
-          <div class="space-y-1">
-            <label class="block font-medium">Price</label>
-            <input type="number" name="Price" required class="w-full border rounded-lg px-4 py-2" />
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Duration</label>
-            <input type="number" name="Duration" required class="w-full border rounded-lg px-4 py-2" />
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="block font-medium">Trip Dates</label>
-            <div id="tripDatesContainer" class="space-y-2">
-              <input type="datetime-local" name="TripDates[]" required class="w-full border rounded-lg px-4 py-2" />
+    
+        <!-- === Tab Buttons === -->
+        <div class="flex border-b mb-4 space-x-6">
+          <button id="tabInfo" class="tab-btn px-4 py-2 font-medium border-b-2 border-blue-600 text-blue-600">Trip Info</button>
+          <button id="tabImages" class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600">Images</button>
+        </div>
+    
+        <!-- === Trip Info Tab === -->
+        <div id="tabContentInfo" class="tab-content">
+          <form id="tripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Multi-language Name -->
+            <div class="md:col-span-2">
+              <label class="block font-medium mb-1">Trip Names (multi-language)</label>
+              <div id="nameTranslations" class="space-y-2"></div>
+              <button type="button" id="addNameTranslation" class="text-sm text-blue-600 hover:underline mt-2">+ Add Name</button>
             </div>
-            <button type="button" id="addTripDate" class="text-sm text-blue-600 hover:underline mt-1">+ Add another date</button>
-          </div>
-          
-
-          <div class="space-y-1">
-            <label class="block font-medium">Category</label>
-            <select id="categorySelect" name="CategoryId" required class="w-full border rounded-lg px-4 py-2"></select>
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Activities</label>
-            <select id="activitiesSelect" name="Activities" multiple class="w-full border rounded-lg px-4 py-2"></select>
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Languages</label>
-            <select id="languagesSelect" name="Languages" multiple class="w-full border rounded-lg px-4 py-2"></select>
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Includes</label>
-            <select id="includesSelect" name="Includes" multiple class="w-full border rounded-lg px-4 py-2"></select>
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Not Includes</label>
-            <select id="notIncludesSelect" name="NotIncludes" multiple class="w-full border rounded-lg px-4 py-2"></select>
-          </div>
-
-          <div class="flex items-center space-x-2 md:col-span-2">
-            <input type="checkbox" name="IsAvailable" class="form-checkbox text-blue-600" />
-            <label class="text-sm">Is Available</label>
-          </div>
-
-          <div class="flex justify-end md:col-span-2 space-x-3">
-            <button type="button" id="cancelBtn2" class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancel</button>
-            <button type="submit" class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">Save</button>
-          </div>
-        </form>
+    
+            <!-- Multi-language Description -->
+            <div class="md:col-span-2">
+              <label class="block font-medium mb-1">Trip Descriptions (multi-language)</label>
+              <div id="descriptionTranslations" class="space-y-2"></div>
+              <button type="button" id="addDescriptionTranslation" class="text-sm text-blue-600 hover:underline mt-2">+ Add Description</button>
+            </div>
+    
+            <div class="space-y-1">
+              <label class="block font-medium">Price</label>
+              <input type="number" name="Price" required class="w-full border rounded-lg px-4 py-2" />
+            </div>
+    
+            <div class="space-y-1">
+              <label class="block font-medium">Duration</label>
+              <input type="number" name="Duration" required class="w-full border rounded-lg px-4 py-2" />
+            </div>
+    
+            <div class="md:col-span-2">
+              <label class="block font-medium">Trip Dates</label>
+              <div id="tripDatesContainer" class="space-y-2">
+                <input type="datetime-local" name="TripDates[]" required class="w-full border rounded-lg px-4 py-2" />
+              </div>
+              <button type="button" id="addTripDate" class="text-sm text-blue-600 hover:underline mt-1">+ Add another date</button>
+            </div>
+    
+            <div class="space-y-1">
+              <label class="block font-medium">Category</label>
+              <select id="categorySelect" name="CategoryId" required class="w-full border rounded-lg px-4 py-2"></select>
+            </div>
+    
+            <div class="space-y-1">
+              <label class="block font-medium">Activities</label>
+              <select id="activitiesSelect" name="Activities" multiple class="w-full border rounded-lg px-4 py-2"></select>
+            </div>
+    
+            <div class="space-y-1">
+              <label class="block font-medium">Languages</label>
+              <select id="languagesSelect" name="Languages" multiple class="w-full border rounded-lg px-4 py-2"></select>
+            </div>
+    
+            <div class="space-y-1">
+              <label class="block font-medium">Includes</label>
+              <select id="includesSelect" name="Includes" multiple class="w-full border rounded-lg px-4 py-2"></select>
+            </div>
+    
+            <div class="space-y-1">
+              <label class="block font-medium">Not Includes</label>
+              <select id="notIncludesSelect" name="NotIncludes" multiple class="w-full border rounded-lg px-4 py-2"></select>
+            </div>
+    
+            <div class="flex items-center space-x-2 md:col-span-2">
+              <input type="checkbox" name="IsAvailable" class="form-checkbox text-blue-600" />
+              <label class="text-sm">Is Available</label>
+            </div>
+    
+            <div class="flex justify-end md:col-span-2 space-x-3">
+              <button type="button" id="cancelBtn2" class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancel</button>
+              <button type="submit" class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">Save</button>
+            </div>
+          </form>
+        </div>
+    
+        <!-- === Images Tab === -->
+        <div id="tabContentImages" class="tab-content hidden">
+          <form id="imageUploadForm" enctype="multipart/form-data" class="space-y-4">
+            <label class="block font-medium">Upload Trip Images</label>
+            <input type="file" id="tripImages" name="images" multiple accept="image/*" class="w-full border rounded px-4 py-2" />
+    
+            <div class="text-sm text-gray-500">You can select multiple images. Main image can be marked below.</div>
+    
+            <div id="imagePreview" class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4"></div>
+    
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Upload Images</button>
+          </form>
+        </div>
       </div>
+    </div>
+    
     </div>
     <script>// trip-page.js
 
