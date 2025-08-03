@@ -1,299 +1,538 @@
-<!-- حفظ هذا الملف كـ index.html مثلاً -->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="../output.css" rel="stylesheet" />
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-  <title>Tour Guide Admin Panel</title>
-</head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="../output.css" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
-  <!-- Sidebar and Main Content -->
-  <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r shadow-md">...</aside>
+    <title>Tour Guide Admin Panel</title>
+  </head>
+  <body class="bg-gray-50 text-gray-800 font-sans">
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-white border-r shadow-md">
+        <div class="p-6 border-b">
+          <img src="../img/Vector.png" alt="main logo" />
+        </div>
+        <nav class="p-4 space-y-3">
+          <a
+            href="home.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 bg-blue-100 shadow-inner font-medium"
+          >
+            <i data-lucide="map"></i> <span>Trips</span>
+          </a>
+          <a
+            href="categories.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="folder"></i> <span>Categories</span>
+          </a>
+          <a
+            href="includes.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="check-square"></i> <span>Includes</span>
+          </a>
+          <a
+            href="Languages.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="languages"></i> <span>Languages</span>
+          </a>
+          <a
+            href="activities.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="activity"></i> <span>Activities</span>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="calendar-check"></i> <span>Bookings</span>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-red-600 hover:bg-red-100"
+          >
+            <i data-lucide="log-out"></i> <span>Logout</span>
+          </a>
+        </nav>
+      </aside>
 
-    <!-- Main -->
-    <main class="flex-1 p-8">
-      <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h1 class="text-3xl font-bold text-gray-900">Manage Trips</h1>
-        <button id="addTripBtn" class="flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-lg shadow">
-          <i data-lucide="plus"></i> <span>Add Trip</span>
-        </button>
-      </div>
+      <!-- Main Content -->
+      <main class="flex-1 p-8">
+        <div
+          class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
+        >
+          <h1 class="text-3xl font-bold text-gray-900">Manage Trips</h1>
+          <button
+            id="addTripBtn"
+            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow"
+          >
+            <i data-lucide="plus"></i>
+            <span>Add Trip</span>
+          </button>
+        </div>
 
-      <div class="mb-6">
-        <input type="text" placeholder="Search trips..." class="w-full border border-gray-300 rounded-lg px-4 py-2" />
-      </div>
+        <div class="mb-6">
+          <input
+            type="text"
+            placeholder="Search trips..."
+            class="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-4 py-2"
+          />
+        </div>
 
-      <!-- Table -->
-      <div class="bg-white rounded-xl shadow overflow-x-auto">
-        <table class="min-w-full text-sm text-left">
-          <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-            <tr>
-              <th class="px-6 py-4">Name</th>
-              <th class="px-6 py-4">Category</th>
-              <th class="px-6 py-4">Price</th>
-              <th class="px-6 py-4">Duration</th>
-              <th class="px-6 py-4">Available</th>
-              <th class="px-6 py-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tripTable" class="divide-y divide-gray-200 bg-white"></tbody>
-        </table>
-      </div>
+        <!-- Trip Table -->
+        <div class="bg-white rounded-xl shadow overflow-x-auto">
+          <table class="min-w-full text-sm text-left">
+            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+              <tr>
+                <th class="px-6 py-4">Name</th>
+                <th class="px-6 py-4">Category</th>
+                <th class="px-6 py-4">Price</th>
+                <th class="px-6 py-4">Duration</th>
+                <th class="px-6 py-4">Available</th>
+                <th class="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tripTable" class="divide-y divide-gray-200 bg-white">
+              <!-- Trip rows go here -->
+            </tbody>
+          </table>
+        </div>
+        <div
+          id="pagination"
+          class="mt-6 flex justify-center items-center gap-3 text-sm font-medium"
+        ></div>
+      </main>
+    </div>
 
-      <div id="pagination" class="mt-6 flex justify-center items-center gap-3 text-sm font-medium"></div>
-    </main>
-  </div>
+    <!-- Modal (hidden by default) -->
+    <div
+      id="tripModal"
+      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-lg backdrop-filter flex items-center justify-center px-4 py-8 hidden transition-opacity duration-300"
+    >
+      <div
+        class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl p-6 transform transition-all duration-300"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-semibold text-gray-800">Add Trip</h2>
+          <button
+            type="button"
+            id="cancelBtn"
+            class="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+          >
+            &times;
+          </button>
+        </div>
 
-  <!-- Edit Trip Modal -->
-  <div id="tripModal" class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4 py-8 hidden">
-    <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-semibold">Edit Trip</h2>
-        <button type="button" id="cancelBtn" class="text-gray-500 text-2xl">&times;</button>
-      </div>
-
-      <!-- Tabs -->
-      <div class="flex space-x-4 border-b mb-4">
-        <button id="tabInfo" class="font-medium border-b-2 border-blue-500 pb-2 text-blue-600">Trip Info</button>
-        <button id="tabImages" class="font-medium text-gray-600 hover:text-blue-600 pb-2">Images</button>
-      </div>
-
-      <!-- Trip Info Form -->
-      <div id="tripInfoSection">
         <form id="tripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <input type="hidden" id="tripId" />
-          <div id="translationsSection" class="md:col-span-2 space-y-4"></div>
+          <input type="hidden" id="tripId" name="id" />
 
-          <div><label>Price</label><input type="number" id="tripPrice" class="w-full border rounded px-4 py-2" /></div>
-          <div><label>Duration</label><input type="number" id="tripDuration" class="w-full border rounded px-4 py-2" /></div>
-          <div><label>Category</label><select id="categorySelect" class="w-full border rounded px-4 py-2"></select></div>
-          <div><label>Activities</label><select id="activitiesSelect" multiple class="w-full border rounded px-4 py-2"></select></div>
-          <div><label>Languages</label><select id="languagesSelect" multiple class="w-full border rounded px-4 py-2"></select></div>
-          <div><label>Includes</label><select id="includesSelect" multiple class="w-full border rounded px-4 py-2"></select></div>
-          <div><label>Not Included</label><select id="notIncludesSelect" multiple class="w-full border rounded px-4 py-2"></select></div>
+          <div class="space-y-1">
+            <label class="block font-medium">Trip Name</label>
+            <input
+              type="text"
+              name="Name"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
 
-          <div class="md:col-span-2"><input type="checkbox" id="tripAvailable" /> <label>Available</label></div>
+          <div class="space-y-1">
+            <label class="block font-medium">Price</label>
+            <input
+              type="number"
+              name="Price"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
 
-          <div class="md:col-span-2">
-            <label>Trip Dates</label>
-            <div id="tripDatesWrapper" class="space-y-2"></div>
-            <button type="button" id="addDateBtn" class="text-blue-600 text-sm">+ Add Date</button>
+          <div class="space-y-1">
+            <label class="block font-medium">Duration</label>
+            <input
+              type="text"
+              name="Duration"
+              placeholder="e.g. 2h"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Date & Time</label>
+            <input
+              type="datetime-local"
+              name="DateTime"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Meeting Point Address</label>
+            <input
+              type="text"
+              name="MeetingPointAddress"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Meeting Point URL</label>
+            <input
+              type="url"
+              name="MeetingPointURL"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div class="md:col-span-2 space-y-2">
+            <label class="block font-medium">Main Image</label>
+            <input
+              type="file"
+              name="MainImage"
+              accept="image/*"
+              class="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              required
+            />
+          </div>
+
+          <div class="md:col-span-2 space-y-2">
+            <label class="block font-medium">Gallery Images</label>
+            <input
+              type="file"
+              name="Images"
+              accept="image/*"
+              multiple
+              class="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Category</label>
+            <select
+              name="CategoryId"
+              id="categorySelect"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Loading...</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Activities</label>
+            <select
+              id="activitiesSelect"
+              name="Activities"
+              multiple
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            ></select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Languages</label>
+            <select
+              id="languagesSelect"
+              name="Languages"
+              multiple
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            ></select>
+          </div>
+
+          <!-- Includes -->
+          <div class="space-y-1">
+            <label class="block font-medium">Includes</label>
+            <select
+              name="Includes"
+              id="includesSelect"
+              multiple
+              class="w-full border rounded-lg px-4 py-2"
+              required
+            ></select>
+          </div>
+
+          <!-- Not Includes -->
+          <div class="space-y-1">
+            <label class="block font-medium">Not Included</label>
+            <select
+              name="NotIncludes"
+              id="notIncludesSelect"
+              multiple
+              class="w-full border rounded-lg px-4 py-2"
+            ></select>
+          </div>
+
+          <div class="flex items-center space-x-2 md:col-span-2">
+            <input
+              type="checkbox"
+              name="IsAvailable"
+              class="form-checkbox text-blue-600"
+            />
+            <label class="text-sm">Is Available</label>
+          </div>
+
+          <div class="md:col-span-2 space-y-1">
+            <label class="block font-medium">Description</label>
+            <textarea
+              name="Description"
+              rows="4"
+              class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              required
+            ></textarea>
           </div>
 
           <div class="flex justify-end md:col-span-2 space-x-3">
-            <button type="button" id="cancelBtn2" class="px-5 py-2 bg-gray-200 rounded">Cancel</button>
-            <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded">Save</button>
+            <button
+              type="button"
+              id="cancelBtn2"
+              class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Save
+            </button>
           </div>
         </form>
       </div>
-
-      <!-- Trip Images -->
-      <div id="tripImagesSection" class="hidden">
-        <div class="space-y-4">
-          <h3 class="text-lg font-semibold">Manage Images</h3>
-          <div id="existingImages" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-          <label>Add New Images</label>
-          <input type="file" id="addImagesInput" multiple accept="image/*" />
-          <button id="uploadImagesBtn" class="bg-blue-600 text-white px-4 py-2 rounded">Upload</button>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <script src="main.js"></script>
-</body>
+    <script>
+      lucide.createIcons();
+      const baseUrl =
+       "/api/Trip/GetAllTrips";
+      const tripTable = document.getElementById("tripTable");
+      let currentPage = 1;
+      const pageSize = 8;
+
+      async function fetchTrips(page = 1) {
+        const response = await fetch(
+          `${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`
+        );
+        const result = await response.json();
+      
+        if (result.succeeded) {
+          renderTrips(result.data.data);
+          renderPagination(result.data.pageNumber, result.data.count);
+        } else {
+          tripTable.innerHTML = '<tr><td colspan="7" class="text-center text-red-500 py-4">Failed to load trips</td></tr>';
+        }
+      }
+      
+      function renderTrips(trips) {
+        tripTable.innerHTML = "";
+      
+        if (trips.length === 0) {
+          tripTable.innerHTML = '<tr><td colspan="7" class="text-center py-4">No trips found</td></tr>';
+          return;
+        }
+      
+        trips.forEach((trip) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td class="px-6 py-3">${trip.name}</td>
+            <td class="px-6 py-3">${trip.category}</td>
+            <td class="px-6 py-3">$${trip.price.toFixed(2)}</td>
+            <td class="px-6 py-3">${trip.duration}</td>
+            <td class="px-6 py-3">${trip.isAvailable ? "Yes" : "No"}</td>
+            <td class="px-6 py-3 flex items-center gap-2">
+              <button class="text-blue-400 hover:text-blue-900 shadow-inner" title="Edit">
+                <i data-lucide="pencil"></i>  
+              </button>
+              <button class="text-red-400 hover:text-red-900" title="Delete">
+                <i data-lucide="trash-2"></i>
+              </button>
+            </td>
+          `;
+          tripTable.appendChild(row);
+        });
+      
+        lucide.createIcons();
+      }
+      
+      function renderPagination(current, totalCount) {
+        const paginationContainer = document.getElementById("pagination");
+        const totalPages = Math.ceil(totalCount / pageSize);
+        paginationContainer.innerHTML = "";
+
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "Previous";
+        prevBtn.disabled = current === 1;
+        prevBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+        prevBtn.onclick = () => {
+          if (current > 1) {
+            currentPage--;
+            fetchTrips(currentPage);
+          }
+        };
+
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "Next";
+        nextBtn.disabled = current === totalPages;
+        nextBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+        nextBtn.onclick = () => {
+          if (current < totalPages) {
+            currentPage++;
+            fetchTrips(currentPage);
+          }
+        };
+
+        paginationContainer.appendChild(prevBtn);
+        paginationContainer.append(` Page ${current} of ${totalPages} `);
+        paginationContainer.appendChild(nextBtn);
+      }
+
+      fetchTrips(currentPage);
+      document.getElementById("addTripBtn").addEventListener("click", () => {
+        document.getElementById("tripModal").classList.remove("hidden");
+      });
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        //Activities
+        const activitiesSelect = document.getElementById("activitiesSelect");
+        const choicesActivities = new Choices(activitiesSelect, {
+          removeItemButton: true,
+          placeholderValue: "Select activities",
+          searchEnabled: true,
+        });
+
+        try {
+          const response = await fetch(
+            "/api/Activity/GetAllActivities"
+          );
+          const result = await response.json();
+          const activities = result.data?.data || [];
+
+          choicesActivities.setChoices(
+            activities.map((act) => ({ value: act.name, label: act.name })),
+            "value",
+            "label",
+            true
+          );
+        } catch (err) {
+          console.error("Failed to load activities", err);
+        }
+
+        //Languages
+        const languagesSelect = document.getElementById("languagesSelect");
+        const choicesLanguages = new Choices(languagesSelect, {
+          removeItemButton: true,
+          placeholderValue: "Select languages",
+          searchEnabled: true,
+        });
+
+        try {
+          const response = await fetch(
+            "/api/Language/GetAllLanguages"
+          );
+          const result = await response.json();
+          const languages = result?.data || [];
+
+          choicesLanguages.setChoices(
+            languages.map((lang) => ({ value: lang.name, label: lang.name })),
+            "value",
+            "label",
+            true
+          );
+        } catch (err) {
+          console.error("Failed to load languages", err);
+        }
+
+        // Category (single)
+        const categorySelect = document.getElementById("categorySelect");
+        const choicesCategory = new Choices(categorySelect, {
+          searchEnabled: true,
+          placeholderValue: "Select a category",
+        });
+
+        try {
+          const response = await fetch(
+            "/api/Category/GetAllCategories"
+          );
+          const result = await response.json();
+          const categories = result.data?.data || [];
+
+          const options = categories.map((cat) => ({
+            value: cat.id,
+            label: cat.name,
+          }));
+
+          choicesCategory.setChoices(options, "value", "label", true);
+        } catch (err) {
+          console.error("Failed to load categories", err);
+        }
+
+        // Includes / NotIncludes
+        const includesSelect = document.getElementById("includesSelect");
+        const notIncludesSelect = document.getElementById("notIncludesSelect");
+
+        const choicesIncludes = new Choices(includesSelect, {
+          removeItemButton: true,
+          placeholderValue: "Select includes",
+          searchEnabled: true,
+        });
+
+        const choicesNotIncludes = new Choices(notIncludesSelect, {
+          removeItemButton: true,
+          placeholderValue: "Remaining will appear here",
+          searchEnabled: true,
+        });
+
+        let allIncludes = [];
+
+        try {
+          const response = await fetch(
+            "/api/Includes/GetAllIncludes"
+          );
+          const result = await response.json();
+          allIncludes = result.data?.data || [];
+
+          choicesIncludes.setChoices(
+            allIncludes.map((i) => ({ value: i.name, label: i.name })),
+            "value",
+            "label",
+            true
+          );
+        } catch (err) {
+          console.error("Failed to load includes", err);
+        }
+
+        // Auto-populate NotIncludes
+        includesSelect.addEventListener("change", () => {
+          const selected = Array.from(includesSelect.selectedOptions).map(
+            (opt) => opt.value
+          );
+          const remaining = allIncludes
+            .filter((item) => !selected.includes(item.name))
+            .map((item) => ({ value: item.name, label: item.name }));
+
+          choicesNotIncludes.clearChoices();
+          choicesNotIncludes.setChoices(remaining, "value", "label", true);
+        });
+      });
+      document.getElementById("cancelBtn").addEventListener("click", () => {
+        document.getElementById("tripModal").classList.add("hidden");
+        document.getElementById("tripForm").reset();
+      });
+
+      document.getElementById("cancelBtn2").addEventListener("click", () => {
+        document.getElementById("tripModal").classList.add("hidden");
+        document.getElementById("tripForm").reset();
+      });
+    </script>
+  </body>
 </html>
-<script>
-  let choicesActivities, choicesLanguages, choicesCategory, choicesIncludes, choicesNotIncludes;
-
-document.addEventListener("DOMContentLoaded", () => {
-  lucide.createIcons();
-  initializeChoices();
-  fetchTrips();
-  bindEventListeners();
-});
-
-function initializeChoices() {
-  choicesActivities = new Choices("#activitiesSelect", { removeItemButton: true });
-  choicesLanguages = new Choices("#languagesSelect", { removeItemButton: true });
-  choicesCategory = new Choices("#categorySelect", { searchEnabled: true });
-  choicesIncludes = new Choices("#includesSelect", { removeItemButton: true });
-  choicesNotIncludes = new Choices("#notIncludesSelect", { removeItemButton: true });
-
-  loadOptions();
-}
-
-async function loadOptions() {
-  await loadChoices("/api/Activity/GetAllActivities", choicesActivities);
-  await loadChoices("/api/Language/GetAllLanguages", choicesLanguages);
-  await loadChoices("/api/Category/GetAllCategories", choicesCategory, true);
-  const includes = await loadChoices("/api/Includes/GetAllIncludes", choicesIncludes);
-  document.getElementById("includesSelect").addEventListener("change", () => {
-    const selected = Array.from(document.getElementById("includesSelect").selectedOptions).map(opt => opt.value);
-    const remaining = includes.filter(item => !selected.includes(item.label));
-    choicesNotIncludes.clearChoices();
-    choicesNotIncludes.setChoices(remaining, "value", "label", true);
-  });
-}
-
-async function loadChoices(apiUrl, instance, includeId = false) {
-  const response = await fetch(apiUrl);
-  const result = await response.json();
-  const data = result.data?.data || result.data || [];
-  const options = data.map(item => ({
-    value: includeId ? item.id : item.name,
-    label: item.name,
-  }));
-  instance.setChoices(options, "value", "label", true);
-  return options;
-}
-
-async function fetchTrips() {
-  const token = localStorage.getItem("accessToken");
-  const response = await fetch("/api/Trip/GetAllTrips?pageNumber=1&pageSize=10", {
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
-  });
-  const result = await response.json();
-  if (result.succeeded) {
-    renderTrips(result.data.data);
-  }
-}
-
-function renderTrips(trips) {
-  const table = document.getElementById("tripTable");
-  table.innerHTML = "";
-  trips.forEach(trip => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td class="px-6 py-4">${trip.name}</td>
-      <td class="px-6 py-4">${trip.category}</td>
-      <td class="px-6 py-4">$${trip.price}</td>
-      <td class="px-6 py-4">${trip.duration}</td>
-      <td class="px-6 py-4">${trip.isAvailable ? "Yes" : "No"}</td>
-      <td class="px-6 py-4">
-        <button onclick="openEditModal(${trip.id})" class="text-blue-600"><i data-lucide="pencil"></i></button>
-      </td>
-    `;
-    table.appendChild(row);
-  });
-  lucide.createIcons();
-}
-
-function bindEventListeners() {
-  document.getElementById("addTripBtn").addEventListener("click", () => {
-    document.getElementById("tripModal").classList.remove("hidden");
-  });
-
-  document.getElementById("cancelBtn").addEventListener("click", closeModal);
-  document.getElementById("cancelBtn2").addEventListener("click", closeModal);
-
-  document.getElementById("tripForm").addEventListener("submit", submitForm);
-}
-
-function closeModal() {
-  document.getElementById("tripModal").classList.add("hidden");
-  document.getElementById("tripForm").reset();
-}
-
-async function openEditModal(id) {
-  const token = localStorage.getItem("accessToken");
-  const response = await fetch(`/api/Trip/GetTripByIdForAdmin?id=${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const result = await response.json();
-  const trip = result.data;
-
-  document.getElementById("tripId").value = id;
-  document.getElementById("tripPrice").value = trip.price;
-  document.getElementById("tripDuration").value = trip.duration;
-  document.getElementById("tripAvailable").checked = trip.isAvailable;
-  document.getElementById("categorySelect").value = trip.categoryId;
-
-  choicesActivities.setChoiceByValue(trip.activities);
-  choicesLanguages.setChoiceByValue(trip.languages);
-  choicesIncludes.setChoiceByValue(trip.includes);
-  choicesNotIncludes.setChoiceByValue(trip.notIncludes);
-
-  const wrapper = document.getElementById("tripDatesWrapper");
-  wrapper.innerHTML = "";
-  trip.tripDates.forEach(date => {
-    const input = document.createElement("input");
-    input.type = "date";
-    input.value = new Date(date).toISOString().split("T")[0];
-    input.className = "border rounded px-3 py-2 w-full";
-    input.name = "TripDates";
-    wrapper.appendChild(input);
-  });
-
-  // Multilingual translations
-  const translations = document.getElementById("translationsSection");
-  translations.innerHTML = "";
-  trip.name.forEach(n => addTranslationInput("Name", n.language, n.translation, translations));
-  trip.description.forEach(d => addTranslationInput("Description", d.language, d.translation, translations));
-
-  document.getElementById("tripModal").classList.remove("hidden");
-}
-
-function addTranslationInput(field, lang, value, container) {
-  const div = document.createElement("div");
-  div.innerHTML = `
-    <label>${field} (${lang})</label>
-    <input type="text" name="${field}_${lang}" value="${value}" class="w-full border rounded px-3 py-2" />
-  `;
-  container.appendChild(div);
-}
-
-async function submitForm(e) {
-  e.preventDefault();
-  const formData = new FormData();
-  const id = document.getElementById("tripId").value;
-
-  const translations = { Name: [], Description: [] };
-  document.querySelectorAll("#translationsSection input").forEach(input => {
-    const [field, lang] = input.name.split("_");
-    translations[field].push({ language: lang, translation: input.value });
-  });
-
-  formData.append("Name", JSON.stringify(translations.Name));
-  formData.append("Description", JSON.stringify(translations.Description));
-  formData.append("Duration", document.getElementById("tripDuration").value);
-  formData.append("Price", document.getElementById("tripPrice").value);
-  formData.append("IsAvailable", document.getElementById("tripAvailable").checked);
-  formData.append("CategoryId", document.getElementById("categorySelect").value);
-
-  const getSelected = (choice) => choice.getValue().map(i => parseInt(i.value));
-  formData.append("Activities", JSON.stringify(getSelected(choicesActivities)));
-  formData.append("Languages", JSON.stringify(getSelected(choicesLanguages)));
-  formData.append("Includes", JSON.stringify(getSelected(choicesIncludes)));
-  formData.append("NotIncludes", JSON.stringify(getSelected(choicesNotIncludes)));
-
-  const tripDates = Array.from(document.querySelectorAll("input[name='TripDates']")).map(i => i.value);
-  formData.append("TripDates", JSON.stringify(tripDates));
-
-  const token = localStorage.getItem("accessToken");
-  const response = await fetch(`/api/Trip/UpdateTrip/${id}`, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData
-  });
-
-  const result = await response.json();
-  if (result.succeeded) {
-    alert("Trip updated successfully.");
-    closeModal();
-    fetchTrips();
-  } else {
-    alert("Update failed.");
-  }
-}
-
-</script>
