@@ -208,6 +208,8 @@ const pageSize = 8;
 let availableLanguages = [];
 let allIncludes = [];
 let currentTripId = null;
+let mainImageName = null;
+
 
 
 // === Fetch Trips ===
@@ -446,6 +448,10 @@ document.getElementById("imageUploadForm").addEventListener("submit", async (e) 
     formData.append("images", file);
   }
 
+  if (mainImageName) {
+    formData.append("mainImageName", mainImageName);
+  }
+
   try {
     const res = await fetch(`/api/Trip/AddImagesToTrip/${currentTripId}`, {
       method: "POST",
@@ -465,22 +471,57 @@ document.getElementById("imageUploadForm").addEventListener("submit", async (e) 
     alert("An error occurred while uploading images.");
   }
 });
+
 document.getElementById("tripImages").addEventListener("change", (e) => {
   const previewContainer = document.getElementById("imagePreview");
   previewContainer.innerHTML = "";
+  mainImageName = null;
 
-  const files = e.target.files;
-  for (const file of files) {
+  const files = Array.from(e.target.files);
+
+  files.forEach((file) => {
     const reader = new FileReader();
     reader.onload = (event) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "relative flex flex-col gap-2 items-start";
+
       const img = document.createElement("img");
       img.src = event.target.result;
       img.className = "w-full h-32 object-cover rounded shadow";
-      previewContainer.appendChild(img);
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "main-checkbox mt-1";
+      checkbox.name = "mainImage";
+      checkbox.dataset.filename = file.name;
+
+      const label = document.createElement("label");
+      label.textContent = "Use as main image";
+      label.className = "text-sm ml-2";
+
+      const checkboxWrapper = document.createElement("div");
+      checkboxWrapper.className = "flex items-center";
+      checkboxWrapper.appendChild(checkbox);
+      checkboxWrapper.appendChild(label);
+
+      checkbox.addEventListener("change", () => {
+        // Uncheck others
+        document.querySelectorAll("input[name='mainImage']").forEach(cb => {
+          if (cb !== checkbox) cb.checked = false;
+        });
+
+        mainImageName = checkbox.checked ? file.name : null;
+      });
+
+      wrapper.appendChild(img);
+      wrapper.appendChild(checkboxWrapper);
+      previewContainer.appendChild(wrapper);
     };
+
     reader.readAsDataURL(file);
-  }
+  });
 });
+
 
 
 // === Event Listeners ===
