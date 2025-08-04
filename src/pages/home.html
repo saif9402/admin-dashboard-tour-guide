@@ -329,7 +329,7 @@ function renderTrips(trips) {
       <td class="px-6 py-3">${trip.duration}</td>
       <td class="px-6 py-3">${trip.isAvailable ? "Yes" : "No"}</td>
       <td class="px-6 py-3 flex items-center gap-2">
-  <button  class="text-blue-400 hover:text-blue-900" title="Edit" onclick="openEditModal(${trip.id})">
+  <button  class="text-blue-400 hover:text-blue-900" title="Edit" onclick="openEditTripModal(${trip.id})">
     <i data-lucide="pencil"></i>
   </button>
   <button class="text-red-400 hover:text-red-900" title="Delete" onclick="handleDeleteTrip(${trip.id})">
@@ -510,6 +510,25 @@ async function handleTripSubmit(e) {
   } catch (err) {
     console.error("Error:", err);
     alert("Something went wrong.");
+  }
+}
+async function openEditTripModal(tripId) {
+  editTripId = tripId;
+  const token = localStorage.getItem("accessToken");
+  try {
+    const res = await fetch(`/api/Trip/GetTripByIdForAdmin/${tripId}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const result = await res.json();
+    if (res.ok && result.succeeded) {
+      populateEditForm(result.data);
+      document.getElementById("editTripModal").classList.remove("hidden");
+    } else {
+      alert("Failed to load trip data.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error fetching trip data.");
   }
 }
 // === Handle Delete ===
@@ -722,25 +741,7 @@ document.getElementById("descriptionTranslations").appendChild(createTranslation
 })();
 
 
-async function openEditTripModal(tripId) {
-  editTripId = tripId;
-  const token = localStorage.getItem("accessToken");
-  try {
-    const res = await fetch(`/api/Trip/GetTripByIdForAdmin/${tripId}`, {
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-    const result = await res.json();
-    if (res.ok && result.succeeded) {
-      populateEditForm(result.data);
-      document.getElementById("editTripModal").classList.remove("hidden");
-    } else {
-      alert("Failed to load trip data.");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Error fetching trip data.");
-  }
-}
+
 
 function populateEditForm(data) {
   const form = document.getElementById("editTripForm");
