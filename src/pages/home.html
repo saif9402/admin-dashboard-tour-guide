@@ -94,6 +94,81 @@
         <div id="pagination" class="mt-6 flex justify-center items-center gap-3 text-sm font-medium"></div>
       </main>
     </div>
+    <!-- Edit Trip Modal -->
+<div id="editTripModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-lg flex items-center justify-center px-4 py-8 hidden">
+  <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-semibold">Edit Trip</h2>
+      <button id="editCancelBtn" type="button" class="text-2xl text-gray-500 hover:text-gray-700">&times;</button>
+    </div>
+
+    <form id="editTripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="md:col-span-2">
+        <label class="block font-medium mb-1">Trip Names (multi-language)</label>
+        <div id="editNameTranslations" class="space-y-2"></div>
+        <button type="button" id="editAddNameTranslation" class="text-sm text-blue-600 hover:underline mt-2">+ Add Name</button>
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block font-medium mb-1">Trip Descriptions (multi-language)</label>
+        <div id="editDescriptionTranslations" class="space-y-2"></div>
+        <button type="button" id="editAddDescriptionTranslation" class="text-sm text-blue-600 hover:underline mt-2">+ Add Description</button>
+      </div>
+
+      <div class="space-y-1">
+        <label class="block font-medium">Price</label>
+        <input type="number" name="Price" required class="w-full border rounded-lg px-4 py-2" />
+      </div>
+
+      <div class="space-y-1">
+        <label class="block font-medium">Duration</label>
+        <input type="number" name="Duration" required class="w-full border rounded-lg px-4 py-2" />
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block font-medium">Trip Dates</label>
+        <div id="editTripDatesContainer" class="space-y-2"></div>
+        <button type="button" id="editAddTripDate" class="text-sm text-blue-600 hover:underline mt-1">+ Add another date</button>
+      </div>
+
+      <div class="space-y-1">
+        <label class="block font-medium">Category</label>
+        <select id="editCategorySelect" name="CategoryId" required class="w-full border rounded-lg px-4 py-2"></select>
+      </div>
+
+      <div class="space-y-1">
+        <label class="block font-medium">Activities</label>
+        <select id="editActivitiesSelect" name="Activities" multiple class="w-full border rounded-lg px-4 py-2"></select>
+      </div>
+
+      <div class="space-y-1">
+        <label class="block font-medium">Languages</label>
+        <select id="editLanguagesSelect" name="Languages" multiple class="w-full border rounded-lg px-4 py-2"></select>
+      </div>
+
+      <div class="space-y-1">
+        <label class="block font-medium">Includes</label>
+        <select id="editIncludesSelect" name="Includes" multiple class="w-full border rounded-lg px-4 py-2"></select>
+      </div>
+
+      <div class="space-y-1">
+        <label class="block font-medium">Not Includes</label>
+        <select id="editNotIncludesSelect" name="NotIncludes" multiple class="w-full border rounded-lg px-4 py-2"></select>
+      </div>
+
+      <div class="flex items-center space-x-2 md:col-span-2">
+        <input type="checkbox" name="IsAvailable" class="form-checkbox text-blue-600" />
+        <label class="text-sm">Is Available</label>
+      </div>
+
+      <div class="flex justify-end md:col-span-2 space-x-3">
+        <button type="button" id="editCancelBtn2" class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancel</button>
+        <button type="submit" class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">Update</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
     <!-- Modal -->
     <div id="tripModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-lg flex items-center justify-center px-4 py-8 hidden">
@@ -209,6 +284,8 @@ let availableLanguages = [];
 let allIncludes = [];
 let currentTripId = null;
 let mainImageName = null;
+let editTripId = null;
+
 
 
 
@@ -252,7 +329,7 @@ function renderTrips(trips) {
       <td class="px-6 py-3">${trip.duration}</td>
       <td class="px-6 py-3">${trip.isAvailable ? "Yes" : "No"}</td>
       <td class="px-6 py-3 flex items-center gap-2">
-  <button class="text-blue-400 hover:text-blue-900" title="Edit">
+  <button  class="text-blue-400 hover:text-blue-900" title="Edit" onclick="openEditModal(${trip.id})">
     <i data-lucide="pencil"></i>
   </button>
   <button class="text-red-400 hover:text-red-900" title="Delete" onclick="handleDeleteTrip(${trip.id})">
@@ -643,6 +720,159 @@ document.getElementById("descriptionTranslations").appendChild(createTranslation
   setupEventListeners();
   fetchTrips();
 })();
+
+
+async function openEditTripModal(tripId) {
+  editTripId = tripId;
+  const token = localStorage.getItem("accessToken");
+  try {
+    const res = await fetch(`/api/Trip/GetTripByIdForAdmin/${tripId}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const result = await res.json();
+    if (res.ok && result.succeeded) {
+      populateEditForm(result.data);
+      document.getElementById("editTripModal").classList.remove("hidden");
+    } else {
+      alert("Failed to load trip data.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error fetching trip data.");
+  }
+}
+
+function populateEditForm(data) {
+  const form = document.getElementById("editTripForm");
+
+  form.Price.value = data.price;
+  form.Duration.value = data.duration;
+  form.IsAvailable.checked = data.isAvailable;
+  form.CategoryId.value = data.categoryId;
+
+  const nameContainer = document.getElementById("editNameTranslations");
+  const descContainer = document.getElementById("editDescriptionTranslations");
+  nameContainer.innerHTML = "";
+  descContainer.innerHTML = "";
+
+  data.name.forEach(t => {
+    const row = createTranslationRow("name");
+    row.querySelector("select").value = t.languageId;
+    row.querySelector("input").value = t.translation;
+    nameContainer.appendChild(row);
+  });
+
+  data.description.forEach(t => {
+    const row = createTranslationRow("description");
+    row.querySelector("select").value = t.languageId;
+    row.querySelector("textarea").value = t.translation;
+    descContainer.appendChild(row);
+  });
+
+  // Dates
+  const datesContainer = document.getElementById("editTripDatesContainer");
+  datesContainer.innerHTML = "";
+  data.tripDates.forEach(date => {
+    const input = document.createElement("input");
+    input.type = "datetime-local";
+    input.name = "TripDates[]";
+    input.required = true;
+    input.className = "w-full border rounded-lg px-4 py-2";
+    input.value = new Date(date).toISOString().slice(0, 16);
+    datesContainer.appendChild(input);
+  });
+
+  // Selections (assuming Choices.js is in use)
+  ["editActivitiesSelect", "editLanguagesSelect", "editIncludesSelect", "editNotIncludesSelect"].forEach(id => {
+    const element = document.getElementById(id);
+    if (element._choices) element._choices.destroy();
+  });
+
+  setChoices("editActivitiesSelect", data.activities);
+  setChoices("editLanguagesSelect", data.languages);
+  setChoices("editIncludesSelect", data.includes);
+  setChoices("editNotIncludesSelect", data.notIncludes);
+}
+
+function setChoices(selectId, values) {
+  const element = document.getElementById(selectId);
+  const choices = new Choices(element, { removeItemButton: true });
+  choices.setChoiceByValue(values.map(v => v.toString()));
+  element._choices = choices;
+}
+
+// Handle Submit
+async function handleEditSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+
+  const tripDto = {
+    Id: editTripId,
+    Name: extractTranslations("editNameTranslations", "name"),
+    Description: extractTranslations("editDescriptionTranslations", "description"),
+    Price: parseFloat(form.Price.value),
+    Duration: parseInt(form.Duration.value),
+    TripDates: Array.from(form.querySelectorAll("input[name='TripDates[]']")).map(input => new Date(input.value).toISOString()),
+    IsAvailable: form.IsAvailable.checked,
+    CategoryId: parseInt(form.CategoryId.value),
+    Activities: Array.from(form.Activities.selectedOptions).map(opt => parseInt(opt.value)),
+    Languages: Array.from(form.Languages.selectedOptions).map(opt => parseInt(opt.value)),
+    Includes: Array.from(form.Includes.selectedOptions).map(opt => parseInt(opt.value)),
+    NotIncludes: Array.from(form.NotIncludes.selectedOptions).map(opt => parseInt(opt.value))
+  };
+
+  const token = localStorage.getItem("accessToken");
+  try {
+    const res = await fetch("/api/Trip/UpdateTrip", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(tripDto)
+    });
+
+    const result = await res.json();
+    if (res.ok && result.succeeded) {
+      alert("Trip updated successfully");
+      form.reset();
+      document.getElementById("editTripModal").classList.add("hidden");
+      fetchTrips();
+    } else {
+      alert("Failed to update trip: " + result.message);
+    }
+  } catch (err) {
+    console.error("Update error:", err);
+    alert("An error occurred while updating the trip.");
+  }
+}
+
+// === Listeners ===
+document.getElementById("editTripForm").addEventListener("submit", handleEditSubmit);
+document.getElementById("editCancelBtn").addEventListener("click", () => {
+  document.getElementById("editTripModal").classList.add("hidden");
+});
+document.getElementById("editCancelBtn2").addEventListener("click", () => {
+  document.getElementById("editTripModal").classList.add("hidden");
+});
+document.getElementById("editAddNameTranslation").addEventListener("click", () => {
+  document.getElementById("editNameTranslations").appendChild(createTranslationRow("name"));
+});
+document.getElementById("editAddDescriptionTranslation").addEventListener("click", () => {
+  document.getElementById("editDescriptionTranslations").appendChild(createTranslationRow("description"));
+});
+document.getElementById("editAddTripDate").addEventListener("click", () => {
+  const container = document.getElementById("editTripDatesContainer");
+  const input = document.createElement("input");
+  input.type = "datetime-local";
+  input.name = "TripDates[]";
+  input.required = true;
+  input.className = "w-full border rounded-lg px-4 py-2";
+  container.appendChild(input);
+});
+
+
+
 
       </script>
     
