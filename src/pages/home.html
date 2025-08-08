@@ -603,27 +603,25 @@
       // === Fetch & Populate Selects ===
       async function populateSelect(id, url, valueField, labelField) {
         const element = document.getElementById(id);
-        const ch =
-          element._choices || new Choices(element, { removeItemButton: true });
+        const ch = getChoicesInstance(element, { removeItemButton: true });
 
         const res = await fetch(url);
         const result = await res.json();
 
-        let data = Array.isArray(result.data)
+        const data = Array.isArray(result.data)
           ? result.data
           : Array.isArray(result.data?.data)
           ? result.data.data
           : [];
 
         const mapped = data.map((item) => ({
-          value: item[valueField],
+          value: String(item[valueField]),
           label: item[labelField],
         }));
 
         ch.clearChoices();
         ch.setChoices(mapped, "value", "label", true);
 
-        element._choices = ch;
         return { element, choices: ch, data };
       }
 
@@ -632,28 +630,25 @@
           { id: "editActivitiesSelect", url: "/api/Activity/GetAllActivities" },
           { id: "editLanguagesSelect", url: "/api/Language/GetAllLanguages" },
           { id: "editIncludesSelect", url: "/api/Includes/GetAllIncludes" },
-          { id: "editNotIncludesSelect", url: "/api/Includes/GetAllIncludes" }, // same source
+          { id: "editNotIncludesSelect", url: "/api/Includes/GetAllIncludes" },
           { id: "editCategorySelect", url: "/api/Category/GetAllCategories" },
         ];
 
+        // Ensure options exist
         for (const { id, url } of sources) {
-          const {
-            element,
-            choices,
-            data: rows,
-          } = await populateSelect(id, url, "id", "name");
-          element._choices = choices; // keep reference like you did
+          await populateSelect(id, url, "id", "name");
         }
 
-        // Now set selected values
-        setChoices("editActivitiesSelect", data.activities);
-        setChoices("editLanguagesSelect", data.languages);
-        setChoices("editIncludesSelect", data.includes);
-        setChoices("editNotIncludesSelect", data.notIncludes);
-        const catEl = document.getElementById("editCategorySelect");
-        catEl._choices.setChoiceByValue(String(data.categoryId));
-      }
+        // Multi-selects
+        setSelectedValues("editActivitiesSelect", data.activities || []);
+        setSelectedValues("editLanguagesSelect", data.languages || []);
+        setSelectedValues("editIncludesSelect", data.includes || []);
+        setSelectedValues("editNotIncludesSelect", data.notIncludes || []);
 
+        // Single-select Category via Choices API (do NOT use element.value)
+        const catEl = document.getElementById("editCategorySelect");
+        getChoicesInstance(catEl).setChoiceByValue(String(data.categoryId));
+      }
       // === Languages (for translations) ===
       async function fetchLanguages() {
         const res = await fetch("/api/Language/GetAllLanguages");
@@ -1066,7 +1061,6 @@
         form.Price.value = data.price;
         form.Duration.value = data.duration;
         form.IsAvailable.checked = data.isAvailable;
-        form.CategoryId.value = data.categoryId;
 
         const nameContainer = document.getElementById("editNameTranslations");
         const descContainer = document.getElementById(
@@ -1102,17 +1096,6 @@
           input.className = "w-full border rounded-lg px-4 py-2";
           input.value = new Date(date).toISOString().slice(0, 16);
           datesContainer.appendChild(input);
-        });
-
-        // Selections (assuming Choices.js is in use)
-        [
-          "editActivitiesSelect",
-          "editLanguagesSelect",
-          "editIncludesSelect",
-          "editNotIncludesSelect",
-        ].forEach((id) => {
-          const element = document.getElementById(id);
-          if (element._choices) element._choices.destroy();
         });
 
         await populateEditSelects(data);
