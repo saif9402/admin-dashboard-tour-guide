@@ -603,29 +603,28 @@
       // === Fetch & Populate Selects ===
       async function populateSelect(id, url, valueField, labelField) {
         const element = document.getElementById(id);
-        const choices = new Choices(element, { removeItemButton: true });
+        const ch =
+          element._choices || new Choices(element, { removeItemButton: true });
 
         const res = await fetch(url);
         const result = await res.json();
 
-        // ✅ Fix: unwrap nested structure
-        let data = [];
-        if (Array.isArray(result.data)) {
-          data = result.data;
-        } else if (Array.isArray(result.data?.data)) {
-          data = result.data.data;
-        } else {
-          console.error(`Invalid data for ${id}`, result.data);
-          return;
-        }
+        let data = Array.isArray(result.data)
+          ? result.data
+          : Array.isArray(result.data?.data)
+          ? result.data.data
+          : [];
 
         const mapped = data.map((item) => ({
           value: item[valueField],
           label: item[labelField],
         }));
 
-        choices.setChoices(mapped, "value", "label", true);
-        return { element, choices, data };
+        ch.clearChoices();
+        ch.setChoices(mapped, "value", "label", true);
+
+        element._choices = ch;
+        return { element, choices: ch, data };
       }
 
       async function populateEditSelects(data) {
@@ -651,7 +650,8 @@
         setChoices("editLanguagesSelect", data.languages);
         setChoices("editIncludesSelect", data.includes);
         setChoices("editNotIncludesSelect", data.notIncludes);
-        document.getElementById("editCategorySelect").value = data.categoryId;
+        const catEl = document.getElementById("editCategorySelect");
+        catEl._choices.setChoiceByValue(String(data.categoryId));
       }
 
       // === Languages (for translations) ===
@@ -1116,18 +1116,16 @@
         });
 
         await populateEditSelects(data);
-
-        setChoices("editActivitiesSelect", data.activities);
-        setChoices("editLanguagesSelect", data.languages);
-        setChoices("editIncludesSelect", data.includes);
-        setChoices("editNotIncludesSelect", data.notIncludes);
       }
 
       function setChoices(selectId, values) {
-        const element = document.getElementById(selectId);
-        const choices = new Choices(element, { removeItemButton: true });
-        choices.setChoiceByValue(values.map((v) => v.toString()));
-        element._choices = choices;
+        const el = document.getElementById(selectId);
+        // Reuse existing instance (created in populateSelect)
+        const ch = el._choices || new Choices(el, { removeItemButton: true });
+        // Clear current selection then apply new values
+        ch.removeActiveItems();
+        ch.setChoiceByValue(values.map(String));
+        el._choices = ch;
       }
 
       // Handle Submit
