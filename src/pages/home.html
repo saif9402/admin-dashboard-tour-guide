@@ -1201,53 +1201,92 @@
         e.preventDefault();
         const form = e.target;
 
-        const tripDto = {
-          Id: editTripId, // Trip ID for the update
-          Name: extractTranslations("editNameTranslations", "name"), // Gather all name translations
-          Description: extractTranslations(
-            "editDescriptionTranslations",
-            "description"
-          ), // Gather all description translations
-          Price: parseFloat(form.Price.value), // Price from form input
-          Duration: parseInt(form.Duration.value), // Duration from form input
-          TripDates: Array.from(
-            form.querySelectorAll("input[name='TripDates[]']")
-          ).map((input) => new Date(input.value).toISOString()), // Trip dates
-          IsAvailable: form.IsAvailable.checked, // Whether the trip is available or not
-          CategoryId: parseInt(form.CategoryId.value), // Category ID from selected category
-          Activities: Array.from(form.Activities.selectedOptions).map((opt) =>
-            parseInt(opt.value)
-          ), // Activities IDs
-          Languages: Array.from(form.Languages.selectedOptions).map((opt) =>
-            parseInt(opt.value)
-          ), // Language IDs
-          Includes: Array.from(form.Includes.selectedOptions).map((opt) =>
-            parseInt(opt.value)
-          ), // Includes IDs
-          NotIncludes: Array.from(form.NotIncludes.selectedOptions).map((opt) =>
-            parseInt(opt.value)
-          ), // NotIncludes IDs
-        };
+        // Collect values (same as before)
+        const nameArr = extractTranslations("editNameTranslations", "name");
+        const descArr = extractTranslations(
+          "editDescriptionTranslations",
+          "description"
+        );
+        const price = parseFloat(form.Price.value);
+        const duration = parseInt(form.Duration.value);
+        const dates = Array.from(
+          form.querySelectorAll("input[name='TripDates[]']")
+        ).map((input) => new Date(input.value).toISOString());
+        const isAvailable = form.IsAvailable.checked;
+        const categoryId = parseInt(form.CategoryId.value);
+        const activities = Array.from(form.Activities.selectedOptions).map(
+          (o) => parseInt(o.value)
+        );
+        const languages = Array.from(form.Languages.selectedOptions).map((o) =>
+          parseInt(o.value)
+        );
+        const includes = Array.from(form.Includes.selectedOptions).map((o) =>
+          parseInt(o.value)
+        );
+        const notIncludes = Array.from(form.NotIncludes.selectedOptions).map(
+          (o) => parseInt(o.value)
+        );
+
+        // Build FormData the way ASP.NET expects
+        const fd = new FormData();
+        // Name[]
+        nameArr.forEach((t, i) => {
+          fd.append(`Name[${i}].languageId`, String(t.languageId));
+          fd.append(`Name[${i}].translation`, t.translation);
+          // If your API supports it and you later add hidden ids:
+          // if (t.id) fd.append(`Name[${i}].id`, String(t.id));
+        });
+        // Description[]
+        descArr.forEach((t, i) => {
+          fd.append(`Description[${i}].languageId`, String(t.languageId));
+          fd.append(`Description[${i}].translation`, t.translation);
+          // if (t.id) fd.append(`Description[${i}].id`, String(t.id));
+        });
+        // TripDates[]
+        dates.forEach((d, i) => fd.append(`TripDates[${i}]`, d));
+        // Scalars
+        fd.append("Price", String(price));
+        fd.append("Duration", String(duration));
+        fd.append("IsAvailable", String(isAvailable));
+        fd.append("CategoryId", String(categoryId));
+        // Int arrays
+        activities.forEach((id, i) =>
+          fd.append(`Activities[${i}]`, String(id))
+        );
+        languages.forEach((id, i) => fd.append(`Languages[${i}]`, String(id)));
+        includes.forEach((id, i) => fd.append(`Includes[${i}]`, String(id)));
+        notIncludes.forEach((id, i) =>
+          fd.append(`NotIncludes[${i}]`, String(id))
+        );
 
         const token = localStorage.getItem("accessToken");
-
         try {
           const res = await fetch(`/api/Trip/UpdateTrip/${editTripId}`, {
             method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(tripDto), // Send the formatted trip data
+            headers: { Authorization: `Bearer ${token}` }, // don't set Content-Type
+            body: fd,
           });
 
+          // If backend returns JSON on error, great; otherwise fall back to text for debugging
+          if (!res.ok) {
+            const text = await res.text();
+            console.error("Update failed", res.status, text);
+            alert(
+              `Failed to update trip (${res.status}). ${
+                text || "Check required fields."
+              }`
+            );
+            return;
+          }
           const result = await res.json();
-          if (res.ok && result.succeeded) {
+          if (result.succeeded) {
             alert("Trip updated successfully");
-            fetchTrips(); // Refresh trips table
             document.getElementById("editTripModal").classList.add("hidden");
+            fetchTrips();
           } else {
-            alert("Failed to update trip: " + result.message); // Display error
+            alert(
+              "Failed to update trip: " + (result.message || "Unknown error")
+            );
           }
         } catch (err) {
           console.error("Update error:", err);
