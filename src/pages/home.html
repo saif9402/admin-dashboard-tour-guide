@@ -649,28 +649,96 @@
       }
 
       async function populateEditSelects(data) {
-        const sources = [
-          { id: "editActivitiesSelect", url: "/api/Activity/GetAllActivities" },
-          { id: "editLanguagesSelect", url: "/api/Language/GetAllLanguages" },
-          { id: "editIncludesSelect", url: "/api/Includes/GetAllIncludes" },
-          { id: "editNotIncludesSelect", url: "/api/Includes/GetAllIncludes" },
-          { id: "editCategorySelect", url: "/api/Category/GetAllCategories" },
-        ];
+        // Load all choices in parallel
+        const [acts, langs, incs, notIncs, cats] = await Promise.all([
+          populateSelect(
+            "editActivitiesSelect",
+            "/api/Activity/GetAllActivities",
+            "id",
+            "name"
+          ),
+          populateSelect(
+            "editLanguagesSelect",
+            "/api/Language/GetAllLanguages",
+            "id",
+            "name"
+          ),
+          populateSelect(
+            "editIncludesSelect",
+            "/api/Includes/GetAllIncludes",
+            "id",
+            "name"
+          ),
+          populateSelect(
+            "editNotIncludesSelect",
+            "/api/Includes/GetAllIncludes",
+            "id",
+            "name"
+          ),
+          populateSelect(
+            "editCategorySelect",
+            "/api/Category/GetAllCategories",
+            "id",
+            "name"
+          ),
+        ]);
 
-        // Ensure options exist
-        for (const { id, url } of sources) {
-          await populateSelect(id, url, "id", "name");
-        }
+        // Convert arrays of objects -> arrays of ids
+        const activityIds = getIds(data.activities);
+        const languageIds = getIds(data.languages);
+        const includeIds = getIds(data.includes);
+        const notIncludeIds = getIds(data.notIncludes);
+        const allIncludesList = incs.data; // full list from API
 
         // Multi-selects
-        setSelectedValues("editActivitiesSelect", data.activities || []);
-        setSelectedValues("editLanguagesSelect", data.languages || []);
-        setSelectedValues("editIncludesSelect", data.includes || []);
-        setSelectedValues("editNotIncludesSelect", data.notIncludes || []);
+        setSelectedValues("editActivitiesSelect", activityIds);
+        setSelectedValues("editLanguagesSelect", languageIds);
 
-        // Single-select Category via Choices API
+        // Includes first
+        setSelectedValues("editIncludesSelect", includeIds);
+
+        // Not-Includes = complement of Includes
+        const notSel = document.getElementById("editNotIncludesSelect");
+        const notChoices = getChoicesInstance(notSel);
+        const remaining = allIncludesList
+          .filter((i) => !includeIds.includes(i.id))
+          .map((i) => ({ value: String(i.id), label: i.name }));
+        notChoices.clearChoices();
+        notChoices.setChoices(remaining, "value", "label", true);
+
+        // Pre-select valid not-includes (ignore any that now collide with Includes)
+        const filteredNotIds = notIncludeIds.filter(
+          (id) => !includeIds.includes(id)
+        );
+        setSelectedValues("editNotIncludesSelect", filteredNotIds);
+
+        // Single-select category
         const catEl = document.getElementById("editCategorySelect");
         getChoicesInstance(catEl).setChoiceByValue(String(data.categoryId));
+
+        // Keep complement rule while user edits
+        const includesEl = document.getElementById("editIncludesSelect");
+        // clean old handler if any
+        if (window._editIncludesHandler) {
+          includesEl.removeEventListener("change", window._editIncludesHandler);
+        }
+        window._editIncludesHandler = () => {
+          const selected = Array.from(includesEl.selectedOptions).map((o) =>
+            parseInt(o.value)
+          );
+          const remaining = allIncludesList
+            .filter((i) => !selected.includes(i.id))
+            .map((i) => ({ value: String(i.id), label: i.name }));
+          notChoices.clearChoices();
+          notChoices.setChoices(remaining, "value", "label", true);
+
+          // drop now-invalid not-includes
+          const validNotIds = Array.from(notSel.selectedOptions)
+            .map((o) => parseInt(o.value))
+            .filter((id) => !selected.includes(id));
+          setSelectedValues("editNotIncludesSelect", validNotIds);
+        };
+        includesEl.addEventListener("change", window._editIncludesHandler);
       }
 
       // === Languages (for translations) ===
@@ -727,6 +795,16 @@
           }
         }
         return translations;
+      }
+
+      function getIds(arr, key = "id") {
+        return (arr || []).map((x) => (typeof x === "object" ? x[key] : x));
+      }
+
+      function isoToLocalInputValue(iso) {
+        const d = new Date(iso);
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        return d.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
       }
 
       // === Form Submission (Add) ===
@@ -1111,7 +1189,7 @@
           input.required = true;
           input.className = "w-full border rounded-lg px-4 py-2";
           // Note: toISOString() is UTC; adjust if needed for local display
-          input.value = new Date(date).toISOString().slice(0, 16);
+          input.value = isoToLocalInputValue(date);
           datesContainer.appendChild(input);
         });
 
