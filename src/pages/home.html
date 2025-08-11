@@ -1202,52 +1202,52 @@
         const form = e.target;
 
         const tripDto = {
-          Id: editTripId,
-          Name: extractTranslations("editNameTranslations", "name"),
+          Id: editTripId, // Trip ID for the update
+          Name: extractTranslations("editNameTranslations", "name"), // Gather all name translations
           Description: extractTranslations(
             "editDescriptionTranslations",
             "description"
-          ),
-          Price: parseFloat(form.Price.value),
-          Duration: parseInt(form.Duration.value),
+          ), // Gather all description translations
+          Price: parseFloat(form.Price.value), // Price from form input
+          Duration: parseInt(form.Duration.value), // Duration from form input
           TripDates: Array.from(
             form.querySelectorAll("input[name='TripDates[]']")
-          ).map((input) => new Date(input.value).toISOString()),
-          IsAvailable: form.IsAvailable.checked,
-          CategoryId: parseInt(form.CategoryId.value),
+          ).map((input) => new Date(input.value).toISOString()), // Trip dates
+          IsAvailable: form.IsAvailable.checked, // Whether the trip is available or not
+          CategoryId: parseInt(form.CategoryId.value), // Category ID from selected category
           Activities: Array.from(form.Activities.selectedOptions).map((opt) =>
             parseInt(opt.value)
-          ),
+          ), // Activities IDs
           Languages: Array.from(form.Languages.selectedOptions).map((opt) =>
             parseInt(opt.value)
-          ),
+          ), // Language IDs
           Includes: Array.from(form.Includes.selectedOptions).map((opt) =>
             parseInt(opt.value)
-          ),
+          ), // Includes IDs
           NotIncludes: Array.from(form.NotIncludes.selectedOptions).map((opt) =>
             parseInt(opt.value)
-          ),
+          ), // NotIncludes IDs
         };
 
         const token = localStorage.getItem("accessToken");
+
         try {
-          const res = await fetch("/api/Trip/UpdateTrip", {
+          const res = await fetch(`/api/Trip/UpdateTrip/${editTripId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(tripDto),
+            body: JSON.stringify(tripDto), // Send the formatted trip data
           });
 
           const result = await res.json();
           if (res.ok && result.succeeded) {
             alert("Trip updated successfully");
-            form.reset();
+            fetchTrips(); // Refresh trips table
             document.getElementById("editTripModal").classList.add("hidden");
-            fetchTrips();
           } else {
-            alert("Failed to update trip: " + result.message);
+            alert("Failed to update trip: " + result.message); // Display error
           }
         } catch (err) {
           console.error("Update error:", err);
