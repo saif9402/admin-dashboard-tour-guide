@@ -1231,14 +1231,14 @@
         const fd = new FormData();
         // Name[]
         nameArr.forEach((t, i) => {
-          fd.append(`Name[${i}].languageId`, String(t.languageId));
+          fd.append(`Name[${i}].languageId`, t.languageId);
           fd.append(`Name[${i}].translation`, t.translation);
           // If your API supports it and you later add hidden ids:
           // if (t.id) fd.append(`Name[${i}].id`, String(t.id));
         });
         // Description[]
         descArr.forEach((t, i) => {
-          fd.append(`Description[${i}].languageId`, String(t.languageId));
+          fd.append(`Description[${i}].languageId`, t.languageId);
           fd.append(`Description[${i}].translation`, t.translation);
           // if (t.id) fd.append(`Description[${i}].id`, String(t.id));
         });
