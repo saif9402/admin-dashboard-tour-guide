@@ -67,23 +67,14 @@
           class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
         >
           <h1 class="text-3xl font-bold text-gray-900">Manage Languages</h1>
-          <button
+          <!-- <button
             class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow"
             id="addLangBtn"
           >
             <i data-lucide="plus"></i>
             Add Language
-          </button>
+          </button> -->
         </div>
-
-        <!-- <div class="mb-4">
-          <input
-            id="searchInput"
-            type="text"
-            placeholder="Search Language"
-            class="w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div> -->
 
         <!-- Trip Table -->
         <div class="bg-white rounded-xl shadow overflow-x-auto">
@@ -92,7 +83,6 @@
               <tr>
                 <th class="px-6 py-4">ID</th>
                 <th class="px-6 py-4">Language</th>
-                <th class="px-6 py-4">Actions</th>
               </tr>
             </thead>
             <tbody id="langTable" class="divide-y divide-gray-200 bg-white">
@@ -178,21 +168,7 @@
               row.innerHTML = `
             <td class="px-6 py-3">${lang.id}</td>
             <td class="px-6 py-3">${lang.name}</td>
-            <td class="px-6 py-3">
-                  <button class="text-blue-400 hover:text-blue-900" title="Edit" onclick="editLang(${
-                    lang.id
-                  }, '${lang.name.replace(/'/g, "\\'")}')">
-                <i data-lucide="pencil"></i>
-                  
-                  </button>
-
-              <button class="text-red-400 hover:text-red-900" title="Delete" onclick="deleteLang(${
-                lang.id
-              })">
-                 <i data-lucide="trash-2"></i>
-
-              </button>
-            </td>
+            
           `;
               tableBody.appendChild(row);
             });
