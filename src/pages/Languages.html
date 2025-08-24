@@ -94,7 +94,7 @@
     </div>
 
     <!-- Modal (hidden by default) -->
-    <div
+    <!-- <div
       id="langModel"
       class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out hidden"
     >
@@ -108,9 +108,9 @@
           >
             &times;
           </button>
-        </div>
+        </div> -->
 
-        <form id="langForm" class="flex flex-col flex-1 gap-6 overflow-auto">
+        <!-- <form id="langForm" class="flex flex-col flex-1 gap-6 overflow-auto">
           <input type="hidden" id="langId" name="id" />
 
           <div class="space-y-1">
@@ -139,7 +139,7 @@
               Save
             </button>
           </div>
-        </form>
+        </form> -->
       </div>
     </div>
 
@@ -182,85 +182,85 @@
         }
       }
 
-      function editLang(id, name) {
-        form.elements["Name"].value = name;
-        form.elements["id"].value = id;
-        modal.classList.remove("hidden");
-      }
+      // function editLang(id, name) {
+      //   form.elements["Name"].value = name;
+      //   form.elements["id"].value = id;
+      //   modal.classList.remove("hidden");
+      // }
 
       // Add a new Lang
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+      // form.addEventListener("submit", async (e) => {
+      //   e.preventDefault();
 
-        const id = form.elements["id"].value;
-        const name = form.elements["Name"].value;
-        const formData = { name };
+      //   const id = form.elements["id"].value;
+      //   const name = form.elements["Name"].value;
+      //   const formData = { name };
 
-        const isEdit = Boolean(id);
+      //   const isEdit = Boolean(id);
 
-        const endpoint = isEdit
-          ? `/api/Language/UpdateLanguage/${id}`
-          : `/api/Language/AddLanguage`;
+      //   const endpoint = isEdit
+      //     ? `/api/Language/UpdateLanguage/${id}`
+      //     : `/api/Language/AddLanguage`;
 
-        const method = isEdit ? "PUT" : "POST";
+      //   const method = isEdit ? "PUT" : "POST";
 
-        try {
-          const res = await fetch(endpoint, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-          });
+      //   try {
+      //     const res = await fetch(endpoint, {
+      //       method,
+      //       headers: { "Content-Type": "application/json" },
+      //       body: JSON.stringify(formData),
+      //     });
 
-          const data = await res.json();
-          if (res.ok && data.succeeded) {
-            alert(isEdit ? "Language updated!" : "Language added!");
-            form.reset();
-            modal.classList.add("hidden");
-            loadLanguages();
-          } else {
-            alert("Failed: " + (data.message || "Unknown error"));
-          }
-        } catch (err) {
-          console.error(err);
-          alert("Error while saving Language.");
-        }
-      });
+      //     const data = await res.json();
+      //     if (res.ok && data.succeeded) {
+      //       alert(isEdit ? "Language updated!" : "Language added!");
+      //       form.reset();
+      //       modal.classList.add("hidden");
+      //       loadLanguages();
+      //     } else {
+      //       alert("Failed: " + (data.message || "Unknown error"));
+      //     }
+      //   } catch (err) {
+      //     console.error(err);
+      //     alert("Error while saving Language.");
+      //   }
+      // });
 
       // Delete Lang
-      async function deleteLang(id) {
-        if (!confirm("Are you sure you want to delete this Language?")) return;
+      // async function deleteLang(id) {
+      //   if (!confirm("Are you sure you want to delete this Language?")) return;
 
-        try {
-          const res = await fetch(`/api/Language/DeleteLanguage/${id}`, {
-            method: "DELETE",
-          });
+      //   try {
+      //     const res = await fetch(`/api/Language/DeleteLanguage/${id}`, {
+      //       method: "DELETE",
+      //     });
 
-          const data = await res.json();
-          if (res.ok && data.succeeded) {
-            alert("Language deleted");
-            loadLanguages();
-          } else {
-            alert("Failed to delete Language");
-          }
-        } catch (err) {
-          console.error(err);
-          alert("Error deleting Language");
-        }
-      }
+      //     const data = await res.json();
+      //     if (res.ok && data.succeeded) {
+      //       alert("Language deleted");
+      //       loadLanguages();
+      //     } else {
+      //       alert("Failed to delete Language");
+      //     }
+      //   } catch (err) {
+      //     console.error(err);
+      //     alert("Error deleting Language");
+      //   }
+      // }
 
       // Show modal
-      document.getElementById("addLangBtn").addEventListener("click", () => {
-        modal.classList.remove("hidden");
-        setTimeout(() => modal.classList.remove("translate-x-full"), 10);
-      });
+      // document.getElementById("addLangBtn").addEventListener("click", () => {
+      //   modal.classList.remove("hidden");
+      //   setTimeout(() => modal.classList.remove("translate-x-full"), 10);
+      // });
 
-      document.querySelectorAll("#cancelBtn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          modal.classList.add("translate-x-full");
-          setTimeout(() => modal.classList.add("hidden"), 300);
-          form.reset();
-        });
-      });
+      // document.querySelectorAll("#cancelBtn").forEach((btn) => {
+      //   btn.addEventListener("click", () => {
+      //     modal.classList.add("translate-x-full");
+      //     setTimeout(() => modal.classList.add("hidden"), 300);
+      //     form.reset();
+      //   });
+      // });
 
       // Initial load
       loadLanguages();
