@@ -246,7 +246,7 @@
         </td>
         <td class="px-6 py-4">${b.tripName ?? ""}</td>
         <td class="px-6 py-4">€${formatMoney(b.totalCost)}</td>
-        <td class="px-6 py-4">${formatDate(b.createdAt)}</td>
+        <td class="px-6 py-4">${formatDateLocal(b.createdAt)}</td>
         <td class="px-6 py-4">${statusBadge(b.status)}</td>
       </tr>
     `
