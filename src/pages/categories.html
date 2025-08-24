@@ -198,7 +198,7 @@
               languageSelect.appendChild(option);
             });
 
-            // default to English
+            // Optional: default to English
             const defaultLang = data.data.find(
               (l) => l.name.toLowerCase() === "english"
             );
@@ -207,7 +207,7 @@
               languageSelect.value = defaultLang.id;
             }
 
-            loadCategories(searchInput.value.trim(), currentPage);
+            loadCategory(searchInput.value.trim(), currentPage);
           } else {
             console.error("Failed to fetch languages");
           }
@@ -216,7 +216,7 @@
         }
       }
 
-      async function loadCategories(searchQuery = "", pageNumber = 1) {
+      async function loadCategory(searchQuery = "", pageNumber = 1) {
         try {
           let url = `/api/Category/GetAllCategories/${selectedLanguageId}?pageNumber=${pageNumber}&pageSize=${pageSize}`;
 
@@ -226,7 +226,7 @@
 
           const res = await fetch(url);
           const data = await res.json();
-          console.log("API response:", data);
+          // console.log("API response:", data);
 
           if (res.ok && data.succeeded) {
             const categories = data.data.data;
@@ -261,11 +261,11 @@
         }
       }
 
-      // 👇 Re-fetch includes when language is changed
+      // 👇 Re-fetch Categories when language is changed
       languageSelect.addEventListener("change", () => {
         selectedLanguageId = languageSelect.value;
         currentPage = 1;
-        loadCategories(searchInput.value.trim(), currentPage);
+        loadCategory(searchInput.value.trim(), currentPage);
       });
 
       function renderPagination(current, totalCount) {
@@ -280,7 +280,7 @@
         prevBtn.onclick = () => {
           if (current > 1) {
             currentPage--;
-            loadCategories(searchInput.value.trim(), currentPage);
+            loadCategory(searchInput.value.trim(), currentPage); // ✅ Fixed
           }
         };
 
@@ -291,7 +291,7 @@
         nextBtn.onclick = () => {
           if (current < totalPages) {
             currentPage++;
-            loadCategories(searchInput.value.trim(), currentPage);
+            loadCategory(searchInput.value.trim(), currentPage);
           }
         };
 
@@ -303,14 +303,14 @@
       // Update this to pass `currentPage`
       searchInput.addEventListener("input", () => {
         currentPage = 1;
-        loadCategories(searchInput.value.trim(), currentPage);
+        loadCategory(searchInput.value.trim(), currentPage);
       });
 
       async function editCategory(id) {
         try {
           const res = await fetch(`/api/Category/GetCategoryById/${id}`);
           const data = await res.json();
-          console.log("data: ", data);
+          // console.log("data: ", data);
 
           if (!res.ok || !data.succeeded) {
             alert("Failed to load Category for editing");
@@ -318,7 +318,7 @@
           }
 
           const category = data.data;
-          console.log("data.data: ", category.id);
+          // console.log("data.data: ", Category.id);
           form.elements["id"].value = category.id;
 
           // Clear and populate language fields
@@ -356,12 +356,12 @@
           modal.classList.remove("hidden");
           setTimeout(() => modal.classList.remove("translate-x-full"), 10);
         } catch (err) {
-          console.error("Error fetching category for edit:", err);
-          alert("Error loading category");
+          console.error("Error fetching Category for edit:", err);
+          alert("Error loading Category");
         }
       }
 
-      // Add a new category
+      // Add a new Category
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -387,7 +387,7 @@
               alert("Category added!");
               form.reset();
               modal.classList.add("hidden");
-              loadCategories(searchInput.value.trim(), currentPage);
+              loadCategory(searchInput.value.trim(), currentPage);
             } else {
               alert("Failed: " + (data.message || "Unknown error"));
             }
@@ -403,7 +403,7 @@
                   {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: translation }),
+                    body: JSON.stringify({ translation: translation }),
                   }
                 );
 
@@ -434,14 +434,14 @@
               // alert("Include updated!");
               form.reset();
               modal.classList.add("hidden");
-              loadCategories(searchInput.value.trim(), currentPage);
+              loadCategory(searchInput.value.trim(), currentPage);
             } else {
               alert("Some translations failed to update.");
             }
           }
         } catch (err) {
           console.error(err);
-          alert("Error while saving Category.");
+          alert("Error while saving Categpry.");
         }
       });
 
@@ -457,7 +457,7 @@
           const data = await res.json();
           if (res.ok && data.succeeded) {
             alert("Category deleted");
-            loadCategories(searchInput.value.trim(), currentPage);
+            loadCategory(searchInput.value.trim(), currentPage);
           } else {
             alert("Failed to delete Category");
           }
