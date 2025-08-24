@@ -109,7 +109,11 @@
     ></div>
 
     <!-- NEW: Booking Modal -->
-    <div id="bookingModal" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+    <div
+      id="bookingModal"
+      class="fixed inset-0 z-50 hidden overflow-y-auto"
+      aria-hidden="true"
+    >
       <!-- Overlay -->
       <div
         id="bookingModalOverlay"
@@ -122,7 +126,7 @@
         id="bookingModalPanel"
       >
         <div
-          class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden"
+          class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[90vh]"
         >
           <div class="px-6 py-4 border-b flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -147,7 +151,10 @@
             </button>
           </div>
 
-          <div class="px-6 py-5" id="bm-body">
+          <div
+            class="px-6 py-5 flex-1 overflow-y-auto overscroll-contain"
+            id="bm-body"
+          >
             <!-- Filled dynamically -->
             <div id="bm-loading" class="flex items-center gap-3 text-gray-500">
               <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
@@ -661,6 +668,8 @@
       // ---------- Modal logic ----------
       function openModal() {
         modalRoot.classList.remove("hidden");
+        document.documentElement.classList.add("overflow-hidden");
+        document.body.classList.add("overflow-hidden");
         requestAnimationFrame(() => {
           modalOverlay.classList.remove("opacity-0");
           modalPanel.classList.remove("opacity-0", "translate-y-6");
@@ -674,6 +683,8 @@
         setTimeout(() => {
           modalRoot.classList.add("hidden");
           modalRoot.setAttribute("aria-hidden", "true");
+          document.documentElement.classList.remove("overflow-hidden");
+          document.body.classList.remove("overflow-hidden");
         }, 150);
       }
 
