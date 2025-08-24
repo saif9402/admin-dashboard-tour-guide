@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="../output.css" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <title>Tour Guide Admin Panel</title>
+  </head>
+  <body class="bg-gray-100 font-sans">
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-white border-r shadow-md">
+        <div class="p-6 border-b">
+          <img src="../img/Vector.png" alt="main logo" />
+        </div>
+        <nav class="p-4 space-y-3">
+          <a
+            href="home.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="map"></i> <span>Trips</span>
+          </a>
+          <a
+            href="categories.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="folder"></i> <span>Categories</span>
+          </a>
+          <a
+            href="includes.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="check-square"></i> <span>Includes</span>
+          </a>
+          <a
+            href="Languages.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="languages"></i> <span>Languages</span>
+          </a>
+          <a
+            href="activities.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+          >
+            <i data-lucide="activity"></i> <span>Activities</span>
+          </a>
+          <a
+            href="booking.html"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 bg-blue-100 shadow-inner font-medium"
+          >
+            <i data-lucide="calendar-check"></i> <span>Bookings</span>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-red-600 hover:bg-red-100"
+          >
+            <i data-lucide="log-out"></i> <span>Logout</span>
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-8">
+        <div
+          class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
+        >
+          <h1 class="text-3xl font-bold text-gray-900">Manage Bookings</h1>
+        </div>
+
+        <div class="mb-6">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search Booking..."
+            class="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-4 py-2"
+          />
+        </div>
+
+        <!-- Trip Table -->
+        <div class="bg-white rounded-xl shadow overflow-x-auto">
+          <table class="min-w-full text-sm text-left">
+            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+              <tr>
+                <th class="px-6 py-4">Name</th>
+                <th class="px-6 py-4">Trip</th>
+                <th class="px-6 py-4">Cost</th>
+                <th class="px-6 py-4">Created At</th>
+                <th class="px-6 py-4">Status</th>
+              </tr>
+            </thead>
+            <tbody id="bookingTable" class="divide-y divide-gray-200 bg-white">
+              <!-- Trip rows go here -->
+            </tbody>
+          </table>
+        </div>
+        <div
+          id="pagination"
+          class="mt-6 flex justify-center items-center gap-3 text-sm font-medium"
+        ></div>
+      </main>
+    </div>
+    <script>
+      // ---------- Config ----------
+      const ENDPOINTS = {
+        bookings: "/api/Booking/GetAllBookings",
+        refresh: "/api/Auth/GetToken",
+      };
+
+      // Pagination + Search state
+      let currentPage = 1;
+      const pageSize = 8; // like your sample
+      let currentSearch = "";
+
+      // ---------- Token helpers ----------
+      function getStoredToken() {
+        return (
+          localStorage.getItem("accessToken") ||
+          localStorage.getItem("token") ||
+          localStorage.getItem("jwt") ||
+          null
+        );
+      }
+      function setStoredToken(token) {
+        if (!token) return;
+        localStorage.setItem("accessToken", token);
+        localStorage.setItem("token", token);
+      }
+      function extractTokenFromResponse(json) {
+        if (!json) return null;
+        if (typeof json.token === "string") return json.token;
+        if (json.data && typeof json.data.token === "string")
+          return json.data.token;
+        if (json.data && typeof json.data.accessToken === "string")
+          return json.data.accessToken;
+        if (typeof json.accessToken === "string") return json.accessToken;
+        return null;
+      }
+      async function refreshToken() {
+        const res = await fetch(ENDPOINTS.refresh, {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error("Failed to refresh token");
+        const json = await res.json().catch(() => ({}));
+        const newToken = extractTokenFromResponse(json);
+        if (!newToken)
+          throw new Error("Refresh endpoint did not return a token");
+        setStoredToken(newToken);
+        return newToken;
+      }
+      async function authorizedFetch(
+        url,
+        options = {},
+        { retryOn401 = true } = {}
+      ) {
+        const headers = new Headers(options.headers || {});
+        const token = getStoredToken();
+        if (token) headers.set("Authorization", `Bearer ${token}`);
+
+        let res = await fetch(url, { ...options, headers });
+
+        if (res.status === 401 && retryOn401) {
+          try {
+            const newToken = await refreshToken();
+            const retryHeaders = new Headers(options.headers || {});
+            retryHeaders.set("Authorization", `Bearer ${newToken}`);
+            res = await fetch(url, { ...options, headers: retryHeaders });
+          } catch (e) {
+            throw e;
+          }
+        }
+        return res;
+      }
+
+      // ---------- UI refs ----------
+      const tableBody = document.getElementById("bookingTable");
+      const searchInput = document.getElementById("searchInput");
+      const paginationEl = document.getElementById("pagination");
+
+      // Server-paged data for the current page
+      let pageRows = [];
+      let totalCount = 0;
+
+      // ---------- Formatters ----------
+      function formatMoney(value) {
+        if (typeof value !== "number") return value ?? "";
+        return value.toLocaleString(undefined, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        });
+      }
+      function formatDate(iso) {
+        if (!iso) return "";
+        const d = new Date(iso);
+        return d.toLocaleString();
+      }
+      function statusBadge(status) {
+        const base =
+          "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium";
+        const map = {
+          Pending: "bg-yellow-100 text-yellow-800",
+          Confirmed: "bg-green-100 text-green-800",
+          Completed: "bg-blue-100 text-blue-800",
+          Cancelled: "bg-red-100 text-red-700",
+          Rejected: "bg-red-100 text-red-700",
+        };
+        const cls = map[status] || "bg-gray-100 text-gray-700";
+        return `<span class="${base} ${cls}">${status ?? ""}</span>`;
+      }
+
+      // ---------- Renderers ----------
+      function renderRows(rows) {
+        if (!rows || rows.length === 0) {
+          tableBody.innerHTML = `
+        <tr>
+          <td colspan="5" class="px-6 py-6 text-center text-gray-500">No bookings found.</td>
+        </tr>`;
+          return;
+        }
+
+        tableBody.innerHTML = rows
+          .map(
+            (b) => `
+      <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4">
+          <div class="font-medium text-gray-900">${b.userName ?? ""}</div>
+          <div class="text-xs text-gray-500">${b.phoneNumber ?? ""}</div>
+          <div class="text-[11px] text-gray-400">${
+            b.bookingPublicId ?? ""
+          }</div>
+        </td>
+        <td class="px-6 py-4">${b.tripName ?? ""}</td>
+        <td class="px-6 py-4">$${formatMoney(b.totalCost)}</td>
+        <td class="px-6 py-4">${formatDate(b.createdAt)}</td>
+        <td class="px-6 py-4">${statusBadge(b.status)}</td>
+      </tr>
+    `
+          )
+          .join("");
+
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+          window.lucide.createIcons();
+        }
+      }
+
+      function renderPagination(current, totalCount) {
+        const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+        paginationEl.innerHTML = "";
+
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "Previous";
+        prevBtn.disabled = current === 1 || totalCount === 0;
+        prevBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+        prevBtn.onclick = () => {
+          if (currentPage > 1) {
+            currentPage--;
+            loadBookings(currentPage);
+          }
+        };
+
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "Next";
+        nextBtn.disabled = current === totalPages || totalCount === 0;
+        nextBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+        nextBtn.onclick = () => {
+          const tp = Math.max(1, Math.ceil(totalCount / pageSize));
+          if (currentPage < tp) {
+            currentPage++;
+            loadBookings(currentPage);
+          }
+        };
+
+        paginationEl.appendChild(prevBtn);
+        paginationEl.append(
+          ` Page ${Math.min(current, totalPages)} of ${totalPages} `
+        );
+        paginationEl.appendChild(nextBtn);
+      }
+
+      // ---------- Data ----------
+      function buildBookingsUrl(pageNumber, pageSize) {
+        const params = new URLSearchParams();
+        params.set("PageNumber", String(pageNumber));
+        params.set("PageSize", String(pageSize));
+        if (currentSearch) params.set("Search", currentSearch); // << server-side search
+        return `${ENDPOINTS.bookings}?${params.toString()}`;
+      }
+
+      async function loadBookings(pageNumber = 1) {
+        try {
+          const url = buildBookingsUrl(pageNumber, pageSize);
+          const res = await authorizedFetch(url, { method: "GET" });
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`Fetch failed (${res.status}) ${text}`);
+          }
+          const json = await res.json();
+
+          const payload =
+            json && json.data
+              ? json.data
+              : { pageNumber: 1, pageSize, count: 0, data: [] };
+          currentPage = payload.pageNumber || pageNumber;
+          totalCount = typeof payload.count === "number" ? payload.count : 0;
+          pageRows = Array.isArray(payload.data) ? payload.data : [];
+
+          renderRows(pageRows);
+          renderPagination(currentPage, totalCount);
+        } catch (err) {
+          console.error(err);
+          tableBody.innerHTML = `
+        <tr>
+          <td colspan="5" class="px-6 py-6 text-center">
+            <div class="text-red-600 font-medium">Couldn't load bookings.</div>
+            <div class="text-sm text-gray-500 mt-1">${
+              err?.message || "Unexpected error"
+            }</div>
+          </td>
+        </tr>`;
+          paginationEl.innerHTML = "";
+        }
+      }
+
+      // ---------- Utils ----------
+      function debounce(fn, delay = 300) {
+        let t;
+        return (...args) => {
+          clearTimeout(t);
+          t = setTimeout(() => fn.apply(null, args), delay);
+        };
+      }
+
+      // ---------- Boot ----------
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+          window.lucide.createIcons();
+        }
+
+        loadBookings(currentPage);
+
+        // Server-side search: reset to page 1 and query with ?Search=
+        const onSearch = debounce(() => {
+          currentSearch = (searchInput.value || "").trim();
+          currentPage = 1;
+          loadBookings(currentPage);
+        }, 350);
+
+        searchInput.addEventListener("input", onSearch);
+      });
+    </script>
+  </body>
+</html>
