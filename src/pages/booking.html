@@ -102,16 +102,13 @@
       </main>
     </div>
 
-    <!-- NEW: Toast -->
-    <div
-      id="toastRoot"
-      class="fixed top-4 right-4 z-[60] space-y-2 pointer-events-none"
-    ></div>
+    <!-- Toast -->
+    <div id="toastRoot" class="fixed top-4 right-4 z-[60] space-y-2 pointer-events-none"></div>
 
-    <!-- NEW: Booking Modal -->
+    <!-- Booking Modal -->
     <div
       id="bookingModal"
-      class="fixed inset-0 z-50 hidden overflow-y-auto"
+      class="fixed inset-0 z-50 hidden overflow-y-auto"  <!-- NEW: scrollable container -->
       aria-hidden="true"
     >
       <!-- Overlay -->
@@ -125,20 +122,14 @@
         class="relative mx-auto my-10 w-[min(96vw,820px)] opacity-0 translate-y-6 transition-all"
         id="bookingModalPanel"
       >
-        <div
-          class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[90vh]"
-        >
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[90vh]"><!-- NEW: flex + cap height -->
           <div class="px-6 py-4 border-b flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div
-                class="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center"
-              >
+              <div class="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
                 <i data-lucide="calendar-check" class="text-blue-600"></i>
               </div>
               <div>
-                <h3 id="bm-title" class="text-lg font-semibold text-gray-900">
-                  Booking
-                </h3>
+                <h3 id="bm-title" class="text-lg font-semibold text-gray-900">Booking</h3>
                 <p id="bm-subtitle" class="text-xs text-gray-500">—</p>
               </div>
             </div>
@@ -151,26 +142,11 @@
             </button>
           </div>
 
-          <div
-            class="px-6 py-5 flex-1 overflow-y-auto overscroll-contain"
-            id="bm-body"
-          >
-            <!-- Filled dynamically -->
+          <div class="px-6 py-5 flex-1 overflow-y-auto overscroll-contain" id="bm-body"><!-- NEW: scrollable body -->
             <div id="bm-loading" class="flex items-center gap-3 text-gray-500">
               <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                ></path>
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
               </svg>
               Loading details…
             </div>
@@ -199,117 +175,73 @@
                 </div>
                 <div class="rounded-xl border p-4">
                   <p class="text-xs text-gray-500 mb-1">Status</p>
-                  <div
-                    id="bm-statusPill"
-                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700"
-                  >
-                    —
-                  </div>
+                  <div id="bm-statusPill" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">—</div>
                 </div>
               </div>
 
               <div class="mt-4 rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
-                <div>
-                  <span class="text-gray-500">Total:</span>
-                  <span id="bm-total" class="font-semibold text-gray-900"
-                    >—</span
-                  >
-                </div>
-                <div class="text-xs text-gray-500 mt-1">
-                  Booking ID: <span id="bm-publicId">—</span>
-                </div>
-                <div class="text-xs text-gray-500">
-                  Created: <span id="bm-created">—</span>
-                </div>
+                <div><span class="text-gray-500">Total:</span> <span id="bm-total" class="font-semibold text-gray-900">—</span></div>
+                <div class="text-xs text-gray-500 mt-1">Booking ID: <span id="bm-publicId">—</span></div>
+                <div class="text-xs text-gray-500">Created: <span id="bm-created">—</span></div>
               </div>
 
-              <!-- NEW: inline editor -->
+              <!-- Inline editor -->
               <div class="mt-6">
                 <div class="flex items-center justify-between mb-2">
-                  <h4 class="text-sm font-semibold text-gray-900">
-                    Adjust before confirming
-                  </h4>
-                  <span class="text-xs text-gray-500"
-                    >These changes apply to this booking.</span
-                  >
+                  <h4 class="text-sm font-semibold text-gray-900">Adjust before confirming / declining</h4>
+                  <span class="text-xs text-gray-500">These changes apply to this booking.</span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label
-                      for="bm-edit-adults"
-                      class="block text-xs text-gray-600 mb-1"
-                      >Adults</label
-                    >
-                    <input
-                      id="bm-edit-adults"
-                      type="number"
-                      min="0"
-                      max="2147483647"
+                    <label for="bm-edit-adults" class="block text-xs text-gray-600 mb-1">Adults</label>
+                    <input id="bm-edit-adults" type="number" min="0" max="2147483647"
                       class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2"
-                      placeholder="0"
-                    />
+                      placeholder="0" />
                   </div>
                   <div>
-                    <label
-                      for="bm-edit-children"
-                      class="block text-xs text-gray-600 mb-1"
-                      >Children</label
-                    >
-                    <input
-                      id="bm-edit-children"
-                      type="number"
-                      min="0"
-                      max="2147483647"
+                    <label for="bm-edit-children" class="block text-xs text-gray-600 mb-1">Children</label>
+                    <input id="bm-edit-children" type="number" min="0" max="2147483647"
                       class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2"
-                      placeholder="0"
-                    />
+                      placeholder="0" />
                   </div>
                   <div>
-                    <label
-                      for="bm-edit-datetime"
-                      class="block text-xs text-gray-600 mb-1"
-                      >Trip date & time</label
-                    >
-                    <input
-                      id="bm-edit-datetime"
-                      type="datetime-local"
-                      class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2"
-                    />
-                    <p class="text-[11px] mt-1 text-gray-500">
-                      Times interpreted in
-                      <span class="font-medium">Africa/Cairo</span>.
-                    </p>
+                    <label for="bm-edit-datetime" class="block text-xs text-gray-600 mb-1">Trip date & time</label>
+                    <input id="bm-edit-datetime" type="datetime-local"
+                      class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2" />
+                    <p class="text-[11px] mt-1 text-gray-500">Times interpreted in <span class="font-medium">Africa/Cairo</span>.</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div id="bm-error" class="hidden">
-              <div
-                class="rounded-xl bg-red-50 text-red-700 border border-red-200 p-4"
-              >
+              <div class="rounded-xl bg-red-50 text-red-700 border border-red-200 p-4">
                 <div class="font-medium">Couldn’t load booking.</div>
                 <div id="bm-errorMsg" class="text-sm opacity-90 mt-1"></div>
               </div>
             </div>
           </div>
 
-          <div
-            class="px-6 py-4 border-t bg-gray-50 flex items-center justify-between"
-          >
-            <div class="text-xs text-gray-500">
-              Click outside or press
-              <kbd class="px-1.5 py-0.5 bg-white border rounded">Esc</kbd> to
-              close.
-            </div>
+          <div class="px-6 py-4 border-t bg-gray-50 flex items-center justify-between">
+            <div class="text-xs text-gray-500">Click outside or press <kbd class="px-1.5 py-0.5 bg-white border rounded">Esc</kbd> to close.</div>
             <div class="flex items-center gap-2">
+              <!-- NEW: Delete -->
               <button
-                id="bm-cancel"
-                class="inline-flex items-center gap-2 rounded-xl bg-red-600 text-white px-4 py-2 font-semibold shadow hover:bg-red-700 active:bg-red-800 disabled:opacity-60 disabled:cursor-not-allowed"
+                id="bm-delete"
+                class="inline-flex items-center gap-2 rounded-xl bg-white text-red-600 border border-red-200 px-4 py-2 font-semibold hover:bg-red-50 disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled
               >
                 <i data-lucide="trash-2" class="h-4 w-4"></i>
-                Cancel booking
+                Delete
+              </button>
+              <!-- UPDATED: Cancel -> Decline -->
+              <button
+                id="bm-cancel"
+                class="inline-flex items-center gap-2 rounded-xl bg-rose-600 text-white px-4 py-2 font-semibold shadow hover:bg-rose-700 active:bg-rose-800 disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled
+              >
+                <i data-lucide="x-circle" class="h-4 w-4"></i>
+                Decline
               </button>
               <button
                 id="bm-confirm"
@@ -330,12 +262,9 @@
       const ENDPOINTS = {
         bookings: "/api/Booking/GetAllBookings",
         refresh: "/api/Auth/GetToken",
-        getBooking: (id) =>
-          `/api/Booking/GetBookingById/${encodeURIComponent(id)}`,
-        deleteBooking: (id) =>
-          `/api/Booking/DeleteBooking/${encodeURIComponent(id)}`,
-        updateBooking: (id) =>
-          `/api/Booking/UpdateBooking/${encodeURIComponent(id)}`,
+        getBooking: (id) => `/api/Booking/GetBookingById/${encodeURIComponent(id)}`,
+        deleteBooking: (id) => `/api/Booking/DeleteBooking/${encodeURIComponent(id)}`,
+        updateBooking: (id) => `/api/Booking/UpdateBooking/${encodeURIComponent(id)}`
       };
 
       // Pagination + Search state
@@ -429,10 +358,11 @@
       const bmPublicId = document.getElementById("bm-publicId");
       const bmCreated = document.getElementById("bm-created");
 
-      const bmBtnCancel = document.getElementById("bm-cancel");
+      const bmBtnDelete = document.getElementById("bm-delete");
+      const bmBtnCancel = document.getElementById("bm-cancel"); // Decline
       const bmBtnConfirm = document.getElementById("bm-confirm");
 
-      // NEW: editor refs
+      // Editor refs
       const bmEditAdults = document.getElementById("bm-edit-adults");
       const bmEditChildren = document.getElementById("bm-edit-children");
       const bmEditDatetime = document.getElementById("bm-edit-datetime");
@@ -448,13 +378,10 @@
       // ---------- Formatters ----------
       function formatMoney(value) {
         if (typeof value !== "number") value = Number(value) || 0;
-        return (
-          "€" +
-          value.toLocaleString(undefined, {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2,
-          })
-        );
+        return "€" + value.toLocaleString(undefined, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        });
       }
       function parseISOGuessTZ(iso) {
         if (!iso) return null;
@@ -480,20 +407,17 @@
           return d.toLocaleString("en-GB");
         }
       }
-      // NEW: ISO <-> input[type=datetime-local] helpers
       function toDatetimeLocalValue(iso) {
         const d = parseISOGuessTZ(iso);
         if (!d) return "";
         const pad = (n) => String(n).padStart(2, "0");
-        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
-          d.getDate()
-        )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
       }
       function datetimeLocalToISO(val) {
         if (!val) return null;
-        const d = new Date(val); // interpret as local time
+        const d = new Date(val);
         if (isNaN(d)) return null;
-        return d.toISOString(); // send as ISO UTC
+        return d.toISOString();
       }
 
       function statusBadge(status) {
@@ -505,6 +429,7 @@
           Completed: "bg-blue-100 text-blue-800",
           Cancelled: "bg-red-100 text-red-700",
           Rejected: "bg-red-100 text-red-700",
+          Declined: "bg-red-100 text-red-700", // NEW
         };
         const cls = map[status] || "bg-gray-100 text-gray-700";
         return `<span class="${base} ${cls}">${status ?? ""}</span>`;
@@ -516,6 +441,7 @@
           Completed: "bg-blue-100 text-blue-800",
           Cancelled: "bg-red-100 text-red-700",
           Rejected: "bg-red-100 text-red-700",
+          Declined: "bg-red-100 text-red-700", // NEW
         };
         el.className =
           "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium " +
@@ -569,9 +495,7 @@
               <td class="px-6 py-4">
                 <div class="font-medium text-gray-900">${b.userName ?? ""}</div>
                 <div class="text-xs text-gray-500">${b.phoneNumber ?? ""}</div>
-                <div class="text-[11px] text-gray-400">${
-                  b.bookingPublicId ?? ""
-                }</div>
+                <div class="text-[11px] text-gray-400">${b.bookingPublicId ?? ""}</div>
               </td>
               <td class="px-6 py-4">${b.tripName ?? ""}</td>
               <td class="px-6 py-4">${formatMoney(b.totalCost)}</td>
@@ -656,9 +580,7 @@
             <tr>
               <td colspan="5" class="px-6 py-6 text-center">
                 <div class="text-red-600 font-medium">Couldn't load bookings.</div>
-                <div class="text-sm text-gray-500 mt-1">${
-                  err?.message || "Unexpected error"
-                }</div>
+                <div class="text-sm text-gray-500 mt-1">${err?.message || "Unexpected error"}</div>
               </td>
             </tr>`;
           paginationEl.innerHTML = "";
@@ -668,7 +590,7 @@
       // ---------- Modal logic ----------
       function openModal() {
         modalRoot.classList.remove("hidden");
-        document.documentElement.classList.add("overflow-hidden");
+        document.documentElement.classList.add("overflow-hidden");   // prevent bg scroll
         document.body.classList.add("overflow-hidden");
         requestAnimationFrame(() => {
           modalOverlay.classList.remove("opacity-0");
@@ -690,11 +612,11 @@
 
       function setActionBusy(busy) {
         modalBusy = busy;
-        bmBtnCancel.disabled = busy || !currentModalBooking;
-        bmBtnConfirm.disabled =
-          busy || !currentModalBooking || !isEditorValid();
+        bmBtnDelete.disabled = busy || !currentModalBooking;
+        bmBtnCancel.disabled = busy || !currentModalBooking; // Decline
+        bmBtnConfirm.disabled = busy || !currentModalBooking || !isEditorValid();
         bmCloseDisabled(busy);
-        [bmBtnCancel, bmBtnConfirm].forEach((btn) => {
+        [bmBtnDelete, bmBtnCancel, bmBtnConfirm].forEach((btn) => {
           if (busy) {
             btn.dataset._label = btn.innerHTML;
             btn.innerHTML = `
@@ -726,6 +648,7 @@
         bmLoading.classList.remove("hidden");
         bmContent.classList.add("hidden");
         bmError.classList.add("hidden");
+        bmBtnDelete.disabled = true;
         bmBtnCancel.disabled = true;
         bmBtnConfirm.disabled = true;
         bmCloseDisabled(false);
@@ -733,9 +656,9 @@
         bmEditAdults.value = "";
         bmEditChildren.value = "";
         bmEditDatetime.value = "";
-        bmEditAdults.classList.remove("ring-1", "ring-red-400");
-        bmEditChildren.classList.remove("ring-1", "ring-red-400");
-        bmEditDatetime.classList.remove("ring-1", "ring-red-400");
+        bmEditAdults.classList.remove("ring-1","ring-red-400");
+        bmEditChildren.classList.remove("ring-1","ring-red-400");
+        bmEditDatetime.classList.remove("ring-1","ring-red-400");
       }
 
       function setEditorValuesFromBooking(d) {
@@ -743,12 +666,8 @@
           typeof d.adults === "number" ? d.adults : Number(d.adults) || 0
         );
         const children =
-          (typeof d.childrens === "number"
-            ? d.childrens
-            : Number(d.childrens)) ||
-          (typeof d.children === "number"
-            ? d.children
-            : Number(d.children) || 0);
+          (typeof d.childrens === "number" ? d.childrens : Number(d.childrens)) ||
+          (typeof d.children === "number" ? d.children : Number(d.children) || 0);
         bmEditChildren.value = Number(children);
         const tripIso = d.tripdate || d.tripDate || d.trip_date;
         bmEditDatetime.value = toDatetimeLocalValue(tripIso);
@@ -758,7 +677,8 @@
         const a = Number(bmEditAdults.value);
         const c = Number(bmEditChildren.value);
         const dt = bmEditDatetime.value;
-        const okInt = (n) => Number.isInteger(n) && n >= 0 && n <= 2147483647;
+        const okInt = (n) =>
+          Number.isInteger(n) && n >= 0 && n <= 2147483647;
         const ok = okInt(a) && okInt(c) && !!dt;
         bmEditAdults.classList.toggle("ring-1", !okInt(a));
         bmEditAdults.classList.toggle("ring-red-400", !okInt(a));
@@ -773,9 +693,7 @@
         resetModalState();
         openModal();
         try {
-          const res = await authorizedFetch(ENDPOINTS.getBooking(id), {
-            method: "GET",
-          });
+          const res = await authorizedFetch(ENDPOINTS.getBooking(id), { method: "GET" });
           if (!res.ok) {
             const text = await res.text();
             throw new Error(`(${res.status}) ${text}`);
@@ -791,15 +709,10 @@
           bmPhone.textContent = d.phoneNumber ?? "—";
           bmTripName.textContent = d.tripName ?? "—";
           bmTripDate.textContent = formatDateLocal(d.tripdate || d.tripDate);
-          bmAdults.textContent =
-            typeof d.adults === "number" ? d.adults : Number(d.adults) || 0;
+          bmAdults.textContent = typeof d.adults === "number" ? d.adults : (Number(d.adults) || 0);
           bmChildren.textContent =
-            (typeof d.childrens === "number"
-              ? d.childrens
-              : Number(d.childrens)) ||
-            (typeof d.children === "number"
-              ? d.children
-              : Number(d.children) || 0);
+            (typeof d.childrens === "number" ? d.childrens : Number(d.childrens)) ||
+            (typeof d.children === "number" ? d.children : Number(d.children) || 0);
           applyStatusPill(bmStatusPill, d.status || "—");
           bmTotal.textContent = formatMoney(d.totalCost);
           bmPublicId.textContent = d.bookingPublicId ?? "—";
@@ -810,13 +723,11 @@
 
           bmLoading.classList.add("hidden");
           bmContent.classList.remove("hidden");
+          bmBtnDelete.disabled = false;
           bmBtnCancel.disabled = false;
           bmBtnConfirm.disabled = !isEditorValid();
 
-          if (
-            window.lucide &&
-            typeof window.lucide.createIcons === "function"
-          ) {
+          if (window.lucide && typeof window.lucide.createIcons === "function") {
             window.lucide.createIcons();
           }
         } catch (err) {
@@ -828,15 +739,55 @@
         }
       }
 
-      async function cancelBooking() {
+      // NEW: Decline (Cancel) via UpdateBooking with status "Declined"
+      async function declineBooking() {
         if (!currentModalBooking || modalBusy) return;
-        if (!confirm("Delete this booking? This cannot be undone.")) return;
+        if (!isEditorValid()) return;
+        setActionBusy(true);
+        try {
+          const b = currentModalBooking;
+          const payload = {
+            adults: Number(bmEditAdults.value),
+            children: Number(bmEditChildren.value),
+            tripDate: datetimeLocalToISO(bmEditDatetime.value) || (b.tripdate || b.tripDate),
+            status: "Declined",
+          };
+
+          const res = await authorizedFetch(ENDPOINTS.updateBooking(b.id), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`(${res.status}) ${text}`);
+          }
+
+          // Update UI
+          applyStatusPill(bmStatusPill, "Declined");
+          const idx = pageRows.findIndex((r) => String(r.id) === String(b.id));
+          if (idx > -1) {
+            pageRows[idx] = { ...pageRows[idx], status: "Declined" };
+            renderRows(pageRows);
+          }
+          showToast("Booking declined.", "success");
+          closeModal();
+        } catch (e) {
+          console.error(e);
+          showToast("Failed to decline booking.", "error");
+        } finally {
+          setActionBusy(false);
+        }
+      }
+
+      // Permanent delete
+      async function deleteBookingPermanently() {
+        if (!currentModalBooking || modalBusy) return;
+        if (!confirm("Permanently delete this booking? This cannot be undone.")) return;
         setActionBusy(true);
         try {
           const id = currentModalBooking.id;
-          const res = await authorizedFetch(ENDPOINTS.deleteBooking(id), {
-            method: "DELETE",
-          });
+          const res = await authorizedFetch(ENDPOINTS.deleteBooking(id), { method: "DELETE" });
           if (!res.ok) {
             const text = await res.text();
             throw new Error(`(${res.status}) ${text}`);
@@ -866,10 +817,7 @@
           const payload = {
             adults: Number(bmEditAdults.value),
             children: Number(bmEditChildren.value),
-            tripDate:
-              datetimeLocalToISO(bmEditDatetime.value) ||
-              b.tripdate ||
-              b.tripDate,
+            tripDate: datetimeLocalToISO(bmEditDatetime.value) || (b.tripdate || b.tripDate),
             status: "Confirmed",
           };
 
@@ -883,7 +831,7 @@
             throw new Error(`(${res.status}) ${text}`);
           }
 
-          // Update UI: status pill and row
+          // Update UI
           applyStatusPill(bmStatusPill, "Confirmed");
           const idx = pageRows.findIndex((r) => String(r.id) === String(b.id));
           if (idx > -1) {
@@ -893,7 +841,7 @@
               adults: payload.adults,
               childrens: payload.children,
               tripDate: payload.tripDate,
-              tripdate: payload.tripDate,
+              tripdate: payload.tripDate
             };
             renderRows(pageRows);
           }
@@ -924,7 +872,6 @@
 
         loadBookings(currentPage);
 
-        // Server-side search
         const onSearch = debounce(() => {
           currentSearch = (searchInput.value || "").trim();
           currentPage = 1;
@@ -945,18 +892,15 @@
         modalOverlay.addEventListener("click", () => closeModal());
         modalCloseBtn.addEventListener("click", () => closeModal());
         document.addEventListener("keydown", (e) => {
-          if (
-            e.key === "Escape" &&
-            !modalBusy &&
-            !modalRoot.classList.contains("hidden")
-          ) {
+          if (e.key === "Escape" && !modalBusy && !modalRoot.classList.contains("hidden")) {
             closeModal();
           }
         });
-        bmBtnCancel.addEventListener("click", cancelBooking);
+        bmBtnDelete.addEventListener("click", deleteBookingPermanently);
+        bmBtnCancel.addEventListener("click", declineBooking); // UPDATED
         bmBtnConfirm.addEventListener("click", confirmBooking);
 
-        // NEW: live validation for editor
+        // Live validation for editor
         [bmEditAdults, bmEditChildren, bmEditDatetime].forEach((el) => {
           el.addEventListener("input", () => {
             if (!currentModalBooking) return;
