@@ -191,11 +191,22 @@
           maximumFractionDigits: 2,
         });
       }
+      // Force all displayed times to Africa/Cairo (handles DST automatically)
       function formatDate(iso) {
         if (!iso) return "";
-        const d = new Date(iso);
-        return d.toLocaleString();
+        const d = new Date(iso); // if your API sends UTC, prefer "2025-08-23T20:25:36.906Z"
+        return new Intl.DateTimeFormat("en-EG", {
+          timeZone: "Africa/Cairo",
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        }).format(d);
       }
+
       function statusBadge(status) {
         const base =
           "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium";
@@ -232,7 +243,7 @@
           }</div>
         </td>
         <td class="px-6 py-4">${b.tripName ?? ""}</td>
-        <td class="px-6 py-4">$${formatMoney(b.totalCost)}</td>
+        <td class="px-6 py-4">€${formatMoney(b.totalCost)}</td>
         <td class="px-6 py-4">${formatDate(b.createdAt)}</td>
         <td class="px-6 py-4">${statusBadge(b.status)}</td>
       </tr>
