@@ -130,7 +130,7 @@
       <div class="p-6 flex flex-col h-full">
         <div class="flex items-center justify-between mb-4">
           <h2 id="modelTitle" class="text-xl font-semibold text-gray-800">
-            Add activity
+            Add Activity
           </h2>
           <button
             type="button"
@@ -145,7 +145,7 @@
           id="activityForm"
           class="flex flex-col flex-1 gap-6 overflow-auto"
         >
-          <input type="hidden" id="includeId" name="id" />
+          <input type="hidden" id="activityId" name="id" />
 
           <div id="languageFields" class="flex flex-col gap-4"></div>
 
@@ -207,7 +207,7 @@
               languageSelect.value = defaultLang.id;
             }
 
-            loadActivities(searchInput.value.trim(), currentPage);
+            loadActivity(searchInput.value.trim(), currentPage);
           } else {
             console.error("Failed to fetch languages");
           }
@@ -216,7 +216,7 @@
         }
       }
 
-      async function loadActivities(searchQuery = "", pageNumber = 1) {
+      async function loadActivity(searchQuery = "", pageNumber = 1) {
         try {
           let url = `/api/Activity/GetAllActivities/${selectedLanguageId}?pageNumber=${pageNumber}&pageSize=${pageSize}`;
 
@@ -226,7 +226,7 @@
 
           const res = await fetch(url);
           const data = await res.json();
-          console.log("API response:", data);
+          // console.log("API response:", data);
 
           if (res.ok && data.succeeded) {
             const activities = data.data.data;
@@ -265,7 +265,7 @@
       languageSelect.addEventListener("change", () => {
         selectedLanguageId = languageSelect.value;
         currentPage = 1;
-        loadActivities(searchInput.value.trim(), currentPage);
+        loadActivity(searchInput.value.trim(), currentPage);
       });
 
       function renderPagination(current, totalCount) {
@@ -280,7 +280,7 @@
         prevBtn.onclick = () => {
           if (current > 1) {
             currentPage--;
-            loadActivities(searchInput.value.trim(), currentPage); // ✅ Fixed
+            loadActivity(searchInput.value.trim(), currentPage); // ✅ Fixed
           }
         };
 
@@ -291,7 +291,7 @@
         nextBtn.onclick = () => {
           if (current < totalPages) {
             currentPage++;
-            loadActivities(searchInput.value.trim(), currentPage); // ✅ Fixed
+            loadActivity(searchInput.value.trim(), currentPage);
           }
         };
 
@@ -303,32 +303,32 @@
       // Update this to pass `currentPage`
       searchInput.addEventListener("input", () => {
         currentPage = 1;
-        loadActivities(searchInput.value.trim(), currentPage);
+        loadActivity(searchInput.value.trim(), currentPage);
       });
 
       async function editActivity(id) {
         try {
-          const res = await fetch(`/api/Acticity/GetActivityById/${id}`);
+          const res = await fetch(`/api/Activity/GetActivityById/${id}`);
           const data = await res.json();
-          console.log("data: ", data);
+          // console.log("data: ", data);
 
           if (!res.ok || !data.succeeded) {
-            alert("Failed to load activity for editing");
+            alert("Failed to load Activity for editing");
             return;
           }
 
           const activity = data.data;
-          console.log("data.data: ", activity.id);
+          // console.log("data.data: ", activity.id);
           form.elements["id"].value = activity.id;
 
           // Clear and populate language fields
-          document.getElementById("modelTitle").innerText = "Update activity";
+          document.getElementById("modelTitle").innerText = "Update Activity";
           const languageFieldsContainer =
             document.getElementById("languageFields");
           languageFieldsContainer.innerHTML = "";
 
           availableLanguages.forEach((lang) => {
-            const existingTranslation = activity.name.find(
+            const existingTranslation = category.name.find(
               (n) => n.languageId === lang.id
             );
 
@@ -356,12 +356,12 @@
           modal.classList.remove("hidden");
           setTimeout(() => modal.classList.remove("translate-x-full"), 10);
         } catch (err) {
-          console.error("Error fetching activity for edit:", err);
-          alert("Error loading activity");
+          console.error("Error fetching Activity for edit:", err);
+          alert("Error loading Activity");
         }
       }
 
-      // Add a new activity
+      // Add a new Activity
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -387,7 +387,7 @@
               alert("Activity added!");
               form.reset();
               modal.classList.add("hidden");
-              loadActivities(searchInput.value.trim(), currentPage);
+              loadActivity(searchInput.value.trim(), currentPage);
             } else {
               alert("Failed: " + (data.message || "Unknown error"));
             }
@@ -403,7 +403,7 @@
                   {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: translation }),
+                    body: JSON.stringify({ translation: translation }),
                   }
                 );
 
@@ -434,7 +434,7 @@
               // alert("Include updated!");
               form.reset();
               modal.classList.add("hidden");
-              loadActivities(searchInput.value.trim(), currentPage);
+              loadActivity(searchInput.value.trim(), currentPage);
             } else {
               alert("Some translations failed to update.");
             }
@@ -457,7 +457,7 @@
           const data = await res.json();
           if (res.ok && data.succeeded) {
             alert("Activity deleted");
-            loadActivities(searchInput.value.trim(), currentPage);
+            loadActivity(searchInput.value.trim(), currentPage);
           } else {
             alert("Failed to delete Activity");
           }
@@ -471,7 +471,7 @@
       document
         .getElementById("addActivityBtn")
         .addEventListener("click", () => {
-          document.getElementById("modelTitle").innerText = "Add Acticity";
+          document.getElementById("modelTitle").innerText = "Add Activity";
           const languageFieldsContainer =
             document.getElementById("languageFields");
           languageFieldsContainer.innerHTML = ""; // Clear previous fields
