@@ -191,19 +191,22 @@
           maximumFractionDigits: 2,
         });
       }
-      // Force all displayed times to Africa/Cairo (handles DST automatically)
-      function formatDate(iso) {
-        if (!iso) return "";
-        const d = new Date(iso); // if your API sends UTC, prefer "2025-08-23T20:25:36.906Z"
-        return new Intl.DateTimeFormat("en-EG", {
-          timeZone: "Africa/Cairo",
-          year: "numeric",
-          month: "short",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        }).format(d);
+      function formatDateLocal(iso) {
+        const d = parseISOGuessTZ(iso);
+        if (!d) return "-";
+        try {
+          return new Intl.DateTimeFormat("en-GB", {
+            timeZone: "Africa/Cairo",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }).format(d);
+        } catch {
+          return d.toLocaleString("en-GB");
+        }
       }
 
       function statusBadge(status) {
