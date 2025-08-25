@@ -495,6 +495,38 @@
       }
 
       // === Dynamic Translation Fields ===
+      function createTranslationRow(type) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "flex items-center gap-2 mt-2";
+
+        const select = document.createElement("select");
+        select.name = `${type}LangId`;
+        select.className = "border rounded px-2 py-1";
+        (availableLanguages || []).forEach((lang) => {
+          const opt = document.createElement("option");
+          opt.value = lang.id;
+          opt.textContent = lang.name;
+          select.appendChild(opt);
+        });
+
+        const input = document.createElement(
+          type === "name" ? "input" : "textarea"
+        );
+        input.name = `${type}Value`;
+        input.className = "border rounded px-2 py-1 flex-1";
+        if (type === "description") input.rows = 2;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.textContent = "✕";
+        removeBtn.className = "text-red-500 font-bold";
+        removeBtn.onclick = () => wrapper.remove();
+
+        wrapper.appendChild(select);
+        wrapper.appendChild(input);
+        wrapper.appendChild(removeBtn);
+        return wrapper;
+      }
 
       function createDateRow(value = "") {
         const wrapper = document.createElement("div");
