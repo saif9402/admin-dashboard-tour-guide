@@ -601,21 +601,22 @@
         if (e.target === overlay) closeModal();
       });
 
-      // === Fetch Trips ===
-      const _origFetchTrips = fetchTrips;
-      fetchTrips = async function (page = 1) {
-        showTableSkeleton(); // show skeleton
+      // === Fetch Trips (define normally; no patching) ===
+      async function fetchTrips(page = 1) {
+        showTableSkeleton(); // show skeleton while loading
         const token = localStorage.getItem("accessToken");
         try {
           const response = await fetch(
             `${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`,
             {
               method: "GET",
-              headers: { Authorization: `Bearer ${token}` },
+              headers: {
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
             }
           );
           const result = await response.json();
-          if (result.succeeded) {
+          if (response.ok && result.succeeded) {
             renderTrips(result.data.data);
             renderPagination(result.data.pageNumber, result.data.count);
           } else {
@@ -627,7 +628,7 @@
             '<tr><td colspan="6" class="text-center text-red-500 py-6">Network error</td></tr>';
           console.error(e);
         }
-      };
+      }
 
       // === Render Trips ===
       function renderTrips(trips) {
