@@ -1541,7 +1541,12 @@
         document.getElementById("modalTitle").textContent = "Add Trip";
         document.getElementById("submitBtn").textContent = "Save";
         resetTripForm();
-        hideExistingImagesSection(); // 🔵 hide images section in Add mode
+        hideExistingImagesSection();
+
+        // 🔒 Hide Reviews tab in Add mode
+        document.getElementById("tabReviews").classList.add("hidden");
+        document.getElementById("tabContentReviews").classList.add("hidden");
+
         showInfoTab();
         openModal();
         if (window.lucide?.createIcons) lucide.createIcons();
@@ -1564,8 +1569,15 @@
           if (res.ok && result.succeeded) {
             await loadTripIntoForm(result.data);
 
-            // 🔵 Load images (read-only)
+            // Images (read-only)
             fetchAndRenderTripMedia(tripId);
+
+            // ✅ Show Reviews tab in Edit mode and load data
+            document.getElementById("tabReviews").classList.remove("hidden");
+            reviewsSortValue =
+              document.getElementById("reviewsSortSelect")?.value ||
+              "date:desc";
+            fetchAndRenderReviews(tripId, reviewsSortValue);
 
             showInfoTab();
             openModal();
@@ -2007,6 +2019,45 @@
           .addEventListener("change", refreshNotIncludesOptions);
         const delBtn = document.getElementById("deleteSelectedImagesBtn");
         if (delBtn) delBtn.addEventListener("click", deleteSelectedImages);
+        document
+          .getElementById("tabImages")
+          .addEventListener("click", showImagesTab);
+        document
+          .getElementById("tabInfo")
+          .addEventListener("click", showInfoTab);
+
+        // ✅ NEW: Reviews tab + controls
+        const tabReviews = document.getElementById("tabReviews");
+        if (tabReviews) tabReviews.addEventListener("click", showReviewsTab);
+
+        const sortSel = document.getElementById("reviewsSortSelect");
+        if (sortSel) {
+          sortSel.addEventListener("change", () => {
+            reviewsSortValue = sortSel.value;
+            if (modalMode === "edit" && currentTripId) {
+              fetchAndRenderReviews(currentTripId, reviewsSortValue);
+            }
+          });
+        }
+
+        const refreshBtn = document.getElementById("refreshReviewsBtn");
+        if (refreshBtn) {
+          refreshBtn.addEventListener("click", () => {
+            if (modalMode === "edit" && currentTripId) {
+              fetchAndRenderReviews(currentTripId, reviewsSortValue);
+            }
+          });
+        }
+
+        // Delegate delete clicks inside the list
+        const list = document.getElementById("reviewsList");
+        if (list) {
+          list.addEventListener("click", (e) => {
+            const btn = e.target.closest("[data-action='delete-review']");
+            if (!btn) return;
+            handleDeleteReview(btn.dataset.reviewId || null);
+          });
+        }
       }
 
       // === Initialization ===
