@@ -1,4 +1,4 @@
-<!-- ✅ COMPLETE HTML FILE WITH MULTI-LANGUAGE TRIP FORM -->
+<!-- ✅ COMPLETE HTML FILE WITH SINGLE MODAL (ADD + EDIT) -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -112,165 +112,7 @@
       </main>
     </div>
 
-    <!-- Edit Trip Modal -->
-    <div
-      id="editTripModal"
-      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-lg flex items-center justify-center px-4 py-8 hidden"
-    >
-      <div
-        class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl p-6"
-      >
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-semibold">Edit Trip</h2>
-          <button
-            id="editCancelBtn"
-            type="button"
-            class="text-2xl text-gray-500 hover:text-gray-700"
-          >
-            &times;
-          </button>
-        </div>
-
-        <form id="editTripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="md:col-span-2">
-            <label class="block font-medium mb-1"
-              >Trip Names (multi-language)</label
-            >
-            <div id="editNameTranslations" class="space-y-2"></div>
-            <button
-              type="button"
-              id="editAddNameTranslation"
-              class="text-sm text-blue-600 hover:underline mt-2"
-            >
-              + Add Name
-            </button>
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="block font-medium mb-1"
-              >Trip Descriptions (multi-language)</label
-            >
-            <div id="editDescriptionTranslations" class="space-y-2"></div>
-            <button
-              type="button"
-              id="editAddDescriptionTranslation"
-              class="text-sm text-blue-600 hover:underline mt-2"
-            >
-              + Add Description
-            </button>
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Price</label>
-            <input
-              type="number"
-              name="Price"
-              required
-              class="w-full border rounded-lg px-4 py-2"
-            />
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Duration</label>
-            <input
-              type="number"
-              name="Duration"
-              required
-              class="w-full border rounded-lg px-4 py-2"
-            />
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="block font-medium">Trip Dates</label>
-            <div id="editTripDatesContainer" class="space-y-2"></div>
-            <button
-              type="button"
-              id="editAddTripDate"
-              class="text-sm text-blue-600 hover:underline mt-1"
-            >
-              + Add another date
-            </button>
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Category</label>
-            <select
-              id="editCategorySelect"
-              name="CategoryId"
-              required
-              class="w-full border rounded-lg px-4 py-2"
-            ></select>
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Activities</label>
-            <select
-              id="editActivitiesSelect"
-              name="Activities"
-              multiple
-              class="w-full border rounded-lg px-4 py-2"
-            ></select>
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Languages</label>
-            <select
-              id="editLanguagesSelect"
-              name="Languages"
-              multiple
-              class="w-full border rounded-lg px-4 py-2"
-            ></select>
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Includes</label>
-            <select
-              id="editIncludesSelect"
-              name="Includes"
-              multiple
-              class="w-full border rounded-lg px-4 py-2"
-            ></select>
-          </div>
-
-          <div class="space-y-1">
-            <label class="block font-medium">Not Includes</label>
-            <select
-              id="editNotIncludesSelect"
-              name="NotIncludes"
-              multiple
-              class="w-full border rounded-lg px-4 py-2"
-            ></select>
-          </div>
-
-          <div class="flex items-center space-x-2 md:col-span-2">
-            <input
-              type="checkbox"
-              name="IsAvailable"
-              class="form-checkbox text-blue-600"
-            />
-            <label class="text-sm">Is Available</label>
-          </div>
-
-          <div class="flex justify-end md:col-span-2 space-x-3">
-            <button
-              type="button"
-              id="editCancelBtn2"
-              class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Update
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Add Trip Modal -->
+    <!-- 🔵 Single Trip Modal (Add + Edit) -->
     <div
       id="tripModal"
       class="fixed inset-0 z-50 bg-black/70 backdrop-blur-lg flex items-center justify-center px-4 py-8 hidden"
@@ -279,7 +121,7 @@
         class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl p-6"
       >
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-semibold">Add Trip</h2>
+          <h2 id="modalTitle" class="text-2xl font-semibold">Add Trip</h2>
           <button
             id="cancelBtn"
             type="button"
@@ -360,14 +202,7 @@
 
             <div class="md:col-span-2">
               <label class="block font-medium">Trip Dates</label>
-              <div id="tripDatesContainer" class="space-y-2">
-                <input
-                  type="datetime-local"
-                  name="TripDates[]"
-                  required
-                  class="w-full border rounded-lg px-4 py-2"
-                />
-              </div>
+              <div id="tripDatesContainer" class="space-y-2"></div>
               <button
                 type="button"
                 id="addTripDate"
@@ -446,6 +281,7 @@
               </button>
               <button
                 type="submit"
+                id="submitBtn"
                 class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Save
@@ -503,9 +339,10 @@
       const pageSize = 8;
       let availableLanguages = [];
       let allIncludes = [];
-      let currentTripId = null;
+      let currentTripId = null; // used for images
       let mainImageName = null;
-      let editTripId = null;
+      let modalMode = "add"; // 'add' | 'edit'
+      let editTripId = null; // used for update
 
       // --- Choices helpers (MUST be defined before first use) ---
       function getChoicesInstance(el, opts = { removeItemButton: true }) {
@@ -531,19 +368,14 @@
       // === Fetch Trips ===
       async function fetchTrips(page = 1) {
         const token = localStorage.getItem("accessToken");
-
         const response = await fetch(
           `${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`,
           {
             method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
-
         const result = await response.json();
-
         if (result.succeeded) {
           renderTrips(result.data.data);
           renderPagination(result.data.pageNumber, result.data.count);
@@ -556,13 +388,11 @@
       // === Render Trips ===
       function renderTrips(trips) {
         tripTable.innerHTML = "";
-
         if (!trips || trips.length === 0) {
           tripTable.innerHTML =
             '<tr><td colspan="7" class="text-center py-4">No trips found</td></tr>';
           return;
         }
-
         trips.forEach((trip) => {
           const row = document.createElement("tr");
           row.innerHTML = `
@@ -582,11 +412,9 @@
               })">
                 <i data-lucide="trash-2"></i>
               </button>
-            </td>
-          `;
+            </td>`;
           tripTable.appendChild(row);
         });
-
         lucide.createIcons();
       }
 
@@ -595,7 +423,6 @@
         const paginationContainer = document.getElementById("pagination");
         const totalPages = Math.ceil(totalCount / pageSize);
         paginationContainer.innerHTML = "";
-
         const prevBtn = document.createElement("button");
         prevBtn.textContent = "Previous";
         prevBtn.disabled = current === 1;
@@ -606,7 +433,6 @@
             fetchTrips(currentPage);
           }
         };
-
         const nextBtn = document.createElement("button");
         nextBtn.textContent = "Next";
         nextBtn.disabled = current === totalPages;
@@ -617,7 +443,6 @@
             fetchTrips(currentPage);
           }
         };
-
         paginationContainer.appendChild(prevBtn);
         paginationContainer.append(` Page ${current} of ${totalPages} `);
         paginationContainer.appendChild(nextBtn);
@@ -627,118 +452,39 @@
       async function populateSelect(id, url, valueField, labelField) {
         const element = document.getElementById(id);
         const ch = getChoicesInstance(element, { removeItemButton: true });
-
         const res = await fetch(url);
         const result = await res.json();
-
         const data = Array.isArray(result.data)
           ? result.data
           : Array.isArray(result.data?.data)
           ? result.data.data
           : [];
-
         const mapped = data.map((item) => ({
           value: String(item[valueField]),
           label: item[labelField],
         }));
-
         ch.clearChoices();
         ch.setChoices(mapped, "value", "label", true);
-
         return { element, choices: ch, data };
       }
 
-      async function populateEditSelects(data) {
-        // Load all choices in parallel
-        const [acts, langs, incs, notIncs, cats] = await Promise.all([
-          populateSelect(
-            "editActivitiesSelect",
-            "/api/Activity/GetAllActivities",
-            "id",
-            "name"
-          ),
-          populateSelect(
-            "editLanguagesSelect",
-            "/api/Language/GetAllLanguages",
-            "id",
-            "name"
-          ),
-          populateSelect(
-            "editIncludesSelect",
-            "/api/Includes/GetAllIncludes",
-            "id",
-            "name"
-          ),
-          populateSelect(
-            "editNotIncludesSelect",
-            "/api/Includes/GetAllIncludes",
-            "id",
-            "name"
-          ),
-          populateSelect(
-            "editCategorySelect",
-            "/api/Category/GetAllCategories",
-            "id",
-            "name"
-          ),
-        ]);
-
-        // Convert arrays of objects -> arrays of ids
-        const activityIds = getIds(data.activities);
-        const languageIds = getIds(data.languages);
-        const includeIds = getIds(data.includes);
-        const notIncludeIds = getIds(data.notIncludes);
-        const allIncludesList = incs.data; // full list from API
-
-        // Multi-selects
-        setSelectedValues("editActivitiesSelect", activityIds);
-        setSelectedValues("editLanguagesSelect", languageIds);
-
-        // Includes first
-        setSelectedValues("editIncludesSelect", includeIds);
-
-        // Not-Includes = complement of Includes
-        const notSel = document.getElementById("editNotIncludesSelect");
+      function refreshNotIncludesOptions() {
+        const includesEl = document.getElementById("includesSelect");
+        const notSel = document.getElementById("notIncludesSelect");
         const notChoices = getChoicesInstance(notSel);
-        const remaining = allIncludesList
-          .filter((i) => !includeIds.includes(i.id))
+        const selected = Array.from(includesEl.selectedOptions).map((opt) =>
+          parseInt(opt.value)
+        );
+        const remaining = allIncludes
+          .filter((i) => !selected.includes(i.id))
           .map((i) => ({ value: String(i.id), label: i.name }));
         notChoices.clearChoices();
         notChoices.setChoices(remaining, "value", "label", true);
-
-        // Pre-select valid not-includes (ignore any that now collide with Includes)
-        const filteredNotIds = notIncludeIds.filter(
-          (id) => !includeIds.includes(id)
-        );
-        setSelectedValues("editNotIncludesSelect", filteredNotIds);
-
-        // Single-select category
-        const catEl = document.getElementById("editCategorySelect");
-        getChoicesInstance(catEl).setChoiceByValue(String(data.categoryId));
-
-        // Keep complement rule while user edits
-        const includesEl = document.getElementById("editIncludesSelect");
-        // clean old handler if any
-        if (window._editIncludesHandler) {
-          includesEl.removeEventListener("change", window._editIncludesHandler);
-        }
-        window._editIncludesHandler = () => {
-          const selected = Array.from(includesEl.selectedOptions).map((o) =>
-            parseInt(o.value)
-          );
-          const remaining = allIncludesList
-            .filter((i) => !selected.includes(i.id))
-            .map((i) => ({ value: String(i.id), label: i.name }));
-          notChoices.clearChoices();
-          notChoices.setChoices(remaining, "value", "label", true);
-
-          // drop now-invalid not-includes
-          const validNotIds = Array.from(notSel.selectedOptions)
-            .map((o) => parseInt(o.value))
-            .filter((id) => !selected.includes(id));
-          setSelectedValues("editNotIncludesSelect", validNotIds);
-        };
-        includesEl.addEventListener("change", window._editIncludesHandler);
+        // prune invalid not-includes
+        const validNotIds = Array.from(notSel.selectedOptions)
+          .map((o) => parseInt(o.value))
+          .filter((id) => !selected.includes(id));
+        setSelectedValues("notIncludesSelect", validNotIds);
       }
 
       // === Languages (for translations) ===
@@ -752,7 +498,6 @@
       function createTranslationRow(type) {
         const wrapper = document.createElement("div");
         wrapper.className = "flex items-center gap-2 mt-2";
-
         const select = document.createElement("select");
         select.name = `${type}LangId`;
         select.className = "border rounded px-2 py-1";
@@ -762,20 +507,17 @@
           opt.textContent = lang.name;
           select.appendChild(opt);
         });
-
         const input = document.createElement(
           type === "name" ? "input" : "textarea"
         );
         input.name = `${type}Value`;
         input.className = "border rounded px-2 py-1 flex-1";
         if (type === "description") input.rows = 2;
-
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
         removeBtn.textContent = "✕";
         removeBtn.className = "text-red-500 font-bold";
         removeBtn.onclick = () => wrapper.remove();
-
         wrapper.appendChild(select);
         wrapper.appendChild(input);
         wrapper.appendChild(removeBtn);
@@ -790,30 +532,24 @@
             child.querySelector(`select[name=${type}LangId]`).value
           );
           const text = child.querySelector(`[name=${type}Value]`).value.trim();
-          if (langId && text) {
+          if (langId && text)
             translations.push({ languageId: langId, translation: text });
-          }
         }
         return translations;
       }
 
-      // Merge Name[] + Description[] into tripTranslations[]
       function combineTripTranslations(nameArr, descArr) {
         const byLang = new Map();
-
         nameArr.forEach(({ languageId, translation }) => {
           if (!byLang.has(languageId))
             byLang.set(languageId, { languageId, name: "", description: "" });
           byLang.get(languageId).name = translation;
         });
-
         descArr.forEach(({ languageId, translation }) => {
           if (!byLang.has(languageId))
             byLang.set(languageId, { languageId, name: "", description: "" });
           byLang.get(languageId).description = translation;
         });
-
-        // keep only entries that have at least a name or description
         return Array.from(byLang.values()).filter(
           (t) => (t.name ?? "").trim() || (t.description ?? "").trim()
         );
@@ -826,25 +562,157 @@
       function isoToLocalInputValue(iso) {
         const d = new Date(iso);
         d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-        return d.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
+        return d.toISOString().slice(0, 16);
       }
 
-      // === Form Submission (Add) ===
-      async function handleTripSubmit(e) {
+      // === Form Modes ===
+      function openAddTripModal() {
+        modalMode = "add";
+        editTripId = null;
+        currentTripId = null;
+        mainImageName = null;
+        document.getElementById("modalTitle").textContent = "Add Trip";
+        document.getElementById("submitBtn").textContent = "Save";
+        resetTripForm();
+        document.getElementById("tripModal").classList.remove("hidden");
+        showInfoTab();
+      }
+
+      async function openEditTripModal(tripId) {
+        modalMode = "edit";
+        editTripId = tripId;
+        currentTripId = tripId;
+        mainImageName = null;
+        document.getElementById("modalTitle").textContent = "Edit Trip";
+        document.getElementById("submitBtn").textContent = "Update";
+        resetTripForm();
+        try {
+          const token = localStorage.getItem("accessToken");
+          const res = await fetch(`/api/Trip/GetTripByIdForAdmin/${tripId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const result = await res.json();
+          if (res.ok && result.succeeded) {
+            await loadTripIntoForm(result.data);
+            document.getElementById("tripModal").classList.remove("hidden");
+            showInfoTab();
+          } else {
+            alert("Failed to load trip data.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error fetching trip data.");
+        }
+      }
+
+      function resetTripForm() {
+        const form = document.getElementById("tripForm");
+        form.reset();
+        // Reset translations (one row each)
+        const nameC = document.getElementById("nameTranslations");
+        const descC = document.getElementById("descriptionTranslations");
+        nameC.innerHTML = "";
+        descC.innerHTML = "";
+        nameC.appendChild(createTranslationRow("name"));
+        descC.appendChild(createTranslationRow("description"));
+        // Reset dates
+        const dates = document.getElementById("tripDatesContainer");
+        dates.innerHTML = "";
+        const input = document.createElement("input");
+        input.type = "datetime-local";
+        input.name = "TripDates[]";
+        input.required = true;
+        input.className = "w-full border rounded-lg px-4 py-2";
+        dates.appendChild(input);
+        // Reset Choices selections
+        [
+          "activitiesSelect",
+          "languagesSelect",
+          "includesSelect",
+          "notIncludesSelect",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          const ch = getChoicesInstance(el);
+          ch.removeActiveItems();
+        });
+        const catEl = document.getElementById("categorySelect");
+        getChoicesInstance(catEl).removeActiveItems();
+        // Clear image preview & input
+        document.getElementById("tripImages").value = "";
+        document.getElementById("imagePreview").innerHTML = "";
+        refreshNotIncludesOptions();
+      }
+
+      async function loadTripIntoForm(data) {
+        const form = document.getElementById("tripForm");
+        form.Price.value = data.price;
+        form.Duration.value = data.duration;
+        form.IsAvailable.checked = data.isAvailable;
+        // translations
+        const nameC = document.getElementById("nameTranslations");
+        const descC = document.getElementById("descriptionTranslations");
+        nameC.innerHTML = "";
+        descC.innerHTML = "";
+        (data.name || []).forEach((t) => {
+          const row = createTranslationRow("name");
+          row.querySelector("select").value = t.languageId;
+          row.querySelector("input").value = t.translation;
+          nameC.appendChild(row);
+        });
+        (data.description || []).forEach((t) => {
+          const row = createTranslationRow("description");
+          row.querySelector("select").value = t.languageId;
+          row.querySelector("textarea").value = t.translation;
+          descC.appendChild(row);
+        });
+        // dates
+        const dates = document.getElementById("tripDatesContainer");
+        dates.innerHTML = "";
+        (data.tripDates || []).forEach((date) => {
+          const input = document.createElement("input");
+          input.type = "datetime-local";
+          input.name = "TripDates[]";
+          input.required = true;
+          input.className = "w-full border rounded-lg px-4 py-2";
+          input.value = isoToLocalInputValue(date);
+          dates.appendChild(input);
+        });
+        // selects
+        const activityIds = getIds(data.activities);
+        const languageIds = getIds(data.languages);
+        const includeIds = getIds(data.includes);
+        const notIncludeIds = getIds(data.notIncludes);
+        setSelectedValues("activitiesSelect", activityIds);
+        setSelectedValues("languagesSelect", languageIds);
+        setSelectedValues("includesSelect", includeIds);
+        refreshNotIncludesOptions();
+        // pre-select valid not-includes only
+        const validNotIds = (notIncludeIds || []).filter(
+          (id) => !includeIds.includes(id)
+        );
+        setSelectedValues("notIncludesSelect", validNotIds);
+        // category
+        getChoicesInstance(
+          document.getElementById("categorySelect")
+        ).setChoiceByValue(String(data.categoryId));
+      }
+
+      // === Form Submission (single handler) ===
+      async function onTripFormSubmit(e) {
         e.preventDefault();
         const form = e.target;
-
-        const tripDto = {
-          Name: extractTranslations("nameTranslations", "name"),
-          Description: extractTranslations(
-            "descriptionTranslations",
-            "description"
-          ),
+        const nameArr = extractTranslations("nameTranslations", "name");
+        const descArr = extractTranslations(
+          "descriptionTranslations",
+          "description"
+        );
+        const tripDates = Array.from(
+          form.querySelectorAll("input[name='TripDates[]']")
+        ).map((input) => new Date(input.value).toISOString());
+        const common = {
           Price: parseFloat(form.Price.value),
           Duration: parseInt(form.Duration.value),
-          TripDates: Array.from(
-            form.querySelectorAll("input[name='TripDates[]']")
-          ).map((input) => new Date(input.value).toISOString()),
+          TripDates: tripDates,
           IsAvailable: form.IsAvailable.checked,
           CategoryId: parseInt(form.CategoryId.value),
           Activities: Array.from(form.Activities.selectedOptions).map((opt) =>
@@ -861,67 +729,93 @@
           ),
         };
 
-        try {
-          const res = await fetch("/api/Trip/AddTrip", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(tripDto),
-          });
-          const result = await res.json();
-          if (res.ok && result.succeeded) {
-            const newTripId = result.data;
-            alert("Trip added successfully");
-            currentTripId = newTripId;
-
-            document.getElementById("tabImages").click();
-            form.reset();
-            fetchTrips();
-          } else {
-            alert("Failed to add trip: " + (result.errors || result.message));
+        if (modalMode === "add") {
+          const tripDto = { ...common, Name: nameArr, Description: descArr };
+          try {
+            const res = await fetch("/api/Trip/AddTrip", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(tripDto),
+            });
+            const result = await res.json();
+            if (res.ok && result.succeeded) {
+              currentTripId = result.data; // returned new trip ID
+              alert("Trip added successfully");
+              document.getElementById("tabImages").click(); // switch to images
+              fetchTrips();
+            } else {
+              alert("Failed to add trip: " + (result.errors || result.message));
+            }
+          } catch (err) {
+            console.error("Error:", err);
+            alert("Something went wrong.");
           }
-        } catch (err) {
-          console.error("Error:", err);
-          alert("Something went wrong.");
+        } else {
+          // edit mode -> UpdateTrip expects different payload
+          const payload = {
+            tripTranslations: combineTripTranslations(nameArr, descArr),
+            duration: common.Duration,
+            price: common.Price,
+            isAvailable: common.IsAvailable,
+            tripDates: common.TripDates,
+            categoryId: common.CategoryId,
+            activities: common.Activities,
+            languages: common.Languages,
+            includes: common.Includes,
+            notIncludes: common.NotIncludes,
+          };
+          const token = localStorage.getItem("accessToken");
+          try {
+            const res = await fetch(`/api/Trip/UpdateTrip/${editTripId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify(payload),
+            });
+            let result, text;
+            try {
+              result = await res.json();
+            } catch {
+              text = await res.text();
+            }
+            if (!res.ok) {
+              console.error("Update failed", res.status, text || result);
+              alert(
+                `Failed to update trip (${res.status}). ${
+                  text || result?.message || "Check required fields."
+                }`
+              );
+              return;
+            }
+            if (result?.succeeded) {
+              alert("Trip updated successfully");
+              document.getElementById("tripModal").classList.add("hidden");
+              fetchTrips();
+            } else {
+              alert(
+                "Failed to update trip: " + (result?.message || "Unknown error")
+              );
+            }
+          } catch (err) {
+            console.error("Update error:", err);
+            alert("An error occurred while updating the trip.");
+          }
         }
       }
 
-      async function openEditTripModal(tripId) {
-        editTripId = tripId;
-        const token = localStorage.getItem("accessToken");
-        try {
-          const res = await fetch(`/api/Trip/GetTripByIdForAdmin/${tripId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const result = await res.json();
-          if (res.ok && result.succeeded) {
-            await populateEditForm(result.data);
-            document.getElementById("editTripModal").classList.remove("hidden");
-          } else {
-            alert("Failed to load trip data.");
-          }
-        } catch (err) {
-          console.error(err);
-          alert("Error fetching trip data.");
-        }
-      }
-
-      // === Handle Delete ===
+      // === Delete ===
       async function handleDeleteTrip(tripId) {
         const confirmed = confirm("Are you sure you want to delete this trip?");
         if (!confirmed) return;
-
         const token = localStorage.getItem("accessToken");
-
         try {
           const res = await fetch(`/api/Trip/DeleteTrip/${tripId}`, {
             method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           });
-
           const result = await res.json();
-
           if (res.ok && result.succeeded) {
             alert("Trip deleted successfully.");
             fetchTrips();
@@ -942,37 +836,29 @@
         .getElementById("imageUploadForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
-
           if (!currentTripId) {
-            alert("No trip selected. Please create a trip first.");
+            alert(
+              "No trip selected. Please create a trip first or open an existing one."
+            );
             return;
           }
-
           const fileInput = document.getElementById("tripImages");
           const files = Array.from(fileInput.files);
-
           if (!files.length) {
             alert("Please select at least one image.");
             return;
           }
-
           const formData = new FormData();
-
           files.forEach((file, index) => {
             const isMain = file.name === mainImageName;
-
             formData.append(`images[${index}].Image`, file);
             formData.append(`images[${index}].IsMainImage`, isMain.toString());
           });
           try {
             const res = await fetch(
               `/api/Trip/AddImagesToTrip/${currentTripId}`,
-              {
-                method: "POST",
-                body: formData,
-              }
+              { method: "POST", body: formData }
             );
-
             const result = await res.json();
             if (res.ok && result.succeeded) {
               alert("Images uploaded successfully.");
@@ -991,70 +877,78 @@
         const previewContainer = document.getElementById("imagePreview");
         previewContainer.innerHTML = "";
         mainImageName = null;
-
         const files = Array.from(e.target.files);
-
         files.forEach((file) => {
           const reader = new FileReader();
           reader.onload = (event) => {
             const wrapper = document.createElement("div");
             wrapper.className = "relative flex flex-col gap-2 items-start";
-
             const img = document.createElement("img");
             img.src = event.target.result;
             img.className = "w-full h-32 object-cover rounded shadow";
-
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.className = "main-checkbox mt-1";
             checkbox.name = "mainImage";
             checkbox.dataset.filename = file.name;
-
             const label = document.createElement("label");
             label.textContent = "Use as main image";
             label.className = "text-sm ml-2";
-
             const checkboxWrapper = document.createElement("div");
             checkboxWrapper.className = "flex items-center";
             checkboxWrapper.appendChild(checkbox);
             checkboxWrapper.appendChild(label);
-
             checkbox.addEventListener("change", () => {
               document
                 .querySelectorAll("input[name='mainImage']")
                 .forEach((cb) => {
                   if (cb !== checkbox) cb.checked = false;
                 });
-
               mainImageName = checkbox.checked ? file.name : null;
             });
-
             wrapper.appendChild(img);
             wrapper.appendChild(checkboxWrapper);
             previewContainer.appendChild(wrapper);
           };
-
           reader.readAsDataURL(file);
         });
       });
 
+      // === Tabs ===
+      function showImagesTab() {
+        document.getElementById("tabContentInfo").classList.add("hidden");
+        document.getElementById("tabContentImages").classList.remove("hidden");
+        document
+          .getElementById("tabInfo")
+          .classList.remove("border-b-2", "text-blue-600");
+        document
+          .getElementById("tabImages")
+          .classList.add("border-b-2", "text-blue-600");
+      }
+      function showInfoTab() {
+        document.getElementById("tabContentImages").classList.add("hidden");
+        document.getElementById("tabContentInfo").classList.remove("hidden");
+        document
+          .getElementById("tabImages")
+          .classList.remove("border-b-2", "text-blue-600");
+        document
+          .getElementById("tabInfo")
+          .classList.add("border-b-2", "text-blue-600");
+      }
+
       // === Event Listeners ===
       function setupEventListeners() {
-        document.getElementById("addTripBtn").addEventListener("click", () => {
-          document.getElementById("tripModal").classList.remove("hidden");
-        });
-
+        document
+          .getElementById("addTripBtn")
+          .addEventListener("click", openAddTripModal);
         ["cancelBtn", "cancelBtn2"].forEach((id) => {
           document.getElementById(id).addEventListener("click", () => {
             document.getElementById("tripModal").classList.add("hidden");
-            document.getElementById("tripForm").reset();
           });
         });
-
         document
           .getElementById("tripForm")
-          .addEventListener("submit", handleTripSubmit);
-
+          .addEventListener("submit", onTripFormSubmit);
         document
           .getElementById("addNameTranslation")
           .addEventListener("click", () => {
@@ -1062,7 +956,6 @@
               .getElementById("nameTranslations")
               .appendChild(createTranslationRow("name"));
           });
-
         document
           .getElementById("addDescriptionTranslation")
           .addEventListener("click", () => {
@@ -1070,7 +963,6 @@
               .getElementById("descriptionTranslations")
               .appendChild(createTranslationRow("description"));
           });
-
         document.getElementById("addTripDate").addEventListener("click", () => {
           const container = document.getElementById("tripDatesContainer");
           const input = document.createElement("input");
@@ -1080,46 +972,29 @@
           input.className = "w-full border rounded-lg px-4 py-2";
           container.appendChild(input);
         });
-
-        document.getElementById("tabImages").addEventListener("click", () => {
-          document.getElementById("tabContentInfo").classList.add("hidden");
-          document
-            .getElementById("tabContentImages")
-            .classList.remove("hidden");
-
-          document
-            .getElementById("tabInfo")
-            .classList.remove("border-b-2", "text-blue-600");
-          document
-            .getElementById("tabImages")
-            .classList.add("border-b-2", "text-blue-600");
-        });
-
-        document.getElementById("tabInfo").addEventListener("click", () => {
-          document.getElementById("tabContentImages").classList.add("hidden");
-          document.getElementById("tabContentInfo").classList.remove("hidden");
-
-          document
-            .getElementById("tabImages")
-            .classList.remove("border-b-2", "text-blue-600");
-          document
-            .getElementById("tabInfo")
-            .classList.add("border-b-2", "text-blue-600");
-        });
+        document
+          .getElementById("tabImages")
+          .addEventListener("click", showImagesTab);
+        document
+          .getElementById("tabInfo")
+          .addEventListener("click", showInfoTab);
+        // Includes -> NotIncludes complement rule
+        document
+          .getElementById("includesSelect")
+          .addEventListener("change", refreshNotIncludesOptions);
       }
 
       // === Initialization ===
       (async function init() {
         await fetchLanguages();
-
-        // Add 1 name and 1 description row by default
+        // First-time default rows
         document
           .getElementById("nameTranslations")
           .appendChild(createTranslationRow("name"));
         document
           .getElementById("descriptionTranslations")
           .appendChild(createTranslationRow("description"));
-
+        // Populate selects
         await populateSelect(
           "activitiesSelect",
           "/api/Activity/GetAllActivities",
@@ -1138,7 +1013,6 @@
           "id",
           "name"
         );
-
         const includes = await populateSelect(
           "includesSelect",
           "/api/Includes/GetAllIncludes",
@@ -1146,208 +1020,18 @@
           "name"
         );
         allIncludes = includes.data;
-
-        // Not-Includes is driven by what's NOT selected in Includes
-        const notIncludesChoices = new Choices(
-          document.getElementById("notIncludesSelect"),
-          { removeItemButton: true }
-        );
-
-        document
-          .getElementById("includesSelect")
-          .addEventListener("change", () => {
-            const selected = Array.from(
-              document.getElementById("includesSelect").selectedOptions
-            ).map((opt) => parseInt(opt.value));
-            const remaining = allIncludes
-              .filter((item) => !selected.includes(item.id))
-              .map((item) => ({ value: item.id, label: item.name }));
-            notIncludesChoices.clearChoices();
-            notIncludesChoices.setChoices(remaining, "value", "label", true);
-          });
-
+        // Init Not-Includes Choices
+        getChoicesInstance(document.getElementById("notIncludesSelect"), {
+          removeItemButton: true,
+        });
+        refreshNotIncludesOptions();
         setupEventListeners();
         fetchTrips();
       })();
 
-      // === Populate Edit Form ===
-      async function populateEditForm(data) {
-        const form = document.getElementById("editTripForm");
-
-        form.Price.value = data.price;
-        form.Duration.value = data.duration;
-        form.IsAvailable.checked = data.isAvailable;
-
-        const nameContainer = document.getElementById("editNameTranslations");
-        const descContainer = document.getElementById(
-          "editDescriptionTranslations"
-        );
-        nameContainer.innerHTML = "";
-        descContainer.innerHTML = "";
-
-        data.name.forEach((t) => {
-          const row = createTranslationRow("name");
-          row.querySelector("select").value = t.languageId;
-          row.querySelector("input").value = t.translation;
-          nameContainer.appendChild(row);
-        });
-
-        data.description.forEach((t) => {
-          const row = createTranslationRow("description");
-          row.querySelector("select").value = t.languageId;
-          row.querySelector("textarea").value = t.translation;
-          descContainer.appendChild(row);
-        });
-
-        // Dates
-        const datesContainer = document.getElementById(
-          "editTripDatesContainer"
-        );
-        datesContainer.innerHTML = "";
-        data.tripDates.forEach((date) => {
-          const input = document.createElement("input");
-          input.type = "datetime-local";
-          input.name = "TripDates[]";
-          input.required = true;
-          input.className = "w-full border rounded-lg px-4 py-2";
-          // Note: toISOString() is UTC; adjust if needed for local display
-          input.value = isoToLocalInputValue(date);
-          datesContainer.appendChild(input);
-        });
-
-        await populateEditSelects(data);
-      }
-
-      // === Handle Edit Submit (JSON for /api/Trip/UpdateTrip/{id}) ===
-      async function handleEditSubmit(e) {
-        e.preventDefault();
-        const form = e.target;
-
-        // Collect values (same sources as before)
-        const nameArr = extractTranslations("editNameTranslations", "name");
-        const descArr = extractTranslations(
-          "editDescriptionTranslations",
-          "description"
-        );
-        const tripTranslations = combineTripTranslations(nameArr, descArr);
-
-        const price = parseFloat(form.Price.value);
-        const duration = parseInt(form.Duration.value);
-        const tripDates = Array.from(
-          form.querySelectorAll("input[name='TripDates[]']")
-        ).map((input) => new Date(input.value).toISOString());
-        const isAvailable = form.IsAvailable.checked;
-        const categoryId = parseInt(form.CategoryId.value);
-
-        const activities = Array.from(form.Activities.selectedOptions).map(
-          (o) => parseInt(o.value)
-        );
-        const languages = Array.from(form.Languages.selectedOptions).map((o) =>
-          parseInt(o.value)
-        );
-        const includes = Array.from(form.Includes.selectedOptions).map((o) =>
-          parseInt(o.value)
-        );
-        const notIncludes = Array.from(form.NotIncludes.selectedOptions).map(
-          (o) => parseInt(o.value)
-        );
-
-        // Build the payload EXACTLY as your endpoint expects
-        const payload = {
-          tripTranslations, // [{ languageId, name, description }]
-          duration,
-          price,
-          isAvailable,
-          tripDates,
-          categoryId,
-          activities,
-          languages,
-          includes,
-          notIncludes,
-        };
-
-        const token = localStorage.getItem("accessToken");
-
-        try {
-          const res = await fetch(`/api/Trip/UpdateTrip/${editTripId}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify(payload),
-          });
-
-          // Prefer JSON, but fall back to text for debugging
-          let result, text;
-          try {
-            result = await res.json();
-          } catch {
-            text = await res.text();
-          }
-
-          if (!res.ok) {
-            console.error("Update failed", res.status, text || result);
-            alert(
-              `Failed to update trip (${res.status}). ${
-                text || result?.message || "Check required fields."
-              }`
-            );
-            return;
-          }
-
-          if (result?.succeeded) {
-            alert("Trip updated successfully");
-            document.getElementById("editTripModal").classList.add("hidden");
-            fetchTrips();
-          } else {
-            alert(
-              "Failed to update trip: " + (result?.message || "Unknown error")
-            );
-          }
-        } catch (err) {
-          console.error("Update error:", err);
-          alert("An error occurred while updating the trip.");
-        }
-      }
-
-      // === Listeners for Edit Modal ===
-      document
-        .getElementById("editTripForm")
-        .addEventListener("submit", handleEditSubmit);
-      document.getElementById("editCancelBtn").addEventListener("click", () => {
-        document.getElementById("editTripModal").classList.add("hidden");
-      });
-      document
-        .getElementById("editCancelBtn2")
-        .addEventListener("click", () => {
-          document.getElementById("editTripModal").classList.add("hidden");
-        });
-      document
-        .getElementById("editAddNameTranslation")
-        .addEventListener("click", () => {
-          document
-            .getElementById("editNameTranslations")
-            .appendChild(createTranslationRow("name"));
-        });
-      document
-        .getElementById("editAddDescriptionTranslation")
-        .addEventListener("click", () => {
-          document
-            .getElementById("editDescriptionTranslations")
-            .appendChild(createTranslationRow("description"));
-        });
-      document
-        .getElementById("editAddTripDate")
-        .addEventListener("click", () => {
-          const container = document.getElementById("editTripDatesContainer");
-          const input = document.createElement("input");
-          input.type = "datetime-local";
-          input.name = "TripDates[]";
-          input.required = true;
-          input.className = "w-full border rounded-lg px-4 py-2";
-          container.appendChild(input);
-        });
+      // Expose for inline handlers
+      window.openEditTripModal = openEditTripModal;
+      window.handleDeleteTrip = handleDeleteTrip;
     </script>
   </body>
 </html>
