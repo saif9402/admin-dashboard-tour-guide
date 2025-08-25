@@ -406,14 +406,27 @@
           <div id="tabContentImages" class="tab-content hidden">
             <!-- === Existing Images (read-only) === -->
             <div id="existingImagesSection" class="space-y-3 hidden">
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between gap-3">
                 <h3 class="text-base font-semibold text-gray-900">
                   Existing Images
                 </h3>
-                <span
-                  id="existingImagesCount"
-                  class="text-sm text-gray-500"
-                ></span>
+
+                <div class="flex items-center gap-3">
+                  <span
+                    id="existingImagesCount"
+                    class="text-sm text-gray-500"
+                  ></span>
+                  <button
+                    id="deleteSelectedImagesBtn"
+                    type="button"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-600 text-white text-sm font-medium shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled
+                    title="Select images to enable"
+                  >
+                    <i data-lucide="trash-2" class="h-4 w-4"></i>
+                    Delete selected
+                  </button>
+                </div>
               </div>
 
               <!-- Grid -->
@@ -479,6 +492,76 @@
       let lastFocusedEl = null; // for modal a11y
       let sortState = { key: null, dir: "asc" }; // keys: name|category|price|duration|available
       let lastTripsPage = [];
+      let selectedImageIds = new Set(); // holds ids selected for deletion
+
+      function updateDeleteButtonState() {
+        const btn = document.getElementById("deleteSelectedImagesBtn");
+        const count = selectedImageIds.size;
+        if (!btn) return;
+        btn.disabled = count === 0;
+        btn.title =
+          count === 0
+            ? "Select images to enable"
+            : `Delete ${count} selected image${count === 1 ? "" : "s"}`;
+      }
+
+      async function deleteSelectedImages() {
+        if (!currentTripId || selectedImageIds.size === 0) return;
+
+        const count = selectedImageIds.size;
+        const confirmed = confirm(
+          `Delete ${count} selected image${
+            count === 1 ? "" : "s"
+          }?\nThis cannot be undone.`
+        );
+        if (!confirmed) return;
+
+        // Build multipart form-data with repeated "imageIds" fields
+        const formData = new FormData();
+        [...selectedImageIds].forEach((id) =>
+          formData.append("imageIds", String(id))
+        );
+
+        try {
+          const token = localStorage.getItem("accessToken");
+          const res = await fetch(
+            `/api/Trip/DeleteImagesFromTrip/${currentTripId}`,
+            {
+              method: "DELETE",
+              headers: {
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: formData,
+            }
+          );
+
+          let result, text;
+          try {
+            result = await res.json();
+          } catch {
+            text = await res.text();
+          }
+
+          if (!res.ok || !result?.succeeded) {
+            console.error(
+              "DeleteImagesFromTrip failed",
+              res.status,
+              text || result
+            );
+            alert(`Failed to delete images. ${result?.message || ""}`.trim());
+            return;
+          }
+
+          // Success: refresh UI
+          alert("Selected images deleted.");
+          selectedImageIds.clear();
+          updateDeleteButtonState();
+          await fetchAndRenderTripMedia(currentTripId);
+        } catch (err) {
+          console.error("Delete images error:", err);
+          alert("Network error while deleting images.");
+        }
+      }
 
       function hideExistingImagesSection() {
         const section = document.getElementById("existingImagesSection");
@@ -500,18 +583,18 @@
         return sk;
       }
 
-      function createExistingImageCard(url, isMain = false) {
+      function createExistingImageCard(id, url, isMain = false) {
         const card = document.createElement("div");
         card.className =
-          "relative rounded-xl overflow-hidden ring-1 ring-gray-200 shadow-sm bg-white";
+          "relative rounded-xl overflow-hidden ring-1 ring-gray-200 shadow-sm bg-white transition";
 
         const img = document.createElement("img");
         img.src = url;
         img.alt = "Trip image";
         img.loading = "lazy";
-        img.className = "w-full h-40 object-cover";
+        img.className = "w-full h-40 object-cover select-none";
 
-        // top-left badge if main
+        // Main badge (top-left)
         if (isMain) {
           const badge = document.createElement("div");
           badge.className =
@@ -520,7 +603,31 @@
           card.appendChild(badge);
         }
 
+        // Select checkbox (top-right)
+        const selectWrap = document.createElement("label");
+        selectWrap.className =
+          "absolute top-2 right-2 inline-flex items-center rounded-lg bg-white/90 ring-1 ring-gray-200 p-1";
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.className = "h-4 w-4 rounded text-rose-600";
+        cb.disabled = isMain; // 🔒 don't allow deleting main image (no 'set main' yet)
+        if (isMain) selectWrap.title = "Can't delete main image";
+
+        cb.addEventListener("change", () => {
+          if (cb.checked) {
+            selectedImageIds.add(id);
+            card.classList.add("ring-rose-300");
+          } else {
+            selectedImageIds.delete(id);
+            card.classList.remove("ring-rose-300");
+          }
+          updateDeleteButtonState();
+        });
+
+        selectWrap.appendChild(cb);
+        card.appendChild(selectWrap);
         card.appendChild(img);
+
         queueMicrotask(() => {
           if (window.lucide?.createIcons) lucide.createIcons();
         });
@@ -532,6 +639,9 @@
         const grid = document.getElementById("existingImagesGrid");
         const count = document.getElementById("existingImagesCount");
         if (!section || !grid) return;
+
+        selectedImageIds.clear();
+        updateDeleteButtonState();
 
         // Build a deduped list: main first (if present), then the rest
         const main = data?.mainImage;
@@ -556,13 +666,17 @@
 
         // Main image first
         if (main?.imageURL) {
-          grid.appendChild(createExistingImageCard(main.imageURL, true));
+          grid.appendChild(
+            createExistingImageCard(main.id, main.imageURL, true)
+          );
         }
 
         // Remaining images
         rest.forEach((im) => {
           if (im?.imageURL) {
-            grid.appendChild(createExistingImageCard(im.imageURL, false));
+            grid.appendChild(
+              createExistingImageCard(im.id, im.imageURL, false)
+            );
           }
         });
 
@@ -1589,6 +1703,8 @@
         document
           .getElementById("includesSelect")
           .addEventListener("change", refreshNotIncludesOptions);
+        const delBtn = document.getElementById("deleteSelectedImagesBtn");
+        if (delBtn) delBtn.addEventListener("click", deleteSelectedImages);
       }
 
       // === Initialization ===
