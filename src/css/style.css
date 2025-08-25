@@ -38,3 +38,23 @@
   );
   animation: tg-shimmer 1.25s infinite;
 }
+
+/* Sheet (side panel) transitions */
+.sheet-enter {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.sheet-enter-active {
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.sheet-exit {
+  transform: translateX(0);
+  opacity: 1;
+}
+.sheet-exit-active {
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
