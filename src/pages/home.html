@@ -451,9 +451,12 @@
                 class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
               />
 
-              <p class="text-sm text-gray-500">
-                You can select multiple images. Mark one as the main image
-                below.
+              <p
+                class="text-xs md:text-sm rounded-lg bg-amber-50 ring-1 ring-amber-200 text-amber-800 px-3 py-2"
+              >
+                In <strong>Edit</strong> mode, if you upload an image and mark
+                it as <strong>Main</strong>, the previous main image will be
+                replaced automatically by the backend.
               </p>
 
               <div
@@ -1546,30 +1549,62 @@
             );
             return;
           }
+
           const fileInput = document.getElementById("tripImages");
           const files = Array.from(fileInput.files);
           if (!files.length) {
             alert("Please select at least one image.");
             return;
           }
+
+          // Build payload: one (and only one) image can be marked as main
           const formData = new FormData();
           files.forEach((file, index) => {
-            const isMain = file.name === mainImageName;
+            const isMain = file.name === mainImageName; // checkbox you already wired in preview
             formData.append(`images[${index}].Image`, file);
-            formData.append(`images[${index}].IsMainImage`, isMain.toString());
+            formData.append(`images[${index}].IsMainImage`, String(isMain));
           });
+
           try {
+            const token = localStorage.getItem("accessToken");
             const res = await fetch(
               `/api/Trip/AddImagesToTrip/${currentTripId}`,
-              { method: "POST", body: formData }
+              {
+                method: "POST",
+                headers: {
+                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: formData,
+              }
             );
-            const result = await res.json();
-            if (res.ok && result.succeeded) {
+
+            let result, text;
+            try {
+              result = await res.json();
+            } catch {
+              text = await res.text();
+            }
+
+            if (res.ok && result?.succeeded) {
               alert("Images uploaded successfully.");
+
+              // Reset local UI
               fileInput.value = "";
               document.getElementById("imagePreview").innerHTML = "";
+              mainImageName = null;
+
+              // Refresh existing images — backend will have set the new main
+              await fetchAndRenderTripMedia(currentTripId);
+
+              // Clear any pending delete selections
+              selectedImageIds.clear();
+              updateDeleteButtonState();
             } else {
-              alert("Upload failed: " + (result.message || "Unknown error."));
+              console.error("Upload failed", res.status, text || result);
+              alert(
+                "Upload failed: " +
+                  (result?.message || text || "Unknown error.")
+              );
             }
           } catch (err) {
             console.error("Upload error:", err);
