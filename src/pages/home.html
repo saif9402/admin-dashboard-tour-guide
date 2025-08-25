@@ -1,4 +1,4 @@
-<!-- ✅ COMPLETE HTML FILE WITH SINGLE MODAL (ADD + EDIT) -->
+<!-- ✅ COMPLETE HTML FILE WITH SINGLE MODAL (ADD + EDIT) - Modernized -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -12,6 +12,25 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <title>Tour Guide Admin Panel</title>
+
+    <!-- Small visual polish for scrollbars inside the modal -->
+    <style>
+      .custom-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #c7c9d1 transparent;
+      }
+      .custom-scroll::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background: #c7c9d1;
+        border-radius: 8px;
+      }
+      .custom-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+    </style>
   </head>
   <body class="bg-gray-50 text-gray-800 font-sans">
     <div class="flex min-h-screen">
@@ -112,217 +131,258 @@
       </main>
     </div>
 
-    <!-- 🔵 Single Trip Modal (Add + Edit) -->
-    <div
-      id="tripModal"
-      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-lg flex items-center justify-center px-4 py-8 hidden"
-    >
+    <!-- 🔵 Single Trip Modal (Add + Edit) — Modernized -->
+    <div id="tripModal" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+      <!-- overlay -->
       <div
-        class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl p-6"
+        id="tripModalOverlay"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300"
+      ></div>
+
+      <!-- panel -->
+      <div
+        id="tripModalPanel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+        class="relative mx-auto my-8 w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 opacity-0 translate-y-6 scale-95 transition-[opacity,transform] duration-300"
       >
-        <div class="flex justify-between items-center mb-4">
-          <h2 id="modalTitle" class="text-2xl font-semibold">Add Trip</h2>
-          <button
-            id="cancelBtn"
-            type="button"
-            class="text-2xl text-gray-500 hover:text-gray-700"
-          >
-            &times;
-          </button>
+        <!-- sticky header -->
+        <div
+          class="sticky top-0 z-10 bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+        >
+          <div class="px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span
+                class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20"
+              >
+                <i data-lucide="route" class="h-5 w-5"></i>
+              </span>
+              <h2 id="modalTitle" class="text-xl font-semibold tracking-tight">
+                Add Trip
+              </h2>
+            </div>
+            <button
+              id="cancelBtn"
+              type="button"
+              class="rounded-xl p-2 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40"
+              aria-label="Close"
+              title="Close"
+            >
+              <i data-lucide="x" class="h-5 w-5"></i>
+            </button>
+          </div>
+
+          <!-- tabs as segmented control -->
+          <div class="px-6 pb-4">
+            <div
+              class="inline-flex rounded-full bg-white/10 p-1 ring-1 ring-white/20"
+            >
+              <button
+                id="tabInfo"
+                class="tab-btn rounded-full px-4 py-2 text-sm font-medium bg-white text-gray-900 shadow"
+                aria-selected="true"
+              >
+                Trip Info
+              </button>
+              <button
+                id="tabImages"
+                class="tab-btn rounded-full px-4 py-2 text-sm font-medium text-white/80 hover:text-white"
+                aria-selected="false"
+              >
+                Images
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- === Tab Buttons === -->
-        <div class="flex border-b mb-4 space-x-6">
-          <button
-            id="tabInfo"
-            class="tab-btn px-4 py-2 font-medium border-b-2 border-blue-600 text-blue-600"
-          >
-            Trip Info
-          </button>
-          <button
-            id="tabImages"
-            class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600"
-          >
-            Images
-          </button>
-        </div>
+        <!-- content area -->
+        <div
+          class="p-6 pt-4 overflow-y-auto custom-scroll max-h-[calc(90vh-168px)]"
+        >
+          <!-- === Trip Info Tab === -->
+          <div id="tabContentInfo" class="tab-content">
+            <form id="tripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Multi-language Name -->
+              <div class="md:col-span-2">
+                <label class="block font-medium mb-2"
+                  >Trip Names (multi-language)</label
+                >
+                <div id="nameTranslations" class="space-y-2"></div>
+                <button
+                  type="button"
+                  id="addNameTranslation"
+                  class="mt-2 inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                >
+                  <i data-lucide="plus" class="h-4 w-4"></i> Add Name
+                </button>
+              </div>
 
-        <!-- === Trip Info Tab === -->
-        <div id="tabContentInfo" class="tab-content">
-          <form id="tripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Multi-language Name -->
-            <div class="md:col-span-2">
-              <label class="block font-medium mb-1"
-                >Trip Names (multi-language)</label
-              >
-              <div id="nameTranslations" class="space-y-2"></div>
-              <button
-                type="button"
-                id="addNameTranslation"
-                class="text-sm text-blue-600 hover:underline mt-2"
-              >
-                + Add Name
-              </button>
-            </div>
+              <!-- Multi-language Description -->
+              <div class="md:col-span-2">
+                <label class="block font-medium mb-2"
+                  >Trip Descriptions (multi-language)</label
+                >
+                <div id="descriptionTranslations" class="space-y-2"></div>
+                <button
+                  type="button"
+                  id="addDescriptionTranslation"
+                  class="mt-2 inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                >
+                  <i data-lucide="plus" class="h-4 w-4"></i> Add Description
+                </button>
+              </div>
 
-            <!-- Multi-language Description -->
-            <div class="md:col-span-2">
-              <label class="block font-medium mb-1"
-                >Trip Descriptions (multi-language)</label
-              >
-              <div id="descriptionTranslations" class="space-y-2"></div>
-              <button
-                type="button"
-                id="addDescriptionTranslation"
-                class="text-sm text-blue-600 hover:underline mt-2"
-              >
-                + Add Description
-              </button>
-            </div>
+              <div class="space-y-1">
+                <label class="block font-medium">Price</label>
+                <input
+                  type="number"
+                  name="Price"
+                  required
+                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+                  placeholder="e.g. 59.99"
+                />
+              </div>
 
-            <div class="space-y-1">
-              <label class="block font-medium">Price</label>
+              <div class="space-y-1">
+                <label class="block font-medium">Duration</label>
+                <input
+                  type="number"
+                  name="Duration"
+                  required
+                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+                  placeholder="Hours"
+                />
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block font-medium mb-1">Trip Dates</label>
+                <div id="tripDatesContainer" class="space-y-2"></div>
+                <button
+                  type="button"
+                  id="addTripDate"
+                  class="mt-2 inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                >
+                  <i data-lucide="calendar-plus" class="h-4 w-4"></i> Add
+                  another date
+                </button>
+              </div>
+
+              <div class="space-y-1">
+                <label class="block font-medium">Category</label>
+                <select
+                  id="categorySelect"
+                  name="CategoryId"
+                  required
+                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+                ></select>
+              </div>
+
+              <div class="space-y-1">
+                <label class="block font-medium">Activities</label>
+                <select
+                  id="activitiesSelect"
+                  name="Activities"
+                  multiple
+                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+                ></select>
+              </div>
+
+              <div class="space-y-1">
+                <label class="block font-medium">Languages</label>
+                <select
+                  id="languagesSelect"
+                  name="Languages"
+                  multiple
+                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+                ></select>
+              </div>
+
+              <div class="space-y-1">
+                <label class="block font-medium">Includes</label>
+                <select
+                  id="includesSelect"
+                  name="Includes"
+                  multiple
+                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+                ></select>
+              </div>
+
+              <div class="space-y-1">
+                <label class="block font-medium">Not Includes</label>
+                <select
+                  id="notIncludesSelect"
+                  name="NotIncludes"
+                  multiple
+                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+                ></select>
+              </div>
+
+              <div
+                class="flex items-center gap-3 md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3"
+              >
+                <input
+                  type="checkbox"
+                  name="IsAvailable"
+                  class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label class="text-sm font-medium">Is Available</label>
+              </div>
+
+              <div class="flex justify-end md:col-span-2 gap-3 pt-2">
+                <button
+                  type="button"
+                  id="cancelBtn2"
+                  class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium shadow-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  id="submitBtn"
+                  class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- === Images Tab === -->
+          <div id="tabContentImages" class="tab-content hidden">
+            <form
+              id="imageUploadForm"
+              enctype="multipart/form-data"
+              class="space-y-4"
+            >
+              <label class="block font-medium">Upload Trip Images</label>
               <input
-                type="number"
-                name="Price"
-                required
-                class="w-full border rounded-lg px-4 py-2"
+                type="file"
+                id="tripImages"
+                name="images"
+                multiple
+                accept="image/*"
+                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
               />
-            </div>
 
-            <div class="space-y-1">
-              <label class="block font-medium">Duration</label>
-              <input
-                type="number"
-                name="Duration"
-                required
-                class="w-full border rounded-lg px-4 py-2"
-              />
-            </div>
+              <p class="text-sm text-gray-500">
+                You can select multiple images. Mark one as the main image
+                below.
+              </p>
 
-            <div class="md:col-span-2">
-              <label class="block font-medium">Trip Dates</label>
-              <div id="tripDatesContainer" class="space-y-2"></div>
-              <button
-                type="button"
-                id="addTripDate"
-                class="text-sm text-blue-600 hover:underline mt-1"
-              >
-                + Add another date
-              </button>
-            </div>
+              <div
+                id="imagePreview"
+                class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4"
+              ></div>
 
-            <div class="space-y-1">
-              <label class="block font-medium">Category</label>
-              <select
-                id="categorySelect"
-                name="CategoryId"
-                required
-                class="w-full border rounded-lg px-4 py-2"
-              ></select>
-            </div>
-
-            <div class="space-y-1">
-              <label class="block font-medium">Activities</label>
-              <select
-                id="activitiesSelect"
-                name="Activities"
-                multiple
-                class="w-full border rounded-lg px-4 py-2"
-              ></select>
-            </div>
-
-            <div class="space-y-1">
-              <label class="block font-medium">Languages</label>
-              <select
-                id="languagesSelect"
-                name="Languages"
-                multiple
-                class="w-full border rounded-lg px-4 py-2"
-              ></select>
-            </div>
-
-            <div class="space-y-1">
-              <label class="block font-medium">Includes</label>
-              <select
-                id="includesSelect"
-                name="Includes"
-                multiple
-                class="w-full border rounded-lg px-4 py-2"
-              ></select>
-            </div>
-
-            <div class="space-y-1">
-              <label class="block font-medium">Not Includes</label>
-              <select
-                id="notIncludesSelect"
-                name="NotIncludes"
-                multiple
-                class="w-full border rounded-lg px-4 py-2"
-              ></select>
-            </div>
-
-            <div class="flex items-center space-x-2 md:col-span-2">
-              <input
-                type="checkbox"
-                name="IsAvailable"
-                class="form-checkbox text-blue-600"
-              />
-              <label class="text-sm">Is Available</label>
-            </div>
-
-            <div class="flex justify-end md:col-span-2 space-x-3">
-              <button
-                type="button"
-                id="cancelBtn2"
-                class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
               <button
                 type="submit"
-                id="submitBtn"
-                class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
+                class="px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow font-semibold"
               >
-                Save
+                Upload Images
               </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- === Images Tab === -->
-        <div id="tabContentImages" class="tab-content hidden">
-          <form
-            id="imageUploadForm"
-            enctype="multipart/form-data"
-            class="space-y-4"
-          >
-            <label class="block font-medium">Upload Trip Images</label>
-            <input
-              type="file"
-              id="tripImages"
-              name="images"
-              multiple
-              accept="image/*"
-              class="w-full border rounded px-4 py-2"
-            />
-
-            <div class="text-sm text-gray-500">
-              You can select multiple images. Main image can be marked below.
-            </div>
-
-            <div
-              id="imagePreview"
-              class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4"
-            ></div>
-
-            <button
-              type="submit"
-              class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Upload Images
-            </button>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -343,6 +403,7 @@
       let mainImageName = null;
       let modalMode = "add"; // 'add' | 'edit'
       let editTripId = null; // used for update
+      let lastFocusedEl = null; // for modal a11y
 
       // --- Choices helpers (MUST be defined before first use) ---
       function getChoicesInstance(el, opts = { removeItemButton: true }) {
@@ -364,6 +425,69 @@
         ch.removeActiveItems();
         ch.setChoiceByValue((values || []).map(String));
       }
+
+      // ===== Modal open/close with animation + a11y =====
+      function openModal() {
+        const modal = document.getElementById("tripModal");
+        const overlay = document.getElementById("tripModalOverlay");
+        const panel = document.getElementById("tripModalPanel");
+        lastFocusedEl = document.activeElement;
+
+        modal.classList.remove("hidden");
+        requestAnimationFrame(() => {
+          overlay.classList.remove("opacity-0");
+          panel.classList.remove("opacity-0", "translate-y-6", "scale-95");
+          const focusable = panel.querySelector(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          if (focusable) focusable.focus();
+        });
+        document.addEventListener("keydown", onEscClose);
+        document.addEventListener("keydown", trapTab);
+      }
+
+      function closeModal() {
+        const modal = document.getElementById("tripModal");
+        const overlay = document.getElementById("tripModalOverlay");
+        const panel = document.getElementById("tripModalPanel");
+
+        overlay.classList.add("opacity-0");
+        panel.classList.add("opacity-0", "translate-y-6", "scale-95");
+        setTimeout(() => {
+          modal.classList.add("hidden");
+          if (lastFocusedEl) lastFocusedEl.focus();
+        }, 200);
+        document.removeEventListener("keydown", onEscClose);
+        document.removeEventListener("keydown", trapTab);
+      }
+
+      function onEscClose(e) {
+        if (e.key === "Escape") closeModal();
+      }
+
+      function trapTab(e) {
+        if (e.key !== "Tab") return;
+        const panel = document.getElementById("tripModalPanel");
+        const focusables = panel.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          last.focus();
+          e.preventDefault();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          first.focus();
+          e.preventDefault();
+        }
+      }
+
+      // Close when clicking the overlay
+      document.addEventListener("click", (e) => {
+        const overlay = document.getElementById("tripModalOverlay");
+        if (e.target === overlay) closeModal();
+      });
 
       // === Fetch Trips ===
       async function fetchTrips(page = 1) {
@@ -415,7 +539,7 @@
             </td>`;
           tripTable.appendChild(row);
         });
-        lucide.createIcons();
+        if (window.lucide?.createIcons) lucide.createIcons();
       }
 
       // === Pagination ===
@@ -494,14 +618,23 @@
         availableLanguages = result.data || [];
       }
 
-      // === Dynamic Translation Fields ===
+      // === Dynamic Translation Fields (styled) ===
       function createTranslationRow(type) {
         const wrapper = document.createElement("div");
-        wrapper.className = "flex items-center gap-2 mt-2";
+        wrapper.className =
+          "group flex items-center gap-3 p-2.5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100/60 transition";
+
+        const icon = document.createElement("i");
+        icon.setAttribute(
+          "data-lucide",
+          type === "name" ? "type" : "align-left"
+        );
+        icon.className = "h-4 w-4 text-gray-500";
 
         const select = document.createElement("select");
         select.name = `${type}LangId`;
-        select.className = "border rounded px-2 py-1";
+        select.className =
+          "min-w-36 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition";
         (availableLanguages || []).forEach((lang) => {
           const opt = document.createElement("option");
           opt.value = lang.id;
@@ -513,37 +646,61 @@
           type === "name" ? "input" : "textarea"
         );
         input.name = `${type}Value`;
-        input.className = "border rounded px-2 py-1 flex-1";
+        input.placeholder =
+          type === "name" ? "Translation" : "Description translation";
+        input.className =
+          "flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition";
         if (type === "description") input.rows = 2;
 
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
-        removeBtn.textContent = "✕";
-        removeBtn.className = "text-red-500 font-bold";
+        removeBtn.className =
+          "ml-1 inline-flex items-center justify-center rounded-lg p-2 text-gray-500 hover:text-red-600 hover:bg-white transition";
+        removeBtn.innerHTML = '<i data-lucide="x" class="h-4 w-4"></i>';
         removeBtn.onclick = () => wrapper.remove();
 
+        wrapper.appendChild(icon);
         wrapper.appendChild(select);
         wrapper.appendChild(input);
         wrapper.appendChild(removeBtn);
+
+        queueMicrotask(() => {
+          if (window.lucide?.createIcons) lucide.createIcons();
+        });
         return wrapper;
       }
 
       function createDateRow(value = "") {
         const wrapper = document.createElement("div");
-        wrapper.className = "flex items-center gap-2 mt-2";
+        wrapper.className =
+          "group flex items-center gap-3 p-2.5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100/60 transition";
+
+        const icon = document.createElement("i");
+        icon.setAttribute("data-lucide", "calendar");
+        icon.className = "h-4 w-4 text-gray-500";
+
         const input = document.createElement("input");
         input.type = "datetime-local";
         input.name = "TripDates[]";
         input.required = true;
-        input.className = "w-full border rounded-lg px-4 py-2";
+        input.className =
+          "w-full rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition";
         if (value) input.value = value;
+
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
-        removeBtn.textContent = "✕";
-        removeBtn.className = "text-red-500 font-bold";
+        removeBtn.className =
+          "ml-1 inline-flex items-center justify-center rounded-lg p-2 text-gray-500 hover:text-red-600 hover:bg-white transition";
+        removeBtn.innerHTML = '<i data-lucide="x" class="h-4 w-4"></i>';
         removeBtn.onclick = () => wrapper.remove();
+
+        wrapper.appendChild(icon);
         wrapper.appendChild(input);
         wrapper.appendChild(removeBtn);
+
+        queueMicrotask(() => {
+          if (window.lucide?.createIcons) lucide.createIcons();
+        });
         return wrapper;
       }
 
@@ -597,8 +754,9 @@
         document.getElementById("modalTitle").textContent = "Add Trip";
         document.getElementById("submitBtn").textContent = "Save";
         resetTripForm();
-        document.getElementById("tripModal").classList.remove("hidden");
         showInfoTab();
+        openModal();
+        if (window.lucide?.createIcons) lucide.createIcons();
       }
 
       async function openEditTripModal(tripId) {
@@ -617,8 +775,9 @@
           const result = await res.json();
           if (res.ok && result.succeeded) {
             await loadTripIntoForm(result.data);
-            document.getElementById("tripModal").classList.remove("hidden");
             showInfoTab();
+            openModal();
+            if (window.lucide?.createIcons) lucide.createIcons();
           } else {
             alert("Failed to load trip data.");
           }
@@ -656,7 +815,8 @@
         const catEl = document.getElementById("categorySelect");
         getChoicesInstance(catEl).removeActiveItems();
         // Clear image preview & input
-        document.getElementById("tripImages").value = "";
+        const fileInput = document.getElementById("tripImages");
+        if (fileInput) fileInput.value = "";
         document.getElementById("imagePreview").innerHTML = "";
         refreshNotIncludesOptions();
       }
@@ -753,7 +913,7 @@
             if (res.ok && result.succeeded) {
               currentTripId = result.data; // returned new trip ID
               alert("Trip added successfully");
-              document.getElementById("tabImages").click(); // switch to images
+              showImagesTab(); // switch to images
               fetchTrips();
             } else {
               alert("Failed to add trip: " + (result.errors || result.message));
@@ -803,7 +963,7 @@
             }
             if (result?.succeeded) {
               alert("Trip updated successfully");
-              document.getElementById("tripModal").classList.add("hidden");
+              closeModal();
               fetchTrips();
             } else {
               alert(
@@ -885,6 +1045,7 @@
           }
         });
 
+      // Image preview — modern card look
       document.getElementById("tripImages").addEventListener("change", (e) => {
         const previewContainer = document.getElementById("imagePreview");
         previewContainer.innerHTML = "";
@@ -893,23 +1054,27 @@
         files.forEach((file) => {
           const reader = new FileReader();
           reader.onload = (event) => {
-            const wrapper = document.createElement("div");
-            wrapper.className = "relative flex flex-col gap-2 items-start";
+            const card = document.createElement("div");
+            card.className =
+              "relative rounded-xl overflow-hidden ring-1 ring-gray-200 shadow-sm bg-white";
+
             const img = document.createElement("img");
             img.src = event.target.result;
-            img.className = "w-full h-32 object-cover rounded shadow";
+            img.className = "w-full h-40 object-cover";
+
+            const bottom = document.createElement("div");
+            bottom.className = "flex items-center gap-2 px-3 py-2";
+
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
-            checkbox.className = "main-checkbox mt-1";
+            checkbox.className = "h-4 w-4 rounded text-blue-600";
             checkbox.name = "mainImage";
             checkbox.dataset.filename = file.name;
+
             const label = document.createElement("label");
             label.textContent = "Use as main image";
-            label.className = "text-sm ml-2";
-            const checkboxWrapper = document.createElement("div");
-            checkboxWrapper.className = "flex items-center";
-            checkboxWrapper.appendChild(checkbox);
-            checkboxWrapper.appendChild(label);
+            label.className = "text-sm text-gray-700";
+
             checkbox.addEventListener("change", () => {
               document
                 .querySelectorAll("input[name='mainImage']")
@@ -918,46 +1083,70 @@
                 });
               mainImageName = checkbox.checked ? file.name : null;
             });
-            wrapper.appendChild(img);
-            wrapper.appendChild(checkboxWrapper);
-            previewContainer.appendChild(wrapper);
+
+            bottom.appendChild(checkbox);
+            bottom.appendChild(label);
+
+            card.appendChild(img);
+            card.appendChild(bottom);
+            previewContainer.appendChild(card);
           };
           reader.readAsDataURL(file);
         });
       });
 
-      // === Tabs ===
+      // === Tabs (visual + aria state) ===
       function showImagesTab() {
         document.getElementById("tabContentInfo").classList.add("hidden");
         document.getElementById("tabContentImages").classList.remove("hidden");
         document
           .getElementById("tabInfo")
-          .classList.remove("border-b-2", "text-blue-600");
+          .setAttribute("aria-selected", "false");
         document
           .getElementById("tabImages")
-          .classList.add("border-b-2", "text-blue-600");
+          .setAttribute("aria-selected", "true");
+        document
+          .getElementById("tabInfo")
+          .classList.remove("bg-white", "text-gray-900", "shadow");
+        document
+          .getElementById("tabImages")
+          .classList.add("bg-white", "text-gray-900", "shadow");
+        if (window.lucide?.createIcons) lucide.createIcons();
       }
       function showInfoTab() {
         document.getElementById("tabContentImages").classList.add("hidden");
         document.getElementById("tabContentInfo").classList.remove("hidden");
         document
           .getElementById("tabImages")
-          .classList.remove("border-b-2", "text-blue-600");
+          .setAttribute("aria-selected", "false");
         document
           .getElementById("tabInfo")
-          .classList.add("border-b-2", "text-blue-600");
+          .setAttribute("aria-selected", "true");
+        document
+          .getElementById("tabImages")
+          .classList.remove("bg-white", "text-gray-900", "shadow");
+        document
+          .getElementById("tabInfo")
+          .classList.add("bg-white", "text-gray-900", "shadow");
+        if (window.lucide?.createIcons) lucide.createIcons();
       }
+
+      // === Delete exposed for inline handlers ===
+      window.handleDeleteTrip = handleDeleteTrip;
 
       // === Event Listeners ===
       function setupEventListeners() {
         document
           .getElementById("addTripBtn")
           .addEventListener("click", openAddTripModal);
+
+        // cancel/close
         ["cancelBtn", "cancelBtn2"].forEach((id) => {
-          document.getElementById(id).addEventListener("click", () => {
-            document.getElementById("tripModal").classList.add("hidden");
-          });
+          const el = document.getElementById(id);
+          if (el) el.addEventListener("click", closeModal);
         });
+
+        // overlay click already handled above
         document
           .getElementById("tripForm")
           .addEventListener("submit", onTripFormSubmit);
@@ -976,8 +1165,9 @@
               .appendChild(createTranslationRow("description"));
           });
         document.getElementById("addTripDate").addEventListener("click", () => {
-          const container = document.getElementById("tripDatesContainer");
-          container.appendChild(createDateRow());
+          document
+            .getElementById("tripDatesContainer")
+            .appendChild(createDateRow());
         });
         document
           .getElementById("tabImages")
@@ -985,6 +1175,7 @@
         document
           .getElementById("tabInfo")
           .addEventListener("click", showInfoTab);
+
         // Includes -> NotIncludes complement rule
         document
           .getElementById("includesSelect")
@@ -1001,6 +1192,7 @@
         document
           .getElementById("descriptionTranslations")
           .appendChild(createTranslationRow("description"));
+
         // Populate selects
         await populateSelect(
           "activitiesSelect",
@@ -1027,18 +1219,19 @@
           "name"
         );
         allIncludes = includes.data;
+
         // Init Not-Includes Choices
         getChoicesInstance(document.getElementById("notIncludesSelect"), {
           removeItemButton: true,
         });
         refreshNotIncludesOptions();
+
         setupEventListeners();
         fetchTrips();
       })();
 
-      // Expose for inline handlers
+      // Expose for inline handlers (edit)
       window.openEditTripModal = openEditTripModal;
-      window.handleDeleteTrip = handleDeleteTrip;
     </script>
   </body>
 </html>
