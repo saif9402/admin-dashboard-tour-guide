@@ -493,6 +493,7 @@
       let sortState = { key: null, dir: "asc" }; // keys: name|category|price|duration|available
       let lastTripsPage = [];
       let selectedImageIds = new Set(); // holds ids selected for deletion
+      let currentMainImageId = null;
 
       function updateDeleteButtonState() {
         const btn = document.getElementById("deleteSelectedImagesBtn");
@@ -509,10 +510,18 @@
         if (!currentTripId || selectedImageIds.size === 0) return;
 
         const count = selectedImageIds.size;
+        const includesMain =
+          currentMainImageId !== null &&
+          selectedImageIds.has(currentMainImageId);
+
+        const warning = includesMain
+          ? "\n\n⚠️ You are deleting the CURRENT MAIN image.\nNo main image will remain unless you set another one later."
+          : "";
+
         const confirmed = confirm(
           `Delete ${count} selected image${
             count === 1 ? "" : "s"
-          }?\nThis cannot be undone.`
+          }? This cannot be undone.${warning}`
         );
         if (!confirmed) return;
 
@@ -552,11 +561,10 @@
             return;
           }
 
-          // Success: refresh UI
           alert("Selected images deleted.");
           selectedImageIds.clear();
           updateDeleteButtonState();
-          await fetchAndRenderTripMedia(currentTripId);
+          await fetchAndRenderTripMedia(currentTripId); // refresh grid & main badge
         } catch (err) {
           console.error("Delete images error:", err);
           alert("Network error while deleting images.");
@@ -603,15 +611,15 @@
           card.appendChild(badge);
         }
 
-        // Select checkbox (top-right)
+        // Select checkbox (top-right) — ✅ main is selectable now
         const selectWrap = document.createElement("label");
         selectWrap.className =
           "absolute top-2 right-2 inline-flex items-center rounded-lg bg-white/90 ring-1 ring-gray-200 p-1";
+        if (isMain) selectWrap.title = "This is the current MAIN image";
+
         const cb = document.createElement("input");
         cb.type = "checkbox";
         cb.className = "h-4 w-4 rounded text-rose-600";
-        cb.disabled = isMain; // 🔒 don't allow deleting main image (no 'set main' yet)
-        if (isMain) selectWrap.title = "Can't delete main image";
 
         cb.addEventListener("change", () => {
           if (cb.checked) {
@@ -647,6 +655,7 @@
         const main = data?.mainImage;
         const others = Array.isArray(data?.images) ? data.images : [];
         const rest = main ? others.filter((im) => im.id !== main.id) : others;
+        currentMainImageId = main?.id ?? null;
 
         grid.innerHTML = "";
 
