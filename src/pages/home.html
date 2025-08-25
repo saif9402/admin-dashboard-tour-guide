@@ -728,20 +728,20 @@
         }
       }
 
-      // async function handleDeleteReview(reviewId) {
-      //   if (!reviewId) {
-      //     alert("Cannot delete: review ID not provided by the API.");
-      //     return;
-      //   }
-      //   if (!confirm("Delete this review? This action cannot be undone."))
-      //     return;
+      async function handleDeleteReview(reviewId) {
+        if (!reviewId) {
+          alert("Cannot delete: review ID not provided by the API.");
+          return;
+        }
+        if (!confirm("Delete this review? This action cannot be undone."))
+          return;
 
-      //   // ⚠️ TODO: Replace with your real endpoint/method when you share it
-      //   alert(
-      //     "Delete endpoint is not configured yet. Please plug it in when available."
-      //   );
-      // Example wiring (commented):
-      /*
+        //   // ⚠️ TODO: Replace with your real endpoint/method when you share it
+        //   alert(
+        //     "Delete endpoint is not configured yet. Please plug it in when available."
+        //   );
+        // Example wiring (commented):
+        /*
   const token = localStorage.getItem("accessToken");
   const res = await fetch(`/api/Reviews/DeleteReview/${reviewId}`, {
     method: "DELETE",
@@ -754,7 +754,7 @@
     alert("Failed to delete review.");
   }
   */
-      // }
+      }
 
       function updateDeleteButtonState() {
         const btn = document.getElementById("deleteSelectedImagesBtn");
@@ -1934,25 +1934,39 @@
 
       // === Tabs (visual + aria state) ===
       function showImagesTab() {
+        // content
         document.getElementById("tabContentInfo").classList.add("hidden");
         document.getElementById("tabContentImages").classList.remove("hidden");
+        document.getElementById("tabContentReviews").classList.add("hidden");
+        // aria
         document
           .getElementById("tabInfo")
           .setAttribute("aria-selected", "false");
         document
           .getElementById("tabImages")
           .setAttribute("aria-selected", "true");
+        document
+          .getElementById("tabReviews")
+          .setAttribute("aria-selected", "false");
+        // styles
         document
           .getElementById("tabInfo")
           .classList.remove("bg-white", "text-gray-900", "shadow");
         document
           .getElementById("tabImages")
           .classList.add("bg-white", "text-gray-900", "shadow");
+        document
+          .getElementById("tabReviews")
+          .classList.remove("bg-white", "text-gray-900", "shadow");
         if (window.lucide?.createIcons) lucide.createIcons();
       }
+
       function showInfoTab() {
+        // content
         document.getElementById("tabContentImages").classList.add("hidden");
         document.getElementById("tabContentInfo").classList.remove("hidden");
+        document.getElementById("tabContentReviews").classList.add("hidden");
+        // aria
         document
           .getElementById("tabImages")
           .setAttribute("aria-selected", "false");
@@ -1960,10 +1974,45 @@
           .getElementById("tabInfo")
           .setAttribute("aria-selected", "true");
         document
+          .getElementById("tabReviews")
+          .setAttribute("aria-selected", "false");
+        // styles
+        document
           .getElementById("tabImages")
           .classList.remove("bg-white", "text-gray-900", "shadow");
         document
           .getElementById("tabInfo")
+          .classList.add("bg-white", "text-gray-900", "shadow");
+        document
+          .getElementById("tabReviews")
+          .classList.remove("bg-white", "text-gray-900", "shadow");
+        if (window.lucide?.createIcons) lucide.createIcons();
+      }
+
+      function showReviewsTab() {
+        // content
+        document.getElementById("tabContentInfo").classList.add("hidden");
+        document.getElementById("tabContentImages").classList.add("hidden");
+        document.getElementById("tabContentReviews").classList.remove("hidden");
+        // aria
+        document
+          .getElementById("tabInfo")
+          .setAttribute("aria-selected", "false");
+        document
+          .getElementById("tabImages")
+          .setAttribute("aria-selected", "false");
+        document
+          .getElementById("tabReviews")
+          .setAttribute("aria-selected", "true");
+        // styles
+        document
+          .getElementById("tabInfo")
+          .classList.remove("bg-white", "text-gray-900", "shadow");
+        document
+          .getElementById("tabImages")
+          .classList.remove("bg-white", "text-gray-900", "shadow");
+        document
+          .getElementById("tabReviews")
           .classList.add("bg-white", "text-gray-900", "shadow");
         if (window.lucide?.createIcons) lucide.createIcons();
       }
