@@ -1,0 +1,65 @@
+/* toast portal */
+.toast-enter {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.toast-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.18s ease;
+}
+.toast-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+.toast-exit-active {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.18s ease;
+}
+
+/* basic modal transition */
+.modal-enter {
+  opacity: 0;
+}
+.modal-enter .modal-panel {
+  transform: scale(0.98);
+  opacity: 0;
+}
+.modal-enter-active {
+  opacity: 1;
+  transition: opacity 0.15s ease;
+}
+.modal-enter-active .modal-panel {
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.18s ease;
+}
+.modal-exit {
+  opacity: 1;
+}
+.modal-exit .modal-panel {
+  transform: scale(1);
+  opacity: 1;
+}
+.modal-exit-active {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.modal-exit-active .modal-panel {
+  transform: scale(0.98);
+  opacity: 0;
+  transition: all 0.18s ease;
+}
+
+/* sticky header shadow on scroll */
+.table-wrap {
+  max-height: 70vh;
+  overflow: auto;
+}
+.table-wrap thead th {
+  position: sticky;
+  top: 0;
+  background: #f9fafb;
+  z-index: 1;
+}
