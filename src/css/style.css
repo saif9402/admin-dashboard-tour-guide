@@ -1,65 +1,40 @@
-/* toast portal */
-.toast-enter {
-  opacity: 0;
-  transform: translateY(6px);
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #c7c9d1 transparent;
 }
-.toast-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: all 0.18s ease;
+.custom-scroll::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
 }
-.toast-exit {
-  opacity: 1;
-  transform: translateY(0);
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #c7c9d1;
+  border-radius: 8px;
 }
-.toast-exit-active {
-  opacity: 0;
-  transform: translateY(6px);
-  transition: all 0.18s ease;
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* basic modal transition */
-.modal-enter {
-  opacity: 0;
+/* Table skeleton shimmer */
+@keyframes tg-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
-.modal-enter .modal-panel {
-  transform: scale(0.98);
-  opacity: 0;
+.tg-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: #eceff3;
 }
-.modal-enter-active {
-  opacity: 1;
-  transition: opacity 0.15s ease;
-}
-.modal-enter-active .modal-panel {
-  opacity: 1;
-  transform: scale(1);
-  transition: all 0.18s ease;
-}
-.modal-exit {
-  opacity: 1;
-}
-.modal-exit .modal-panel {
-  transform: scale(1);
-  opacity: 1;
-}
-.modal-exit-active {
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-.modal-exit-active .modal-panel {
-  transform: scale(0.98);
-  opacity: 0;
-  transition: all 0.18s ease;
-}
-
-/* sticky header shadow on scroll */
-.table-wrap {
-  max-height: 70vh;
-  overflow: auto;
-}
-.table-wrap thead th {
-  position: sticky;
-  top: 0;
-  background: #f9fafb;
-  z-index: 1;
+.tg-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.7),
+    transparent
+  );
+  animation: tg-shimmer 1.25s infinite;
 }
