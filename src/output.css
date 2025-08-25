@@ -18,6 +18,7 @@
     --color-amber-50: oklch(98.7% 0.022 95.277);
     --color-amber-100: oklch(96.2% 0.059 95.617);
     --color-amber-200: oklch(92.4% 0.12 95.746);
+    --color-amber-500: oklch(76.9% 0.188 70.08);
     --color-amber-600: oklch(66.6% 0.179 58.318);
     --color-amber-700: oklch(55.5% 0.163 48.998);
     --color-amber-800: oklch(47.3% 0.137 46.201);
@@ -410,6 +411,9 @@
   .table {
     display: table;
   }
+  .h-3 {
+    height: calc(var(--spacing) * 3);
+  }
   .h-3\.5 {
     height: calc(var(--spacing) * 3.5);
   }
@@ -418,6 +422,9 @@
   }
   .h-5 {
     height: calc(var(--spacing) * 5);
+  }
+  .h-6 {
+    height: calc(var(--spacing) * 6);
   }
   .h-7 {
     height: calc(var(--spacing) * 7);
@@ -455,6 +462,9 @@
   .min-h-screen {
     min-height: 100vh;
   }
+  .w-2\/3 {
+    width: calc(2/3 * 100%);
+  }
   .w-3\.5 {
     width: calc(var(--spacing) * 3.5);
   }
@@ -466,6 +476,9 @@
   }
   .w-8 {
     width: calc(var(--spacing) * 8);
+  }
+  .w-9 {
+    width: calc(var(--spacing) * 9);
   }
   .w-10 {
     width: calc(var(--spacing) * 10);
@@ -481,6 +494,9 @@
   }
   .w-24 {
     width: calc(var(--spacing) * 24);
+  }
+  .w-28 {
+    width: calc(var(--spacing) * 28);
   }
   .w-36 {
     width: calc(var(--spacing) * 36);
@@ -574,6 +590,9 @@
   }
   .justify-start {
     justify-content: flex-start;
+  }
+  .gap-0\.5 {
+    gap: calc(var(--spacing) * 0.5);
   }
   .gap-1 {
     gap: calc(var(--spacing) * 1);
@@ -974,6 +993,12 @@
     --tw-tracking: var(--tracking-wide);
     letter-spacing: var(--tracking-wide);
   }
+  .whitespace-pre-line {
+    white-space: pre-line;
+  }
+  .text-amber-500 {
+    color: var(--color-amber-500);
+  }
   .text-amber-700 {
     color: var(--color-amber-700);
   }
@@ -991,6 +1016,9 @@
   }
   .text-emerald-700 {
     color: var(--color-emerald-700);
+  }
+  .text-gray-300 {
+    color: var(--color-gray-300);
   }
   .text-gray-400 {
     color: var(--color-gray-400);
@@ -1131,6 +1159,9 @@
   }
   .ring-rose-100 {
     --tw-ring-color: var(--color-rose-100);
+  }
+  .ring-rose-200 {
+    --tw-ring-color: var(--color-rose-200);
   }
   .ring-rose-300 {
     --tw-ring-color: var(--color-rose-300);
@@ -1281,6 +1312,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-rose-50);
+      }
+    }
+  }
+  .hover\:bg-rose-100 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-rose-100);
       }
     }
   }

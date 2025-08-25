@@ -228,6 +228,7 @@
           </div>
 
           <!-- tabs as segmented control -->
+          <!-- tabs as segmented control -->
           <div class="px-6 pb-4">
             <div
               class="inline-flex rounded-full bg-white/10 p-1 ring-1 ring-white/20"
@@ -245,6 +246,14 @@
                 aria-selected="false"
               >
                 Images
+              </button>
+              <button
+                id="tabReviews"
+                class="tab-btn rounded-full px-4 py-2 text-sm font-medium hidden"
+                aria-selected="false"
+                title="Trip Reviews"
+              >
+                Reviews
               </button>
             </div>
           </div>
@@ -472,6 +481,55 @@
               </button>
             </form>
           </div>
+
+          <!-- === Reviews Tab (Edit mode only) === -->
+          <div id="tabContentReviews" class="tab-content hidden">
+            <div
+              class="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-4"
+            >
+              <div class="flex items-center gap-2">
+                <label for="reviewsSortSelect" class="text-sm font-medium"
+                  >Sort</label
+                >
+                <select
+                  id="reviewsSortSelect"
+                  class="rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none text-sm"
+                  title="Sort reviews by rating or date"
+                >
+                  <option value="date:desc" selected>Newest first</option>
+                  <option value="date:asc">Oldest first</option>
+                  <option value="rating:desc">Rating high → low</option>
+                  <option value="rating:asc">Rating low → high</option>
+                </select>
+
+                <button
+                  id="refreshReviewsBtn"
+                  type="button"
+                  class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 ring-1 ring-gray-200"
+                  title="Refresh reviews"
+                >
+                  <i data-lucide="refresh-ccw" class="h-4 w-4"></i> Refresh
+                </button>
+              </div>
+
+              <div class="text-sm text-gray-500">
+                <span id="reviewsCount">0</span> review(s)
+              </div>
+            </div>
+
+            <!-- List -->
+            <div id="reviewsList" class="space-y-3"></div>
+
+            <!-- Empty state -->
+            <div id="reviewsEmpty" class="hidden">
+              <div
+                class="flex items-center justify-center gap-2 text-gray-600 bg-gray-50 border border-dashed border-gray-200 rounded-xl py-8"
+              >
+                <i data-lucide="message-circle-off" class="h-5 w-5"></i>
+                <span>No reviews yet</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -497,6 +555,206 @@
       let lastTripsPage = [];
       let selectedImageIds = new Set(); // holds ids selected for deletion
       let currentMainImageId = null;
+      let reviewsSortValue = "date:desc";
+      let lastReviews = [];
+
+      function formatDateCairo(iso) {
+        if (!iso) return "";
+        try {
+          const d = new Date(iso);
+          return new Intl.DateTimeFormat("en-GB", {
+            dateStyle: "medium",
+            timeStyle: "short",
+            timeZone: "Africa/Cairo",
+          }).format(d);
+        } catch {
+          return iso;
+        }
+      }
+
+      // Simple stars row (amber for filled, gray for rest)
+      function starsRow(rating = 0) {
+        const r = Math.round(Number(rating) || 0);
+        let html = "";
+        for (let i = 1; i <= 5; i++) {
+          const cls = i <= r ? "text-amber-500" : "text-gray-300";
+          html += `<i data-lucide="star" class="h-4 w-4 ${cls}"></i>`;
+        }
+        return html;
+      }
+
+      function reviewsSkeleton(count = 3) {
+        let sk = "";
+        for (let i = 0; i < count; i++) {
+          sk += `
+    <div class="rounded-xl border border-gray-200 bg-white p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="h-8 w-8 rounded-full tg-shimmer"></div>
+          <div>
+            <div class="h-3 w-28 rounded tg-shimmer"></div>
+            <div class="h-3 w-20 rounded tg-shimmer mt-1"></div>
+          </div>
+        </div>
+        <div class="h-6 w-20 rounded tg-shimmer"></div>
+      </div>
+      <div class="h-4 w-full rounded tg-shimmer mt-3"></div>
+      <div class="h-4 w-2/3 rounded tg-shimmer mt-2"></div>
+    </div>`;
+        }
+        return sk;
+      }
+
+      function renderReviews(list, totalCount) {
+        const wrap = document.getElementById("reviewsList");
+        const empty = document.getElementById("reviewsEmpty");
+        const countEl = document.getElementById("reviewsCount");
+        wrap.innerHTML = "";
+        lastReviews = Array.isArray(list) ? list : [];
+
+        if (!lastReviews.length) {
+          empty.classList.remove("hidden");
+          if (countEl) countEl.textContent = String(totalCount || 0);
+          return;
+        }
+        empty.classList.add("hidden");
+
+        lastReviews.forEach((rv, idx) => {
+          const reviewId = rv.id ?? rv.reviewId ?? null; // use if your API returns it
+          const card = document.createElement("div");
+          card.className = "rounded-xl border border-gray-200 bg-white p-4";
+
+          card.innerHTML = `
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600/10 text-indigo-700 font-semibold ring-1 ring-indigo-200">
+            ${(rv.userName || "?").trim().charAt(0).toUpperCase()}
+          </span>
+          <div>
+            <div class="text-sm font-semibold text-gray-900">${
+              rv.userName || "Anonymous"
+            }</div>
+            <div class="text-xs text-gray-500">${formatDateCairo(
+              rv.createdAt
+            )}</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-0.5">${starsRow(rv.rating)}</div>
+          <span class="text-xs text-gray-500">(${rv.rating ?? "-"}/5)</span>
+          <button
+            type="button"
+            class="ml-3 inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 ring-1 ring-rose-200 hover:bg-rose-100 disabled:opacity-50"
+            data-action="delete-review"
+            ${reviewId ? "" : "disabled"}
+            data-review-id="${reviewId ?? ""}"
+            title="${
+              reviewId
+                ? "Delete review"
+                : "Delete not available (no ID from API)"
+            }"
+          >
+            <i data-lucide="trash-2" class="h-3.5 w-3.5"></i> Delete
+          </button>
+        </div>
+      </div>
+
+      <p class="mt-3 text-sm text-gray-700 whitespace-pre-line">${
+        rv.comment || ""
+      }</p>
+    `;
+
+          wrap.appendChild(card);
+        });
+
+        if (countEl)
+          countEl.textContent = String(totalCount ?? lastReviews.length);
+        if (window.lucide?.createIcons) lucide.createIcons();
+      }
+
+      async function fetchAndRenderReviews(tripId, sortVal = reviewsSortValue) {
+        const list = document.getElementById("reviewsList");
+        const empty = document.getElementById("reviewsEmpty");
+        if (list) {
+          list.innerHTML = reviewsSkeleton();
+          empty.classList.add("hidden");
+        }
+
+        try {
+          const params = new URLSearchParams();
+          params.append("TripId", String(tripId));
+          // API accepts array; we pass a single sort choice for now
+          if (sortVal) params.append("Sort", sortVal);
+
+          const token = localStorage.getItem("accessToken");
+          const res = await fetch(
+            `/api/Reviews/GetReviews?${params.toString()}`,
+            {
+              headers: {
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+            }
+          );
+
+          let result, text;
+          try {
+            result = await res.json();
+          } catch {
+            text = await res.text();
+          }
+
+          if (!res.ok || !result?.succeeded) {
+            console.error("GetReviews failed", res.status, text || result);
+            list.innerHTML = `
+              <div class="rounded-xl border border-rose-200 bg-rose-50 text-rose-700 p-4 flex items-center gap-2">
+                <i data-lucide="alert-triangle" class="h-4 w-4"></i>
+                <span>Failed to load reviews.</span>
+              </div>`;
+            if (window.lucide?.createIcons) lucide.createIcons();
+            return;
+          }
+
+          const page = result.data || {};
+          const items = Array.isArray(page.data) ? page.data : [];
+          renderReviews(items, page.count);
+        } catch (err) {
+          console.error("Reviews fetch error:", err);
+          list.innerHTML = `
+            <div class="rounded-xl border border-rose-200 bg-rose-50 text-rose-700 p-4 flex items-center gap-2">
+              <i data-lucide="wifi-off" class="h-4 w-4"></i>
+              <span>Network error while loading reviews.</span>
+            </div>`;
+          if (window.lucide?.createIcons) lucide.createIcons();
+        }
+      }
+
+      // async function handleDeleteReview(reviewId) {
+      //   if (!reviewId) {
+      //     alert("Cannot delete: review ID not provided by the API.");
+      //     return;
+      //   }
+      //   if (!confirm("Delete this review? This action cannot be undone."))
+      //     return;
+
+      //   // ⚠️ TODO: Replace with your real endpoint/method when you share it
+      //   alert(
+      //     "Delete endpoint is not configured yet. Please plug it in when available."
+      //   );
+      // Example wiring (commented):
+      /*
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`/api/Reviews/DeleteReview/${reviewId}`, {
+    method: "DELETE",
+    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  const result = await res.json();
+  if (res.ok && result?.succeeded) {
+    await fetchAndRenderReviews(currentTripId, reviewsSortValue);
+  } else {
+    alert("Failed to delete review.");
+  }
+  */
+      // }
 
       function updateDeleteButtonState() {
         const btn = document.getElementById("deleteSelectedImagesBtn");
