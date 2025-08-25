@@ -87,18 +87,105 @@
         </div>
 
         <!-- Trip Table -->
-        <!-- Enhanced Table Card -->
         <div
           class="bg-white rounded-2xl shadow ring-1 ring-gray-200 overflow-hidden"
         >
-          <!-- subtle header bar (optional) -->
-          <div
-            class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b"
-          >
-            <div class="text-sm text-gray-600">Trips</div>
-            <!-- room for future filters/actions -->
+          <!-- Toolbar -->
+          <div class="px-4 py-3 bg-gray-50 border-b">
+            <div
+              class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+            >
+              <!-- left label -->
+              <div class="text-sm text-gray-600 flex items-center gap-2">
+                <i data-lucide="list"></i>
+                Trips
+              </div>
+
+              <!-- controls -->
+              <div
+                class="grid grid-cols-1 md:grid-cols-5 gap-3 w-full md:w-auto"
+              >
+                <!-- Search -->
+                <div class="md:col-span-2">
+                  <label for="searchInput" class="sr-only">Search trips</label>
+                  <div class="relative">
+                    <i
+                      data-lucide="search"
+                      class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"
+                    ></i>
+                    <input
+                      id="searchInput"
+                      type="text"
+                      placeholder="Search trips..."
+                      class="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <!-- Language -->
+                <div>
+                  <label for="languageSelect" class="sr-only">Language</label>
+                  <select
+                    id="languageSelect"
+                    class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none"
+                    title="Result language"
+                  >
+                    <option value="">Language…</option>
+                    <option value="2" selected>English</option>
+                    <option value="1">German</option>
+                  </select>
+                </div>
+
+                <!-- Flags -->
+                <div class="flex items-center gap-3">
+                  <label class="inline-flex items-center gap-2 text-sm">
+                    <input
+                      id="isAvailable"
+                      type="checkbox"
+                      class="rounded border-gray-300 text-blue-600"
+                    />
+                    <span>Available</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2 text-sm">
+                    <input
+                      id="isTopRated"
+                      type="checkbox"
+                      class="rounded border-gray-300 text-blue-600"
+                    />
+                    <span>Top</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2 text-sm">
+                    <input
+                      id="isBestSeller"
+                      type="checkbox"
+                      class="rounded border-gray-300 text-blue-600"
+                    />
+                    <span>Best</span>
+                  </label>
+                </div>
+
+                <!-- Server Sort (multi) -->
+                <div>
+                  <label for="sortSelect" class="sr-only">Sort</label>
+                  <select
+                    id="sortSelect"
+                    multiple
+                    class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none"
+                    title="Server sort (multi)"
+                  >
+                    <option value="price:asc">Price ↑</option>
+                    <option value="price:desc">Price ↓</option>
+                    <option value="rating:asc">Rating ↑</option>
+                    <option value="rating:desc">Rating ↓</option>
+                    <option value="date:asc">Date ↑</option>
+                    <option value="date:desc">Date ↓</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
 
+          <!-- Table -->
           <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
               <thead
@@ -133,6 +220,7 @@
                     <button
                       class="flex items-center gap-1 group"
                       data-sort="price"
+                      title="Server-sorted"
                     >
                       <span>Price</span>
                       <span
@@ -551,12 +639,21 @@
       let modalMode = "add"; // 'add' | 'edit'
       let editTripId = null; // used for update
       let lastFocusedEl = null; // for modal a11y
-      let sortState = { key: null, dir: "asc" }; // keys: name|category|price|duration|available
+      let sortState = { key: null, dir: "asc" }; // client sort keys: name|category|price|duration|available
       let lastTripsPage = [];
-      let selectedImageIds = new Set(); // holds ids selected for deletion
+      let selectedImageIds = new Set();
       let currentMainImageId = null;
       let reviewsSortValue = "date:desc";
       let lastReviews = [];
+
+      const searchInput = document.getElementById("searchInput");
+      const languageSelect = document.getElementById("languageSelect");
+      const isAvailableChk = document.getElementById("isAvailable");
+      const isTopRatedChk = document.getElementById("isTopRated");
+      const isBestSellerChk = document.getElementById("isBestSeller");
+      const sortSelectEl = document.getElementById("sortSelect");
+      let sortChoices = null;
+      let activeServerSorts = []; // array of strings like "price:asc"
 
       function formatDateCairo(iso) {
         if (!iso) return "";
@@ -572,7 +669,7 @@
         }
       }
 
-      // Simple stars row (amber for filled, gray for rest)
+      // Simple stars row
       function starsRow(rating = 0) {
         const r = Math.round(Number(rating) || 0);
         let html = "";
@@ -581,6 +678,24 @@
           html += `<i data-lucide="star" class="h-4 w-4 ${cls}"></i>`;
         }
         return html;
+      }
+
+      // --- NEW: skeleton while loading ---
+      function showTableSkeleton(rows = 8) {
+        const tbody = document.getElementById("tripTable");
+        let html = "";
+        for (let i = 0; i < rows; i++) {
+          html += `
+        <tr class="hover:bg-gray-50/70">
+          <td class="px-6 py-4"><div class="h-4 w-40 rounded tg-shimmer"></div></td>
+          <td class="px-6 py-4"><div class="h-4 w-24 rounded tg-shimmer"></div></td>
+          <td class="px-6 py-4"><div class="h-4 w-16 rounded tg-shimmer"></div></td>
+          <td class="px-6 py-4"><div class="h-4 w-12 rounded tg-shimmer"></div></td>
+          <td class="px-6 py-4"><div class="h-5 w-20 rounded-full tg-shimmer"></div></td>
+          <td class="px-6 py-4"><div class="h-8 w-24 rounded-lg tg-shimmer"></div></td>
+        </tr>`;
+        }
+        tbody.innerHTML = html;
       }
 
       function reviewsSkeleton(count = 3) {
@@ -1002,6 +1117,26 @@
         }
       }
 
+      // --- Choices helpers ---
+      function getChoicesInstance(el, opts = { removeItemButton: true }) {
+        if (el._choices && el._choices.initialised === false) {
+          try {
+            el._choices.destroy();
+          } catch (_) {}
+          el._choices = null;
+        }
+        if (!el._choices) {
+          el._choices = new Choices(el, opts);
+        }
+        return el._choices;
+      }
+      function setSelectedValues(selectId, values) {
+        const el = document.getElementById(selectId);
+        const ch = getChoicesInstance(el);
+        ch.removeActiveItems();
+        ch.setChoiceByValue((values || []).map(String));
+      }
+
       // --- NEW: helpers for pretty cells ---
       function badge(text, color = "blue") {
         const cls =
@@ -1038,45 +1173,6 @@
       function initialBubble(name) {
         const ch = (name || "?").trim().charAt(0).toUpperCase() || "?";
         return `<span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600/10 text-indigo-700 font-semibold ring-1 ring-indigo-200">${ch}</span>`;
-      }
-
-      // --- NEW: skeleton while loading ---
-      function showTableSkeleton(rows = 8) {
-        const tbody = document.getElementById("tripTable");
-        let html = "";
-        for (let i = 0; i < rows; i++) {
-          html += `
-        <tr class="hover:bg-gray-50/70">
-          <td class="px-6 py-4"><div class="h-4 w-40 rounded tg-shimmer"></div></td>
-          <td class="px-6 py-4"><div class="h-4 w-24 rounded tg-shimmer"></div></td>
-          <td class="px-6 py-4"><div class="h-4 w-16 rounded tg-shimmer"></div></td>
-          <td class="px-6 py-4"><div class="h-4 w-12 rounded tg-shimmer"></div></td>
-          <td class="px-6 py-4"><div class="h-5 w-20 rounded-full tg-shimmer"></div></td>
-          <td class="px-6 py-4"><div class="h-8 w-24 rounded-lg tg-shimmer"></div></td>
-        </tr>`;
-        }
-        tbody.innerHTML = html;
-      }
-
-      // --- Choices helpers (MUST be defined before first use) ---
-      function getChoicesInstance(el, opts = { removeItemButton: true }) {
-        if (el._choices && el._choices.initialised === false) {
-          try {
-            el._choices.destroy();
-          } catch (_) {}
-          el._choices = null;
-        }
-        if (!el._choices) {
-          el._choices = new Choices(el, opts);
-        }
-        return el._choices;
-      }
-
-      function setSelectedValues(selectId, values) {
-        const el = document.getElementById(selectId);
-        const ch = getChoicesInstance(el);
-        ch.removeActiveItems();
-        ch.setChoiceByValue((values || []).map(String));
       }
 
       // ===== Modal open/close with animation + a11y =====
@@ -1142,30 +1238,65 @@
         if (e.target === overlay) closeModal();
       });
 
-      // === Fetch Trips (define normally; no patching) ===
+      // ========== FETCH TRIPS (now with params) ==========
+      function readActiveServerSorts() {
+        // read selected from Choices
+        const sel = sortSelectEl;
+        const vals = Array.from(sel.selectedOptions).map((o) => o.value);
+        activeServerSorts = vals;
+        return vals;
+      }
+
+      function buildTripsQuery(page = 1) {
+        const params = new URLSearchParams();
+        params.set("pageNumber", String(page));
+        params.set("pageSize", String(pageSize));
+
+        const q = (searchInput?.value || "").trim();
+        if (q) params.set("Search", q);
+
+        const lang = (languageSelect?.value || "").trim();
+        if (lang) params.set("LanguageId", lang);
+
+        if (isAvailableChk?.checked) params.set("IsAvailable", "true");
+        if (isTopRatedChk?.checked) params.set("IsTopRated", "true");
+        if (isBestSellerChk?.checked) params.set("IsBestSeller", "true");
+
+        readActiveServerSorts().forEach((s) => params.append("Sort", s));
+        return params.toString();
+      }
+
       async function fetchTrips(page = 1) {
-        showTableSkeleton(); // show skeleton while loading
+        showTableSkeleton();
         const token = localStorage.getItem("accessToken");
         try {
-          const response = await fetch(
-            `${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`,
-            {
-              method: "GET",
-              headers: {
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-              },
-            }
-          );
-          const result = await response.json();
-          if (response.ok && result.succeeded) {
-            renderTrips(result.data.data);
-            renderPagination(result.data.pageNumber, result.data.count);
+          const query = buildTripsQuery(page);
+          const response = await fetch(`${baseUrl}?${query}`, {
+            method: "GET",
+            headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          });
+          let result, text;
+          try {
+            result = await response.json();
+          } catch {
+            text = await response.text();
+          }
+
+          if (response.ok && result?.succeeded) {
+            const payload = result.data || {};
+            renderTrips(payload.data || []);
+            renderPagination(payload.pageNumber || page, payload.count || 0);
           } else {
-            document.getElementById("tripTable").innerHTML =
+            console.error(
+              "GetAllTrips failed",
+              response.status,
+              text || result
+            );
+            tripTable.innerHTML =
               '<tr><td colspan="6" class="text-center text-red-500 py-6">Failed to load trips</td></tr>';
           }
         } catch (e) {
-          document.getElementById("tripTable").innerHTML =
+          tripTable.innerHTML =
             '<tr><td colspan="6" class="text-center text-red-500 py-6">Network error</td></tr>';
           console.error(e);
         }
@@ -1173,11 +1304,12 @@
 
       // === Render Trips ===
       function renderTrips(trips) {
-        // cache the last page to enable local sorting
         lastTripsPage = Array.isArray(trips) ? [...trips] : [];
 
-        // apply sort if active
-        const toRender = applySort(lastTripsPage);
+        // If server sorts are active, trust server order; otherwise allow client sort
+        const toRender = activeServerSorts.length
+          ? lastTripsPage
+          : applyClientSort(lastTripsPage);
 
         const tbody = document.getElementById("tripTable");
         tbody.innerHTML = "";
@@ -1256,10 +1388,11 @@
         });
         if (window.lucide?.createIcons) lucide.createIcons();
       }
+
       // === Pagination ===
       function renderPagination(current, totalCount) {
         const container = document.getElementById("pagination");
-        const totalPages = Math.ceil(totalCount / pageSize);
+        const totalPages = Math.ceil((totalCount || 0) / pageSize) || 1;
         container.innerHTML = "";
 
         const group = document.createElement("div");
@@ -1268,7 +1401,7 @@
 
         const prevBtn = document.createElement("button");
         prevBtn.textContent = "Previous";
-        prevBtn.disabled = current === 1;
+        prevBtn.disabled = current <= 1;
         prevBtn.className = "px-4 py-2 disabled:opacity-50 hover:bg-gray-50";
         prevBtn.onclick = () => {
           if (current > 1) {
@@ -1283,7 +1416,7 @@
 
         const nextBtn = document.createElement("button");
         nextBtn.textContent = "Next";
-        nextBtn.disabled = current === totalPages;
+        nextBtn.disabled = current >= totalPages;
         nextBtn.className = "px-4 py-2 disabled:opacity-50 hover:bg-gray-50";
         nextBtn.onclick = () => {
           if (current < totalPages) {
@@ -1298,7 +1431,8 @@
         container.appendChild(group);
       }
 
-      function applySort(list) {
+      // === Client sort (fallback when no server sort is selected) ===
+      function applyClientSort(list) {
         if (!Array.isArray(list)) return [];
         if (!sortState.key) return list;
         const dir = sortState.dir === "desc" ? -1 : 1;
@@ -1322,32 +1456,6 @@
         });
       }
 
-      function setupTableSort() {
-        const thButtons = document.querySelectorAll("thead [data-sort]");
-        thButtons.forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const keyMap = {
-              name: "name",
-              category: "category",
-              price: "price",
-              duration: "duration",
-              available: "available",
-            };
-            const key = keyMap[btn.dataset.sort];
-            if (!key) return;
-            if (sortState.key === key) {
-              sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
-            } else {
-              sortState.key = key;
-              sortState.dir = "asc";
-            }
-            updateSortBadges();
-            // re-render current page with sort
-            renderTrips(lastTripsPage);
-          });
-        });
-      }
-
       function updateSortBadges() {
         const thButtons = document.querySelectorAll("thead [data-sort]");
         thButtons.forEach((btn) => {
@@ -1357,6 +1465,109 @@
           badge.classList.toggle("hidden", !isActive);
           if (isActive) badge.textContent = sortState.dir === "asc" ? "▲" : "▼";
         });
+      }
+
+      // === Table header sort: price uses SERVER sort; others remain client ===
+      function setupTableSort() {
+        const thButtons = document.querySelectorAll("thead [data-sort]");
+        thButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const map = {
+              name: "name",
+              category: "category",
+              price: "price",
+              duration: "duration",
+              available: "available",
+            };
+            const key = map[btn.dataset.sort];
+            if (!key) return;
+
+            // Toggle direction
+            if (sortState.key === key) {
+              sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+            } else {
+              sortState.key = key;
+              sortState.dir = "asc";
+            }
+
+            // If price header clicked => drive server sort
+            if (key === "price") {
+              const desired = `price:${sortState.dir}`;
+              // replace current server sorts with just the price sort
+              sortChoices.removeActiveItems();
+              sortChoices.setChoiceByValue([desired]);
+              activeServerSorts = [desired];
+              currentPage = 1;
+              updateSortBadges();
+              fetchTrips(currentPage);
+              return;
+            }
+
+            // otherwise: client sort
+            updateSortBadges();
+            renderTrips(lastTripsPage);
+          });
+        });
+      }
+
+      // ====== Debounce helper ======
+      function debounce(fn, ms = 400) {
+        let t;
+        return (...args) => {
+          clearTimeout(t);
+          t = setTimeout(() => fn(...args), ms);
+        };
+      }
+
+      function setupFilterListeners() {
+        if (searchInput) {
+          searchInput.addEventListener(
+            "input",
+            debounce(() => {
+              currentPage = 1;
+              fetchTrips(currentPage);
+            }, 450)
+          );
+          // Enter key forces immediate fetch
+          searchInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              currentPage = 1;
+              fetchTrips(currentPage);
+            }
+          });
+        }
+        [
+          languageSelect,
+          isAvailableChk,
+          isTopRatedChk,
+          isBestSellerChk,
+        ].forEach((el) => {
+          if (!el) return;
+          el.addEventListener("change", () => {
+            currentPage = 1;
+            fetchTrips(currentPage);
+          });
+        });
+        if (sortSelectEl) {
+          sortChoices = getChoicesInstance(sortSelectEl, {
+            removeItemButton: true,
+            allowHTML: false,
+            placeholder: true,
+            placeholderValue: "Sort (server)…",
+            shouldSort: false, // keep selection order
+          });
+          sortSelectEl.addEventListener("change", () => {
+            // when server sort is selected, disable client sort badges (visual only)
+            activeServerSorts = readActiveServerSorts();
+            if (activeServerSorts.length) {
+              sortState.key = null; // clear client sort
+              updateSortBadges();
+            }
+            currentPage = 1;
+            fetchTrips(currentPage);
+          });
+        }
       }
 
       // === Fetch & Populate Selects ===
@@ -2112,6 +2323,18 @@
       // === Initialization ===
       (async function init() {
         await fetchLanguages();
+        setupTableSort();
+        setupFilterListeners();
+
+        if (!sortChoices) {
+          sortChoices = getChoicesInstance(sortSelectEl, {
+            removeItemButton: true,
+            allowHTML: false,
+            placeholder: true,
+            placeholderValue: "Sort (server)…",
+            shouldSort: false,
+          });
+        }
         // First-time default rows
         document
           .getElementById("nameTranslations")
@@ -2155,7 +2378,7 @@
 
         setupEventListeners();
         setupTableSort();
-        fetchTrips();
+        fetchTrips(currentPage);
       })();
 
       // Expose for inline handlers (edit)
