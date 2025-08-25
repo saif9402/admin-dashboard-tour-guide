@@ -1,130 +1,109 @@
-<!-- ✅ Single-Modal Trips Admin (Refactor)
-  - One reusable modal for Add + Edit (tabs: Info / Images)
-  - Cleaner visuals (badges, shadows, spacing, sticky header)
-  - Choices.js multi-selects
-  - Includes/Not-Includes complement logic
-  - Robust helpers, toasts, skeletons, small UX niceties
--->
+<!-- ✅ COMPLETE HTML FILE WITH MULTI-LANGUAGE TRIP FORM -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="../output.css" rel="stylesheet" />
-    <link rel="stylesheet" href="../css/style.css" />
-
-    <!-- Icons + Choices -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"
     />
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-
     <title>Tour Guide Admin Panel</title>
   </head>
-  <body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
-    <!-- Toasts -->
-    <div id="toastRoot" class="fixed z-[100] right-4 top-4 space-y-3"></div>
-
+  <body class="bg-gray-50 text-gray-800 font-sans">
     <div class="flex min-h-screen">
       <!-- Sidebar -->
-      <aside class="w-64 bg-white border-r shadow-sm hidden md:block">
+      <aside class="w-64 bg-white border-r shadow-md">
         <div class="flex items-center border-b justify-center h-20">
           <img
             src="../img/Header.svg"
             alt="logo header"
-            class="h-16 object-contain"
+            class="h-96 object-contain flex items-start justify-start"
           />
         </div>
-        <nav class="p-4 space-y-2">
+        <nav class="p-4 space-y-3">
           <a
             href="home.html"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 bg-blue-50 font-medium"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 bg-blue-100 shadow-inner font-medium"
           >
             <i data-lucide="map"></i> <span>Trips</span>
           </a>
           <a
             href="categories.html"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
           >
             <i data-lucide="folder"></i> <span>Categories</span>
           </a>
           <a
             href="includes.html"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
           >
             <i data-lucide="check-square"></i> <span>Includes</span>
           </a>
           <a
             href="Languages.html"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
           >
             <i data-lucide="languages"></i> <span>Languages</span>
           </a>
           <a
             href="activities.html"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
           >
             <i data-lucide="activity"></i> <span>Activities</span>
           </a>
           <a
             href="booking.html"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
           >
             <i data-lucide="calendar-check"></i> <span>Bookings</span>
           </a>
           <a
             href="#"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-red-600 hover:bg-red-50"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-red-600 hover:bg-red-100"
           >
             <i data-lucide="log-out"></i> <span>Logout</span>
           </a>
         </nav>
       </aside>
 
-      <!-- Main -->
-      <main class="flex-1 p-6 md:p-8">
+      <!-- Main Content -->
+      <main class="flex-1 p-8">
         <div
-          class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6"
+          class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
         >
-          <div>
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
-              Manage Trips
-            </h1>
-            <p class="text-sm text-gray-500 mt-1">
-              Create, edit and organize your experiences
-            </p>
-          </div>
-          <div class="flex items-center gap-3 w-full md:w-auto">
-            <button
-              id="addTripBtn"
-              class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow"
-            >
-              <i data-lucide="plus"></i>
-              <span>Add Trip</span>
-            </button>
-          </div>
+          <h1 class="text-3xl font-bold text-gray-900">Manage Trips</h1>
+          <button
+            id="addTripBtn"
+            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow"
+          >
+            <i data-lucide="plus"></i>
+            <span>Add Trip</span>
+          </button>
         </div>
 
-        <!-- Table Card -->
-        <section class="bg-white rounded-xl shadow-sm border overflow-hidden">
-          <div class="table-wrap">
-            <table class="min-w-full text-sm">
-              <thead class="text-xs uppercase text-gray-600">
-                <tr class="border-b">
-                  <th class="px-6 py-3 text-left">Name</th>
-                  <th class="px-6 py-3 text-left">Category</th>
-                  <th class="px-6 py-3 text-left">Price</th>
-                  <th class="px-6 py-3 text-left">Duration</th>
-                  <th class="px-6 py-3 text-left">Available</th>
-                  <th class="px-6 py-3 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="tripTable" class="divide-y divide-gray-100"></tbody>
-            </table>
-          </div>
-        </section>
+        <!-- Trip Table -->
+        <div class="bg-white rounded-xl shadow overflow-x-auto">
+          <table class="min-w-full text-sm text-left">
+            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+              <tr>
+                <th class="px-6 py-4">Name</th>
+                <th class="px-6 py-4">Category</th>
+                <th class="px-6 py-4">Price</th>
+                <th class="px-6 py-4">Duration</th>
+                <th class="px-6 py-4">Available</th>
+                <th class="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody
+              id="tripTable"
+              class="divide-y divide-gray-200 bg-white"
+            ></tbody>
+          </table>
+        </div>
 
         <div
           id="pagination"
@@ -133,662 +112,402 @@
       </main>
     </div>
 
-    <!-- Reusable Modal (Add + Edit) -->
-    <div id="tripModal" class="fixed inset-0 z-50 hidden">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <!-- Edit Trip Modal -->
+    <div
+      id="editTripModal"
+      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-lg flex items-center justify-center px-4 py-8 hidden"
+    >
       <div
-        class="relative mx-auto w-full max-w-4xl max-h-[90vh] overflow-hidden p-4"
+        class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl p-6"
       >
-        <div
-          class="modal-panel bg-white rounded-2xl shadow-2xl border w-full max-h-[90vh] overflow-y-auto"
-        >
-          <!-- Header -->
-          <div
-            class="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-white/95 backdrop-blur z-10"
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-semibold">Edit Trip</h2>
+          <button
+            id="editCancelBtn"
+            type="button"
+            class="text-2xl text-gray-500 hover:text-gray-700"
           >
-            <div class="flex items-center gap-3">
-              <span
-                class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50"
-              >
-                <i data-lucide="map" class="text-blue-600"></i>
-              </span>
-              <div>
-                <h2 id="modalTitle" class="text-xl font-semibold">Add Trip</h2>
-                <p id="modalSubtitle" class="text-xs text-gray-500">
-                  Fill the info below, then upload images
-                </p>
-              </div>
-            </div>
-            <button
-              id="modalCloseBtn"
-              class="p-2 rounded-lg hover:bg-gray-100"
-              aria-label="Close"
+            &times;
+          </button>
+        </div>
+
+        <form id="editTripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="md:col-span-2">
+            <label class="block font-medium mb-1"
+              >Trip Names (multi-language)</label
             >
-              <i data-lucide="x"></i>
+            <div id="editNameTranslations" class="space-y-2"></div>
+            <button
+              type="button"
+              id="editAddNameTranslation"
+              class="text-sm text-blue-600 hover:underline mt-2"
+            >
+              + Add Name
             </button>
           </div>
 
-          <!-- Tabs -->
-          <div class="px-6 pt-4">
-            <div class="flex items-center gap-6 border-b">
-              <button
-                id="tabInfo"
-                class="tab-btn px-1 py-3 text-sm font-medium border-b-2 border-blue-600 text-blue-600"
-              >
-                Trip Info
-              </button>
-              <button
-                id="tabImages"
-                class="tab-btn px-1 py-3 text-sm font-medium text-gray-600 hover:text-blue-600"
-              >
-                Images
-              </button>
-              <div
-                id="imagesGate"
-                class="ml-auto hidden text-xs text-amber-600"
-              >
-                Save the trip first to unlock Images
-              </div>
-            </div>
-          </div>
-
-          <!-- Content: Info -->
-          <div id="tabContentInfo" class="px-6 py-5 space-y-5">
-            <form id="tripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Names -->
-              <div class="md:col-span-2">
-                <label class="block font-medium mb-1"
-                  >Trip Names (multi-language)</label
-                >
-                <div id="nameTranslations" class="space-y-2"></div>
-                <button
-                  type="button"
-                  id="addNameTranslation"
-                  class="text-sm text-blue-600 hover:underline mt-2"
-                >
-                  + Add Name
-                </button>
-              </div>
-
-              <!-- Descriptions -->
-              <div class="md:col-span-2">
-                <label class="block font-medium mb-1"
-                  >Trip Descriptions (multi-language)</label
-                >
-                <div id="descriptionTranslations" class="space-y-2"></div>
-                <button
-                  type="button"
-                  id="addDescriptionTranslation"
-                  class="text-sm text-blue-600 hover:underline mt-2"
-                >
-                  + Add Description
-                </button>
-              </div>
-
-              <div class="space-y-1">
-                <label class="block font-medium">Price</label>
-                <input
-                  type="number"
-                  name="Price"
-                  required
-                  class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200"
-                />
-              </div>
-
-              <div class="space-y-1">
-                <label class="block font-medium">Duration</label>
-                <input
-                  type="number"
-                  name="Duration"
-                  required
-                  class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-200"
-                />
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="block font-medium">Trip Dates</label>
-                <div id="tripDatesContainer" class="space-y-2"></div>
-                <button
-                  type="button"
-                  id="addTripDate"
-                  class="text-sm text-blue-600 hover:underline mt-1"
-                >
-                  + Add another date
-                </button>
-              </div>
-
-              <div class="space-y-1">
-                <label class="block font-medium">Category</label>
-                <select
-                  id="categorySelect"
-                  name="CategoryId"
-                  required
-                  class="w-full border rounded-lg px-4 py-2"
-                ></select>
-              </div>
-
-              <div class="space-y-1">
-                <label class="block font-medium">Activities</label>
-                <select
-                  id="activitiesSelect"
-                  name="Activities"
-                  multiple
-                  class="w-full border rounded-lg px-4 py-2"
-                ></select>
-              </div>
-
-              <div class="space-y-1">
-                <label class="block font-medium">Languages</label>
-                <select
-                  id="languagesSelect"
-                  name="Languages"
-                  multiple
-                  class="w-full border rounded-lg px-4 py-2"
-                ></select>
-              </div>
-
-              <div class="space-y-1">
-                <label class="block font-medium">Includes</label>
-                <select
-                  id="includesSelect"
-                  name="Includes"
-                  multiple
-                  class="w-full border rounded-lg px-4 py-2"
-                ></select>
-              </div>
-
-              <div class="space-y-1">
-                <label class="block font-medium">Not Includes</label>
-                <select
-                  id="notIncludesSelect"
-                  name="NotIncludes"
-                  multiple
-                  class="w-full border rounded-lg px-4 py-2"
-                ></select>
-              </div>
-
-              <div class="flex items-center space-x-2 md:col-span-2">
-                <input
-                  type="checkbox"
-                  name="IsAvailable"
-                  class="form-checkbox text-blue-600"
-                />
-                <label class="text-sm">Is Available</label>
-              </div>
-
-              <div class="flex justify-end md:col-span-2 gap-3">
-                <button
-                  type="button"
-                  id="modalCancelBtn"
-                  class="px-5 py-2 rounded-lg bg-gray-100 hover:bg-gray-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Content: Images -->
-          <div id="tabContentImages" class="px-6 py-5 hidden">
-            <form
-              id="imageUploadForm"
-              enctype="multipart/form-data"
-              class="space-y-4"
+          <div class="md:col-span-2">
+            <label class="block font-medium mb-1"
+              >Trip Descriptions (multi-language)</label
             >
-              <div class="flex items-center justify-between">
-                <div>
-                  <label class="block font-medium">Upload Trip Images</label>
-                  <p class="text-xs text-gray-500">
-                    You can select multiple images. Mark one as the main image.
-                  </p>
-                </div>
-                <span
-                  id="tripIdBadge"
-                  class="hidden text-xs inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 text-blue-700"
-                  >Trip #<b id="tripIdBadgeValue"></b
-                ></span>
-              </div>
-
-              <input
-                type="file"
-                id="tripImages"
-                name="images"
-                multiple
-                accept="image/*"
-                class="w-full border rounded px-4 py-2"
-              />
-
-              <div
-                id="imagePreview"
-                class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2"
-              ></div>
-
-              <div class="flex justify-end">
-                <button
-                  type="submit"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Upload Images
-                </button>
-              </div>
-            </form>
+            <div id="editDescriptionTranslations" class="space-y-2"></div>
+            <button
+              type="button"
+              id="editAddDescriptionTranslation"
+              class="text-sm text-blue-600 hover:underline mt-2"
+            >
+              + Add Description
+            </button>
           </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Price</label>
+            <input
+              type="number"
+              name="Price"
+              required
+              class="w-full border rounded-lg px-4 py-2"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Duration</label>
+            <input
+              type="number"
+              name="Duration"
+              required
+              class="w-full border rounded-lg px-4 py-2"
+            />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block font-medium">Trip Dates</label>
+            <div id="editTripDatesContainer" class="space-y-2"></div>
+            <button
+              type="button"
+              id="editAddTripDate"
+              class="text-sm text-blue-600 hover:underline mt-1"
+            >
+              + Add another date
+            </button>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Category</label>
+            <select
+              id="editCategorySelect"
+              name="CategoryId"
+              required
+              class="w-full border rounded-lg px-4 py-2"
+            ></select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Activities</label>
+            <select
+              id="editActivitiesSelect"
+              name="Activities"
+              multiple
+              class="w-full border rounded-lg px-4 py-2"
+            ></select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Languages</label>
+            <select
+              id="editLanguagesSelect"
+              name="Languages"
+              multiple
+              class="w-full border rounded-lg px-4 py-2"
+            ></select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Includes</label>
+            <select
+              id="editIncludesSelect"
+              name="Includes"
+              multiple
+              class="w-full border rounded-lg px-4 py-2"
+            ></select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block font-medium">Not Includes</label>
+            <select
+              id="editNotIncludesSelect"
+              name="NotIncludes"
+              multiple
+              class="w-full border rounded-lg px-4 py-2"
+            ></select>
+          </div>
+
+          <div class="flex items-center space-x-2 md:col-span-2">
+            <input
+              type="checkbox"
+              name="IsAvailable"
+              class="form-checkbox text-blue-600"
+            />
+            <label class="text-sm">Is Available</label>
+          </div>
+
+          <div class="flex justify-end md:col-span-2 space-x-3">
+            <button
+              type="button"
+              id="editCancelBtn2"
+              class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Update
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Trip Modal -->
+    <div
+      id="tripModal"
+      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-lg flex items-center justify-center px-4 py-8 hidden"
+    >
+      <div
+        class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl p-6"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-semibold">Add Trip</h2>
+          <button
+            id="cancelBtn"
+            type="button"
+            class="text-2xl text-gray-500 hover:text-gray-700"
+          >
+            &times;
+          </button>
+        </div>
+
+        <!-- === Tab Buttons === -->
+        <div class="flex border-b mb-4 space-x-6">
+          <button
+            id="tabInfo"
+            class="tab-btn px-4 py-2 font-medium border-b-2 border-blue-600 text-blue-600"
+          >
+            Trip Info
+          </button>
+          <button
+            id="tabImages"
+            class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600"
+          >
+            Images
+          </button>
+        </div>
+
+        <!-- === Trip Info Tab === -->
+        <div id="tabContentInfo" class="tab-content">
+          <form id="tripForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Multi-language Name -->
+            <div class="md:col-span-2">
+              <label class="block font-medium mb-1"
+                >Trip Names (multi-language)</label
+              >
+              <div id="nameTranslations" class="space-y-2"></div>
+              <button
+                type="button"
+                id="addNameTranslation"
+                class="text-sm text-blue-600 hover:underline mt-2"
+              >
+                + Add Name
+              </button>
+            </div>
+
+            <!-- Multi-language Description -->
+            <div class="md:col-span-2">
+              <label class="block font-medium mb-1"
+                >Trip Descriptions (multi-language)</label
+              >
+              <div id="descriptionTranslations" class="space-y-2"></div>
+              <button
+                type="button"
+                id="addDescriptionTranslation"
+                class="text-sm text-blue-600 hover:underline mt-2"
+              >
+                + Add Description
+              </button>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block font-medium">Price</label>
+              <input
+                type="number"
+                name="Price"
+                required
+                class="w-full border rounded-lg px-4 py-2"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label class="block font-medium">Duration</label>
+              <input
+                type="number"
+                name="Duration"
+                required
+                class="w-full border rounded-lg px-4 py-2"
+              />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block font-medium">Trip Dates</label>
+              <div id="tripDatesContainer" class="space-y-2">
+                <input
+                  type="datetime-local"
+                  name="TripDates[]"
+                  required
+                  class="w-full border rounded-lg px-4 py-2"
+                />
+              </div>
+              <button
+                type="button"
+                id="addTripDate"
+                class="text-sm text-blue-600 hover:underline mt-1"
+              >
+                + Add another date
+              </button>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block font-medium">Category</label>
+              <select
+                id="categorySelect"
+                name="CategoryId"
+                required
+                class="w-full border rounded-lg px-4 py-2"
+              ></select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block font-medium">Activities</label>
+              <select
+                id="activitiesSelect"
+                name="Activities"
+                multiple
+                class="w-full border rounded-lg px-4 py-2"
+              ></select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block font-medium">Languages</label>
+              <select
+                id="languagesSelect"
+                name="Languages"
+                multiple
+                class="w-full border rounded-lg px-4 py-2"
+              ></select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block font-medium">Includes</label>
+              <select
+                id="includesSelect"
+                name="Includes"
+                multiple
+                class="w-full border rounded-lg px-4 py-2"
+              ></select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block font-medium">Not Includes</label>
+              <select
+                id="notIncludesSelect"
+                name="NotIncludes"
+                multiple
+                class="w-full border rounded-lg px-4 py-2"
+              ></select>
+            </div>
+
+            <div class="flex items-center space-x-2 md:col-span-2">
+              <input
+                type="checkbox"
+                name="IsAvailable"
+                class="form-checkbox text-blue-600"
+              />
+              <label class="text-sm">Is Available</label>
+            </div>
+
+            <div class="flex justify-end md:col-span-2 space-x-3">
+              <button
+                type="button"
+                id="cancelBtn2"
+                class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- === Images Tab === -->
+        <div id="tabContentImages" class="tab-content hidden">
+          <form
+            id="imageUploadForm"
+            enctype="multipart/form-data"
+            class="space-y-4"
+          >
+            <label class="block font-medium">Upload Trip Images</label>
+            <input
+              type="file"
+              id="tripImages"
+              name="images"
+              multiple
+              accept="image/*"
+              class="w-full border rounded px-4 py-2"
+            />
+
+            <div class="text-sm text-gray-500">
+              You can select multiple images. Main image can be marked below.
+            </div>
+
+            <div
+              id="imagePreview"
+              class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4"
+            ></div>
+
+            <button
+              type="submit"
+              class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Upload Images
+            </button>
+          </form>
         </div>
       </div>
     </div>
 
     <script>
-      // ---------- Utilities ----------
-      const $ = (sel, root = document) => root.querySelector(sel);
-      const $$ = (sel, root = document) =>
-        Array.from(root.querySelectorAll(sel));
-      const iconify = () => window.lucide?.createIcons && lucide.createIcons();
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.lucide?.createIcons) lucide.createIcons();
+      });
 
-      const Toasts = (() => {
-        const root = document.getElementById("toastRoot");
-        function show(msg, type = "info") {
-          const card = document.createElement("div");
-          card.className = `toast-enter rounded-xl shadow-lg border px-4 py-3 text-sm flex items-start gap-3 bg-white`;
-          const colors = {
-            success: "text-green-700",
-            info: "text-blue-700",
-            warn: "text-amber-700",
-            error: "text-red-700",
-          };
-          card.innerHTML = `
-            <span class="mt-0.5 ${
-              type === "success"
-                ? "text-green-600"
-                : type === "error"
-                ? "text-red-600"
-                : type === "warn"
-                ? "text-amber-600"
-                : "text-blue-600"
-            }">
-              <i data-lucide="${
-                type === "success"
-                  ? "check-circle"
-                  : type === "error"
-                  ? "alert-triangle"
-                  : type === "warn"
-                  ? "alert-circle"
-                  : "info"
-              }"></i>
-            </span>
-            <div class="flex-1 ${colors[type] || colors.info}">${msg}</div>
-            <button class="p-1 rounded hover:bg-gray-100" aria-label="Dismiss"><i data-lucide="x"></i></button>`;
-          iconify();
-          root.appendChild(card);
-          requestAnimationFrame(() => card.classList.add("toast-enter-active"));
-          const timeout = setTimeout(() => remove(), 3000);
-          function remove() {
-            clearTimeout(timeout);
-            card.classList.remove("toast-enter", "toast-enter-active");
-            card.classList.add("toast-exit");
-            requestAnimationFrame(() => {
-              card.classList.add("toast-exit-active");
-              setTimeout(() => card.remove(), 180);
-            });
-          }
-          card.querySelector("button").onclick = remove;
-        }
-        return { show };
-      })();
-
-      // API helper with token + basic 401 retry hook
-      async function api(
-        path,
-        { method = "GET", headers = {}, body, auth = true } = {}
-      ) {
-        const token = localStorage.getItem("accessToken");
-        const res = await fetch(path, {
-          method,
-          headers: {
-            "Content-Type":
-              body instanceof FormData ? undefined : "application/json",
-            ...(auth && token ? { Authorization: `Bearer ${token}` } : {}),
-            ...headers,
-          },
-          body:
-            body instanceof FormData
-              ? body
-              : body
-              ? JSON.stringify(body)
-              : undefined,
-        });
-        // Try parse JSON, fall back to text
-        let data = null;
-        let text = null;
-        try {
-          data = await res.json();
-        } catch {
-          text = await res.text();
-        }
-        if (res.status === 401) {
-          // TODO: plug your refresh-token flow here if available
-          // Example: await refreshToken(); and then retry once
-        }
-        return { ok: res.ok, status: res.status, data, text };
-      }
-
-      function isoToLocalInputValue(iso) {
-        const d = new Date(iso);
-        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-        return d.toISOString().slice(0, 16);
-      }
-
-      function localInputValueToISO(val) {
-        // treat datetime-local value as local, convert to ISO (UTC)
-        const dt = new Date(val);
-        return dt.toISOString();
-      }
-
-      // ---------- State ----------
-      const state = {
-        pageSize: 8,
-        currentPage: 1,
-        allIncludes: [],
-        availableLanguages: [],
-        mode: "add", // 'add' | 'edit'
-        currentTripId: null,
-        editTripId: null,
-        mainImageName: null,
-      };
-
-      // ---------- Table rendering ----------
+      // === Constants & Globals ===
+      const baseUrl = "/api/Trip/GetAllTrips";
       const tripTable = document.getElementById("tripTable");
-      function renderSkeleton(rows = 6) {
-        tripTable.innerHTML = "";
-        for (let i = 0; i < rows; i++) {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td class="px-6 py-4"><div class="h-4 w-40 bg-gray-200 rounded animate-pulse"></div></td>
-            <td class="px-6 py-4"><div class="h-4 w-32 bg-gray-200 rounded animate-pulse"></div></td>
-            <td class="px-6 py-4"><div class="h-4 w-16 bg-gray-200 rounded animate-pulse"></div></td>
-            <td class="px-6 py-4"><div class="h-4 w-14 bg-gray-200 rounded animate-pulse"></div></td>
-            <td class="px-6 py-4"><div class="h-5 w-12 bg-gray-200 rounded-full animate-pulse"></div></td>
-            <td class="px-6 py-4"><div class="h-5 w-20 bg-gray-200 rounded animate-pulse"></div></td>`;
-          tripTable.appendChild(tr);
-        }
-      }
+      let currentPage = 1;
+      const pageSize = 8;
+      let availableLanguages = [];
+      let allIncludes = [];
+      let currentTripId = null;
+      let mainImageName = null;
+      let editTripId = null;
 
-      async function fetchTrips(page = 1) {
-        renderSkeleton();
-        const { ok, data } = await api(
-          `/api/Trip/GetAllTrips?pageNumber=${page}&pageSize=${state.pageSize}`
-        );
-        if (!ok || !data?.succeeded) {
-          tripTable.innerHTML =
-            '<tr><td colspan="6" class="px-6 py-6 text-center text-red-600">Failed to load trips</td></tr>';
-          return;
-        }
-        renderTrips(data.data.data || []);
-        renderPagination(data.data.pageNumber, data.data.count);
-      }
-
-      function renderTrips(trips) {
-        tripTable.innerHTML = "";
-        if (!trips.length) {
-          tripTable.innerHTML =
-            '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-500">No trips yet. Click <b>Add Trip</b> to create one.</td></tr>';
-          return;
-        }
-        trips.forEach((t) => {
-          const tr = document.createElement("tr");
-          tr.className = "hover:bg-gray-50";
-          tr.innerHTML = `
-            <td class="px-6 py-3 font-medium">${escapeHtml(t.name)}</td>
-            <td class="px-6 py-3">${escapeHtml(t.category)}</td>
-            <td class="px-6 py-3">$${Number(t.price).toFixed(2)}</td>
-            <td class="px-6 py-3">${t.duration}</td>
-            <td class="px-6 py-3">
-              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
-                t.isAvailable
-                  ? "bg-green-50 text-green-700"
-                  : "bg-gray-100 text-gray-600"
-              }">
-                <span class="w-1.5 h-1.5 rounded-full ${
-                  t.isAvailable ? "bg-green-600" : "bg-gray-500"
-                }"></span>
-                ${t.isAvailable ? "Yes" : "No"}
-              </span>
-            </td>
-            <td class="px-6 py-3">
-              <div class="flex items-center gap-2">
-                <button class="p-2 rounded-lg hover:bg-blue-50 text-blue-700" title="Edit" data-action="edit" data-id="${
-                  t.id
-                }"><i data-lucide="pencil"></i></button>
-                <button class="p-2 rounded-lg hover:bg-red-50 text-red-700" title="Delete" data-action="delete" data-id="${
-                  t.id
-                }"><i data-lucide="trash-2"></i></button>
-              </div>
-            </td>`;
-          tripTable.appendChild(tr);
-        });
-        iconify();
-      }
-
-      function renderPagination(current, totalCount) {
-        const pagination = document.getElementById("pagination");
-        const totalPages = Math.max(1, Math.ceil(totalCount / state.pageSize));
-        pagination.innerHTML = "";
-        const btn = (label, disabled, onClick) => {
-          const b = document.createElement("button");
-          b.textContent = label;
-          b.disabled = !!disabled;
-          b.className =
-            "px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50";
-          b.onclick = onClick;
-          return b;
-        };
-        pagination.appendChild(
-          btn("Previous", current === 1, () => {
-            if (current > 1) {
-              state.currentPage--;
-              fetchTrips(state.currentPage);
-            }
-          })
-        );
-        const status = document.createElement("span");
-        status.textContent = ` Page ${current} of ${totalPages} `;
-        pagination.appendChild(status);
-        pagination.appendChild(
-          btn("Next", current === totalPages, () => {
-            if (current < totalPages) {
-              state.currentPage++;
-              fetchTrips(state.currentPage);
-            }
-          })
-        );
-      }
-
-      // ---------- Modal ----------
-      const modal = document.getElementById("tripModal");
-      const modalPanel = modal.querySelector(".modal-panel");
-      const imagesGate = document.getElementById("imagesGate");
-      const tabInfoBtn = document.getElementById("tabInfo");
-      const tabImagesBtn = document.getElementById("tabImages");
-      const tabInfo = document.getElementById("tabContentInfo");
-      const tabImages = document.getElementById("tabContentImages");
-
-      function openModal(mode = "add", data = null) {
-        state.mode = mode;
-        state.currentTripId = data?.id ?? null;
-        state.editTripId = data?.id ?? null;
-        state.mainImageName = null;
-        $("#modalTitle").textContent =
-          mode === "add" ? "Add Trip" : "Edit Trip";
-        $("#modalSubtitle").textContent =
-          mode === "add"
-            ? "Fill the info below, then upload images"
-            : `Update the trip details`;
-
-        // Always land on Info tab
-        showTab("info");
-        const canUseImages = !!state.currentTripId;
-        imagesGate.classList.toggle("hidden", canUseImages);
-        tabImagesBtn.classList.toggle("opacity-50", !canUseImages);
-        tabImagesBtn.disabled = !canUseImages;
-        $("#tripIdBadge").classList.toggle("hidden", !canUseImages);
-        $("#tripIdBadgeValue").textContent = canUseImages
-          ? state.currentTripId
-          : "";
-
-        // Reset + populate form
-        resetForm();
-        Promise.resolve()
-          .then(() => initChoicesAndStatic())
-          .then(async () => {
-            await ensureLanguages();
-            ensureAtLeastOneTranslationRow();
-            if (mode === "edit" && data) {
-              await populateFormForEdit(data);
-            }
-          })
-          .then(() => iconify());
-
-        showModal();
-      }
-
-      function showModal() {
-        modal.classList.remove("hidden");
-        modal.classList.add("modal-enter");
-        requestAnimationFrame(() => {
-          modal.classList.add("modal-enter-active");
-        });
-        document.body.style.overflow = "hidden";
-      }
-      function hideModal() {
-        modal.classList.remove("modal-enter", "modal-enter-active");
-        modal.classList.add("modal-exit");
-        requestAnimationFrame(() => {
-          modal.classList.add("modal-exit-active");
-          setTimeout(() => {
-            modal.classList.add("hidden");
-            modal.classList.remove("modal-exit", "modal-exit-active");
-            document.body.style.overflow = "";
-          }, 180);
-        });
-      }
-
-      function showTab(which) {
-        const info = which === "info";
-        tabInfo.classList.toggle("hidden", !info);
-        tabImages.classList.toggle("hidden", info);
-        tabInfoBtn.classList.toggle("border-b-2", info);
-        tabInfoBtn.classList.toggle("text-blue-600", info);
-        tabImagesBtn.classList.toggle("border-b-2", !info);
-        tabImagesBtn.classList.toggle("text-blue-600", !info);
-      }
-
-      // Close handlers
-      $("#modalCloseBtn").addEventListener("click", hideModal);
-      $("#modalCancelBtn").addEventListener("click", hideModal);
-      modal.addEventListener("click", (e) => {
-        if (e.target === modal) hideModal();
-      });
-      document.addEventListener("keydown", (e) => {
-        if (!modal.classList.contains("hidden") && e.key === "Escape")
-          hideModal();
-      });
-
-      // Tabs
-      tabInfoBtn.addEventListener("click", () => showTab("info"));
-      tabImagesBtn.addEventListener("click", () => {
-        if (!tabImagesBtn.disabled) showTab("images");
-      });
-
-      // ---------- Translations ----------
-      async function ensureLanguages() {
-        if (state.availableLanguages.length) return;
-        const { ok, data } = await api("/api/Language/GetAllLanguages", {
-          auth: false,
-        });
-        state.availableLanguages = ok ? data?.data || [] : [];
-      }
-
-      function createTranslationRow(type, preset = null) {
-        const wrapper = document.createElement("div");
-        wrapper.className = "flex items-center gap-2";
-        const sel = document.createElement("select");
-        sel.name = `${type}LangId`;
-        sel.className = "border rounded px-2 py-1";
-        state.availableLanguages.forEach((l) => {
-          const o = document.createElement("option");
-          o.value = l.id;
-          o.textContent = l.name;
-          sel.appendChild(o);
-        });
-        const input = document.createElement(
-          type === "name" ? "input" : "textarea"
-        );
-        input.name = `${type}Value`;
-        input.className = "border rounded px-3 py-2 flex-1";
-        if (type !== "name") input.rows = 2;
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "text-red-500 font-semibold px-2";
-        btn.textContent = "✕";
-        btn.onclick = () => wrapper.remove();
-        if (preset) {
-          sel.value = preset.languageId;
-          type === "name"
-            ? (input.value = preset.translation)
-            : (input.value = preset.translation);
-        }
-        wrapper.append(sel, input, btn);
-        return wrapper;
-      }
-
-      function ensureAtLeastOneTranslationRow() {
-        if (!$("#nameTranslations").children.length) {
-          $("#nameTranslations").appendChild(createTranslationRow("name"));
-        }
-        if (!$("#descriptionTranslations").children.length) {
-          $("#descriptionTranslations").appendChild(
-            createTranslationRow("description")
-          );
-        }
-      }
-
-      function extractTranslations(containerId, type) {
-        const container = document.getElementById(containerId);
-        const out = [];
-        for (const row of $$("#" + containerId + " > *")) {
-          const langId = parseInt(
-            row.querySelector(`select[name=${type}LangId]`).value
-          );
-          const text = row.querySelector(`[name=${type}Value]`).value.trim();
-          if (langId && text)
-            out.push({ languageId: langId, translation: text });
-        }
-        return out;
-      }
-
-      function combineTripTranslations(nameArr, descArr) {
-        const map = new Map();
-        nameArr.forEach(({ languageId, translation }) => {
-          if (!map.has(languageId))
-            map.set(languageId, { languageId, name: "", description: "" });
-          map.get(languageId).name = translation;
-        });
-        descArr.forEach(({ languageId, translation }) => {
-          if (!map.has(languageId))
-            map.set(languageId, { languageId, name: "", description: "" });
-          map.get(languageId).description = translation;
-        });
-        return Array.from(map.values()).filter(
-          (t) => t.name?.trim() || t.description?.trim()
-        );
-      }
-
-      // ---------- Choices helpers ----------
+      // --- Choices helpers (MUST be defined before first use) ---
       function getChoicesInstance(el, opts = { removeItemButton: true }) {
         if (el._choices && el._choices.initialised === false) {
           try {
@@ -802,24 +521,6 @@
         return el._choices;
       }
 
-      async function populateSelect(id, url, valueField, labelField) {
-        const el = document.getElementById(id);
-        const ch = getChoicesInstance(el);
-        const { ok, data } = await api(url, { auth: false });
-        const items = Array.isArray(data?.data)
-          ? data.data
-          : Array.isArray(data?.data?.data)
-          ? data.data.data
-          : [];
-        const mapped = items.map((it) => ({
-          value: String(it[valueField]),
-          label: it[labelField],
-        }));
-        ch.clearChoices();
-        ch.setChoices(mapped, "value", "label", true);
-        return { el, ch, items };
-      }
-
       function setSelectedValues(selectId, values) {
         const el = document.getElementById(selectId);
         const ch = getChoicesInstance(el);
@@ -827,7 +528,598 @@
         ch.setChoiceByValue((values || []).map(String));
       }
 
-      async function initChoicesAndStatic() {
+      // === Fetch Trips ===
+      async function fetchTrips(page = 1) {
+        const token = localStorage.getItem("accessToken");
+
+        const response = await fetch(
+          `${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const result = await response.json();
+
+        if (result.succeeded) {
+          renderTrips(result.data.data);
+          renderPagination(result.data.pageNumber, result.data.count);
+        } else {
+          tripTable.innerHTML =
+            '<tr><td colspan="7" class="text-center text-red-500 py-4">Failed to load trips</td></tr>';
+        }
+      }
+
+      // === Render Trips ===
+      function renderTrips(trips) {
+        tripTable.innerHTML = "";
+
+        if (!trips || trips.length === 0) {
+          tripTable.innerHTML =
+            '<tr><td colspan="7" class="text-center py-4">No trips found</td></tr>';
+          return;
+        }
+
+        trips.forEach((trip) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td class="px-6 py-3">${trip.name}</td>
+            <td class="px-6 py-3">${trip.category}</td>
+            <td class="px-6 py-3">$${Number(trip.price).toFixed(2)}</td>
+            <td class="px-6 py-3">${trip.duration}</td>
+            <td class="px-6 py-3">${trip.isAvailable ? "Yes" : "No"}</td>
+            <td class="px-6 py-3 flex items-center gap-2">
+              <button class="text-blue-400 hover:text-blue-900" title="Edit" onclick="openEditTripModal(${
+                trip.id
+              })">
+                <i data-lucide="pencil"></i>
+              </button>
+              <button class="text-red-400 hover:text-red-900" title="Delete" onclick="handleDeleteTrip(${
+                trip.id
+              })">
+                <i data-lucide="trash-2"></i>
+              </button>
+            </td>
+          `;
+          tripTable.appendChild(row);
+        });
+
+        lucide.createIcons();
+      }
+
+      // === Pagination ===
+      function renderPagination(current, totalCount) {
+        const paginationContainer = document.getElementById("pagination");
+        const totalPages = Math.ceil(totalCount / pageSize);
+        paginationContainer.innerHTML = "";
+
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "Previous";
+        prevBtn.disabled = current === 1;
+        prevBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+        prevBtn.onclick = () => {
+          if (current > 1) {
+            currentPage--;
+            fetchTrips(currentPage);
+          }
+        };
+
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "Next";
+        nextBtn.disabled = current === totalPages;
+        nextBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+        nextBtn.onclick = () => {
+          if (current < totalPages) {
+            currentPage++;
+            fetchTrips(currentPage);
+          }
+        };
+
+        paginationContainer.appendChild(prevBtn);
+        paginationContainer.append(` Page ${current} of ${totalPages} `);
+        paginationContainer.appendChild(nextBtn);
+      }
+
+      // === Fetch & Populate Selects ===
+      async function populateSelect(id, url, valueField, labelField) {
+        const element = document.getElementById(id);
+        const ch = getChoicesInstance(element, { removeItemButton: true });
+
+        const res = await fetch(url);
+        const result = await res.json();
+
+        const data = Array.isArray(result.data)
+          ? result.data
+          : Array.isArray(result.data?.data)
+          ? result.data.data
+          : [];
+
+        const mapped = data.map((item) => ({
+          value: String(item[valueField]),
+          label: item[labelField],
+        }));
+
+        ch.clearChoices();
+        ch.setChoices(mapped, "value", "label", true);
+
+        return { element, choices: ch, data };
+      }
+
+      async function populateEditSelects(data) {
+        // Load all choices in parallel
+        const [acts, langs, incs, notIncs, cats] = await Promise.all([
+          populateSelect(
+            "editActivitiesSelect",
+            "/api/Activity/GetAllActivities",
+            "id",
+            "name"
+          ),
+          populateSelect(
+            "editLanguagesSelect",
+            "/api/Language/GetAllLanguages",
+            "id",
+            "name"
+          ),
+          populateSelect(
+            "editIncludesSelect",
+            "/api/Includes/GetAllIncludes",
+            "id",
+            "name"
+          ),
+          populateSelect(
+            "editNotIncludesSelect",
+            "/api/Includes/GetAllIncludes",
+            "id",
+            "name"
+          ),
+          populateSelect(
+            "editCategorySelect",
+            "/api/Category/GetAllCategories",
+            "id",
+            "name"
+          ),
+        ]);
+
+        // Convert arrays of objects -> arrays of ids
+        const activityIds = getIds(data.activities);
+        const languageIds = getIds(data.languages);
+        const includeIds = getIds(data.includes);
+        const notIncludeIds = getIds(data.notIncludes);
+        const allIncludesList = incs.data; // full list from API
+
+        // Multi-selects
+        setSelectedValues("editActivitiesSelect", activityIds);
+        setSelectedValues("editLanguagesSelect", languageIds);
+
+        // Includes first
+        setSelectedValues("editIncludesSelect", includeIds);
+
+        // Not-Includes = complement of Includes
+        const notSel = document.getElementById("editNotIncludesSelect");
+        const notChoices = getChoicesInstance(notSel);
+        const remaining = allIncludesList
+          .filter((i) => !includeIds.includes(i.id))
+          .map((i) => ({ value: String(i.id), label: i.name }));
+        notChoices.clearChoices();
+        notChoices.setChoices(remaining, "value", "label", true);
+
+        // Pre-select valid not-includes (ignore any that now collide with Includes)
+        const filteredNotIds = notIncludeIds.filter(
+          (id) => !includeIds.includes(id)
+        );
+        setSelectedValues("editNotIncludesSelect", filteredNotIds);
+
+        // Single-select category
+        const catEl = document.getElementById("editCategorySelect");
+        getChoicesInstance(catEl).setChoiceByValue(String(data.categoryId));
+
+        // Keep complement rule while user edits
+        const includesEl = document.getElementById("editIncludesSelect");
+        // clean old handler if any
+        if (window._editIncludesHandler) {
+          includesEl.removeEventListener("change", window._editIncludesHandler);
+        }
+        window._editIncludesHandler = () => {
+          const selected = Array.from(includesEl.selectedOptions).map((o) =>
+            parseInt(o.value)
+          );
+          const remaining = allIncludesList
+            .filter((i) => !selected.includes(i.id))
+            .map((i) => ({ value: String(i.id), label: i.name }));
+          notChoices.clearChoices();
+          notChoices.setChoices(remaining, "value", "label", true);
+
+          // drop now-invalid not-includes
+          const validNotIds = Array.from(notSel.selectedOptions)
+            .map((o) => parseInt(o.value))
+            .filter((id) => !selected.includes(id));
+          setSelectedValues("editNotIncludesSelect", validNotIds);
+        };
+        includesEl.addEventListener("change", window._editIncludesHandler);
+      }
+
+      // === Languages (for translations) ===
+      async function fetchLanguages() {
+        const res = await fetch("/api/Language/GetAllLanguages");
+        const result = await res.json();
+        availableLanguages = result.data || [];
+      }
+
+      // === Dynamic Translation Fields ===
+      function createTranslationRow(type) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "flex items-center gap-2 mt-2";
+
+        const select = document.createElement("select");
+        select.name = `${type}LangId`;
+        select.className = "border rounded px-2 py-1";
+        availableLanguages.forEach((lang) => {
+          const opt = document.createElement("option");
+          opt.value = lang.id;
+          opt.textContent = lang.name;
+          select.appendChild(opt);
+        });
+
+        const input = document.createElement(
+          type === "name" ? "input" : "textarea"
+        );
+        input.name = `${type}Value`;
+        input.className = "border rounded px-2 py-1 flex-1";
+        if (type === "description") input.rows = 2;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.textContent = "✕";
+        removeBtn.className = "text-red-500 font-bold";
+        removeBtn.onclick = () => wrapper.remove();
+
+        wrapper.appendChild(select);
+        wrapper.appendChild(input);
+        wrapper.appendChild(removeBtn);
+        return wrapper;
+      }
+
+      function extractTranslations(containerId, type) {
+        const container = document.getElementById(containerId);
+        const translations = [];
+        for (const child of Array.from(container.children)) {
+          const langId = parseInt(
+            child.querySelector(`select[name=${type}LangId]`).value
+          );
+          const text = child.querySelector(`[name=${type}Value]`).value.trim();
+          if (langId && text) {
+            translations.push({ languageId: langId, translation: text });
+          }
+        }
+        return translations;
+      }
+
+      // Merge Name[] + Description[] into tripTranslations[]
+      function combineTripTranslations(nameArr, descArr) {
+        const byLang = new Map();
+
+        nameArr.forEach(({ languageId, translation }) => {
+          if (!byLang.has(languageId))
+            byLang.set(languageId, { languageId, name: "", description: "" });
+          byLang.get(languageId).name = translation;
+        });
+
+        descArr.forEach(({ languageId, translation }) => {
+          if (!byLang.has(languageId))
+            byLang.set(languageId, { languageId, name: "", description: "" });
+          byLang.get(languageId).description = translation;
+        });
+
+        // keep only entries that have at least a name or description
+        return Array.from(byLang.values()).filter(
+          (t) => (t.name ?? "").trim() || (t.description ?? "").trim()
+        );
+      }
+
+      function getIds(arr, key = "id") {
+        return (arr || []).map((x) => (typeof x === "object" ? x[key] : x));
+      }
+
+      function isoToLocalInputValue(iso) {
+        const d = new Date(iso);
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        return d.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
+      }
+
+      // === Form Submission (Add) ===
+      async function handleTripSubmit(e) {
+        e.preventDefault();
+        const form = e.target;
+
+        const tripDto = {
+          Name: extractTranslations("nameTranslations", "name"),
+          Description: extractTranslations(
+            "descriptionTranslations",
+            "description"
+          ),
+          Price: parseFloat(form.Price.value),
+          Duration: parseInt(form.Duration.value),
+          TripDates: Array.from(
+            form.querySelectorAll("input[name='TripDates[]']")
+          ).map((input) => new Date(input.value).toISOString()),
+          IsAvailable: form.IsAvailable.checked,
+          CategoryId: parseInt(form.CategoryId.value),
+          Activities: Array.from(form.Activities.selectedOptions).map((opt) =>
+            parseInt(opt.value)
+          ),
+          Languages: Array.from(form.Languages.selectedOptions).map((opt) =>
+            parseInt(opt.value)
+          ),
+          Includes: Array.from(form.Includes.selectedOptions).map((opt) =>
+            parseInt(opt.value)
+          ),
+          NotIncludes: Array.from(form.NotIncludes.selectedOptions).map((opt) =>
+            parseInt(opt.value)
+          ),
+        };
+
+        try {
+          const res = await fetch("/api/Trip/AddTrip", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(tripDto),
+          });
+          const result = await res.json();
+          if (res.ok && result.succeeded) {
+            const newTripId = result.data;
+            alert("Trip added successfully");
+            currentTripId = newTripId;
+
+            document.getElementById("tabImages").click();
+            form.reset();
+            fetchTrips();
+          } else {
+            alert("Failed to add trip: " + (result.errors || result.message));
+          }
+        } catch (err) {
+          console.error("Error:", err);
+          alert("Something went wrong.");
+        }
+      }
+
+      async function openEditTripModal(tripId) {
+        editTripId = tripId;
+        const token = localStorage.getItem("accessToken");
+        try {
+          const res = await fetch(`/api/Trip/GetTripByIdForAdmin/${tripId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const result = await res.json();
+          if (res.ok && result.succeeded) {
+            await populateEditForm(result.data);
+            document.getElementById("editTripModal").classList.remove("hidden");
+          } else {
+            alert("Failed to load trip data.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error fetching trip data.");
+        }
+      }
+
+      // === Handle Delete ===
+      async function handleDeleteTrip(tripId) {
+        const confirmed = confirm("Are you sure you want to delete this trip?");
+        if (!confirmed) return;
+
+        const token = localStorage.getItem("accessToken");
+
+        try {
+          const res = await fetch(`/api/Trip/DeleteTrip/${tripId}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const result = await res.json();
+
+          if (res.ok && result.succeeded) {
+            alert("Trip deleted successfully.");
+            fetchTrips();
+          } else {
+            alert(
+              "Failed to delete trip: " +
+                (result.message || result.errors || "Unknown error")
+            );
+          }
+        } catch (err) {
+          console.error("Delete error:", err);
+          alert("Something went wrong while deleting the trip.");
+        }
+      }
+
+      // === Upload Images ===
+      document
+        .getElementById("imageUploadForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          if (!currentTripId) {
+            alert("No trip selected. Please create a trip first.");
+            return;
+          }
+
+          const fileInput = document.getElementById("tripImages");
+          const files = Array.from(fileInput.files);
+
+          if (!files.length) {
+            alert("Please select at least one image.");
+            return;
+          }
+
+          const formData = new FormData();
+
+          files.forEach((file, index) => {
+            const isMain = file.name === mainImageName;
+
+            formData.append(`images[${index}].Image`, file);
+            formData.append(`images[${index}].IsMainImage`, isMain.toString());
+          });
+          try {
+            const res = await fetch(
+              `/api/Trip/AddImagesToTrip/${currentTripId}`,
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
+
+            const result = await res.json();
+            if (res.ok && result.succeeded) {
+              alert("Images uploaded successfully.");
+              fileInput.value = "";
+              document.getElementById("imagePreview").innerHTML = "";
+            } else {
+              alert("Upload failed: " + (result.message || "Unknown error."));
+            }
+          } catch (err) {
+            console.error("Upload error:", err);
+            alert("An error occurred while uploading images.");
+          }
+        });
+
+      document.getElementById("tripImages").addEventListener("change", (e) => {
+        const previewContainer = document.getElementById("imagePreview");
+        previewContainer.innerHTML = "";
+        mainImageName = null;
+
+        const files = Array.from(e.target.files);
+
+        files.forEach((file) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "relative flex flex-col gap-2 items-start";
+
+            const img = document.createElement("img");
+            img.src = event.target.result;
+            img.className = "w-full h-32 object-cover rounded shadow";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.className = "main-checkbox mt-1";
+            checkbox.name = "mainImage";
+            checkbox.dataset.filename = file.name;
+
+            const label = document.createElement("label");
+            label.textContent = "Use as main image";
+            label.className = "text-sm ml-2";
+
+            const checkboxWrapper = document.createElement("div");
+            checkboxWrapper.className = "flex items-center";
+            checkboxWrapper.appendChild(checkbox);
+            checkboxWrapper.appendChild(label);
+
+            checkbox.addEventListener("change", () => {
+              document
+                .querySelectorAll("input[name='mainImage']")
+                .forEach((cb) => {
+                  if (cb !== checkbox) cb.checked = false;
+                });
+
+              mainImageName = checkbox.checked ? file.name : null;
+            });
+
+            wrapper.appendChild(img);
+            wrapper.appendChild(checkboxWrapper);
+            previewContainer.appendChild(wrapper);
+          };
+
+          reader.readAsDataURL(file);
+        });
+      });
+
+      // === Event Listeners ===
+      function setupEventListeners() {
+        document.getElementById("addTripBtn").addEventListener("click", () => {
+          document.getElementById("tripModal").classList.remove("hidden");
+        });
+
+        ["cancelBtn", "cancelBtn2"].forEach((id) => {
+          document.getElementById(id).addEventListener("click", () => {
+            document.getElementById("tripModal").classList.add("hidden");
+            document.getElementById("tripForm").reset();
+          });
+        });
+
+        document
+          .getElementById("tripForm")
+          .addEventListener("submit", handleTripSubmit);
+
+        document
+          .getElementById("addNameTranslation")
+          .addEventListener("click", () => {
+            document
+              .getElementById("nameTranslations")
+              .appendChild(createTranslationRow("name"));
+          });
+
+        document
+          .getElementById("addDescriptionTranslation")
+          .addEventListener("click", () => {
+            document
+              .getElementById("descriptionTranslations")
+              .appendChild(createTranslationRow("description"));
+          });
+
+        document.getElementById("addTripDate").addEventListener("click", () => {
+          const container = document.getElementById("tripDatesContainer");
+          const input = document.createElement("input");
+          input.type = "datetime-local";
+          input.name = "TripDates[]";
+          input.required = true;
+          input.className = "w-full border rounded-lg px-4 py-2";
+          container.appendChild(input);
+        });
+
+        document.getElementById("tabImages").addEventListener("click", () => {
+          document.getElementById("tabContentInfo").classList.add("hidden");
+          document
+            .getElementById("tabContentImages")
+            .classList.remove("hidden");
+
+          document
+            .getElementById("tabInfo")
+            .classList.remove("border-b-2", "text-blue-600");
+          document
+            .getElementById("tabImages")
+            .classList.add("border-b-2", "text-blue-600");
+        });
+
+        document.getElementById("tabInfo").addEventListener("click", () => {
+          document.getElementById("tabContentImages").classList.add("hidden");
+          document.getElementById("tabContentInfo").classList.remove("hidden");
+
+          document
+            .getElementById("tabImages")
+            .classList.remove("border-b-2", "text-blue-600");
+          document
+            .getElementById("tabInfo")
+            .classList.add("border-b-2", "text-blue-600");
+        });
+      }
+
+      // === Initialization ===
+      (async function init() {
+        await fetchLanguages();
+
+        // Add 1 name and 1 description row by default
+        document
+          .getElementById("nameTranslations")
+          .appendChild(createTranslationRow("name"));
+        document
+          .getElementById("descriptionTranslations")
+          .appendChild(createTranslationRow("description"));
+
         await populateSelect(
           "activitiesSelect",
           "/api/Activity/GetAllActivities",
@@ -846,136 +1138,107 @@
           "id",
           "name"
         );
+
         const includes = await populateSelect(
           "includesSelect",
           "/api/Includes/GetAllIncludes",
           "id",
           "name"
         );
-        state.allIncludes = includes.items;
-        // setup not-includes complement
-        const notChoices = getChoicesInstance($("#notIncludesSelect"));
-        $("#includesSelect").addEventListener(
-          "change",
-          () => {
+        allIncludes = includes.data;
+
+        // Not-Includes is driven by what's NOT selected in Includes
+        const notIncludesChoices = new Choices(
+          document.getElementById("notIncludesSelect"),
+          { removeItemButton: true }
+        );
+
+        document
+          .getElementById("includesSelect")
+          .addEventListener("change", () => {
             const selected = Array.from(
-              $("#includesSelect").selectedOptions
-            ).map((o) => parseInt(o.value));
-            const remaining = state.allIncludes
-              .filter((i) => !selected.includes(i.id))
-              .map((i) => ({ value: String(i.id), label: i.name }));
-            notChoices.clearChoices();
-            notChoices.setChoices(remaining, "value", "label", true);
-            // prune invalid selections
-            const valid = Array.from($("#notIncludesSelect").selectedOptions)
-              .map((o) => parseInt(o.value))
-              .filter((id) => !selected.includes(id));
-            setSelectedValues("notIncludesSelect", valid);
-          },
-          { once: true }
-        ); // attach once per open
-      }
+              document.getElementById("includesSelect").selectedOptions
+            ).map((opt) => parseInt(opt.value));
+            const remaining = allIncludes
+              .filter((item) => !selected.includes(item.id))
+              .map((item) => ({ value: item.id, label: item.name }));
+            notIncludesChoices.clearChoices();
+            notIncludesChoices.setChoices(remaining, "value", "label", true);
+          });
 
-      function resetForm() {
-        $("#tripForm").reset();
-        $("#nameTranslations").innerHTML = "";
-        $("#descriptionTranslations").innerHTML = "";
-        $("#tripDatesContainer").innerHTML = "";
-        // one default date input
-        addDateInput($("#tripDatesContainer"));
-        // clear images preview
-        $("#imagePreview").innerHTML = "";
-        $("#tripImages").value = "";
-      }
+        setupEventListeners();
+        fetchTrips();
+      })();
 
-      function addDateInput(container) {
-        const input = document.createElement("input");
-        input.type = "datetime-local";
-        input.name = "TripDates[]";
-        input.required = true;
-        input.className = "w-full border rounded-lg px-4 py-2";
-        container.appendChild(input);
-      }
+      // === Populate Edit Form ===
+      async function populateEditForm(data) {
+        const form = document.getElementById("editTripForm");
 
-      // Populate for edit
-      async function populateFormForEdit(server) {
-        const f = $("#tripForm");
-        f.Price.value = server.price;
-        f.Duration.value = server.duration;
-        f.IsAvailable.checked = server.isAvailable;
+        form.Price.value = data.price;
+        form.Duration.value = data.duration;
+        form.IsAvailable.checked = data.isAvailable;
 
-        // translations
-        const nameC = $("#nameTranslations");
-        const descC = $("#descriptionTranslations");
-        nameC.innerHTML = "";
-        descC.innerHTML = "";
-        (server.name || []).forEach((t) =>
-          nameC.appendChild(createTranslationRow("name", t))
+        const nameContainer = document.getElementById("editNameTranslations");
+        const descContainer = document.getElementById(
+          "editDescriptionTranslations"
         );
-        (server.description || []).forEach((t) =>
-          descC.appendChild(createTranslationRow("description", t))
-        );
-        ensureAtLeastOneTranslationRow();
+        nameContainer.innerHTML = "";
+        descContainer.innerHTML = "";
 
-        // dates
-        const datesC = $("#tripDatesContainer");
-        datesC.innerHTML = "";
-        (server.tripDates || []).forEach((d) => {
-          const inp = document.createElement("input");
-          inp.type = "datetime-local";
-          inp.name = "TripDates[]";
-          inp.required = true;
-          inp.className = "w-full border rounded-lg px-4 py-2";
-          inp.value = isoToLocalInputValue(d);
-          datesC.appendChild(inp);
+        data.name.forEach((t) => {
+          const row = createTranslationRow("name");
+          row.querySelector("select").value = t.languageId;
+          row.querySelector("input").value = t.translation;
+          nameContainer.appendChild(row);
         });
-        if (!datesC.children.length) addDateInput(datesC);
 
-        // selects
-        // Wait one tick to ensure choices are ready
-        await new Promise((r) => setTimeout(r));
-        getChoicesInstance($("#categorySelect")).setChoiceByValue(
-          String(server.categoryId)
+        data.description.forEach((t) => {
+          const row = createTranslationRow("description");
+          row.querySelector("select").value = t.languageId;
+          row.querySelector("textarea").value = t.translation;
+          descContainer.appendChild(row);
+        });
+
+        // Dates
+        const datesContainer = document.getElementById(
+          "editTripDatesContainer"
         );
-        setSelectedValues(
-          "activitiesSelect",
-          (server.activities || []).map((o) => o.id ?? o)
-        );
-        setSelectedValues(
-          "languagesSelect",
-          (server.languages || []).map((o) => o.id ?? o)
-        );
-        const includeIds = (server.includes || []).map((o) => o.id ?? o);
-        const notIncludeIds = (server.notIncludes || []).map((o) => o.id ?? o);
-        setSelectedValues("includesSelect", includeIds);
-        // Rebuild not-includes as complement
-        const notChoices = getChoicesInstance($("#notIncludesSelect"));
-        const remaining = state.allIncludes
-          .filter((i) => !includeIds.includes(i.id))
-          .map((i) => ({ value: String(i.id), label: i.name }));
-        notChoices.clearChoices();
-        notChoices.setChoices(remaining, "value", "label", true);
-        const filteredNot = notIncludeIds.filter(
-          (id) => !includeIds.includes(id)
-        );
-        setSelectedValues("notIncludesSelect", filteredNot);
+        datesContainer.innerHTML = "";
+        data.tripDates.forEach((date) => {
+          const input = document.createElement("input");
+          input.type = "datetime-local";
+          input.name = "TripDates[]";
+          input.required = true;
+          input.className = "w-full border rounded-lg px-4 py-2";
+          // Note: toISOString() is UTC; adjust if needed for local display
+          input.value = isoToLocalInputValue(date);
+          datesContainer.appendChild(input);
+        });
+
+        await populateEditSelects(data);
       }
 
-      // ---------- Collect & Submit ----------
-      function collectPayload(form) {
-        const nameArr = extractTranslations("nameTranslations", "name");
+      // === Handle Edit Submit (JSON for /api/Trip/UpdateTrip/{id}) ===
+      async function handleEditSubmit(e) {
+        e.preventDefault();
+        const form = e.target;
+
+        // Collect values (same sources as before)
+        const nameArr = extractTranslations("editNameTranslations", "name");
         const descArr = extractTranslations(
-          "descriptionTranslations",
+          "editDescriptionTranslations",
           "description"
         );
         const tripTranslations = combineTripTranslations(nameArr, descArr);
+
         const price = parseFloat(form.Price.value);
         const duration = parseInt(form.Duration.value);
         const tripDates = Array.from(
           form.querySelectorAll("input[name='TripDates[]']")
-        ).map((i) => localInputValueToISO(i.value));
+        ).map((input) => new Date(input.value).toISOString());
         const isAvailable = form.IsAvailable.checked;
         const categoryId = parseInt(form.CategoryId.value);
+
         const activities = Array.from(form.Activities.selectedOptions).map(
           (o) => parseInt(o.value)
         );
@@ -988,8 +1251,10 @@
         const notIncludes = Array.from(form.NotIncludes.selectedOptions).map(
           (o) => parseInt(o.value)
         );
-        return {
-          tripTranslations,
+
+        // Build the payload EXACTLY as your endpoint expects
+        const payload = {
+          tripTranslations, // [{ languageId, name, description }]
           duration,
           price,
           isAvailable,
@@ -1000,179 +1265,89 @@
           includes,
           notIncludes,
         };
+
+        const token = localStorage.getItem("accessToken");
+
+        try {
+          const res = await fetch(`/api/Trip/UpdateTrip/${editTripId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify(payload),
+          });
+
+          // Prefer JSON, but fall back to text for debugging
+          let result, text;
+          try {
+            result = await res.json();
+          } catch {
+            text = await res.text();
+          }
+
+          if (!res.ok) {
+            console.error("Update failed", res.status, text || result);
+            alert(
+              `Failed to update trip (${res.status}). ${
+                text || result?.message || "Check required fields."
+              }`
+            );
+            return;
+          }
+
+          if (result?.succeeded) {
+            alert("Trip updated successfully");
+            document.getElementById("editTripModal").classList.add("hidden");
+            fetchTrips();
+          } else {
+            alert(
+              "Failed to update trip: " + (result?.message || "Unknown error")
+            );
+          }
+        } catch (err) {
+          console.error("Update error:", err);
+          alert("An error occurred while updating the trip.");
+        }
       }
 
-      $("#tripForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const payload = collectPayload(e.target);
-        if (state.mode === "add") {
-          const { ok, data } = await api("/api/Trip/AddTrip", {
-            method: "POST",
-            body: payload,
-            auth: false,
-          });
-          if (ok && data?.succeeded) {
-            state.currentTripId = data.data; // backend returns id
-            state.editTripId = data.data;
-            Toasts.show("Trip created successfully", "success");
-            // unlock images tab and switch
-            imagesGate.classList.add("hidden");
-            tabImagesBtn.disabled = false;
-            tabImagesBtn.classList.remove("opacity-50");
-            $("#tripIdBadge").classList.remove("hidden");
-            $("#tripIdBadgeValue").textContent = state.currentTripId;
-            showTab("images");
-            fetchTrips(state.currentPage);
-          } else {
-            Toasts.show("Failed to add trip", "error");
-          }
-        } else {
-          const { ok, data } = await api(
-            `/api/Trip/UpdateTrip/${state.editTripId}`,
-            { method: "PUT", body: payload }
-          );
-          if (ok && data?.succeeded) {
-            Toasts.show("Trip updated successfully", "success");
-            hideModal();
-            fetchTrips(state.currentPage);
-          } else {
-            Toasts.show(data?.message || "Failed to update trip", "error");
-          }
-        }
-      });
-
-      // Add / Edit open
+      // === Listeners for Edit Modal ===
       document
-        .getElementById("addTripBtn")
-        .addEventListener("click", () => openModal("add"));
-
-      // row actions
-      tripTable.addEventListener("click", async (e) => {
-        const btn = e.target.closest("button[data-action]");
-        if (!btn) return;
-        const id = btn.getAttribute("data-id");
-        if (btn.dataset.action === "edit") {
-          const { ok, data } = await api(`/api/Trip/GetTripByIdForAdmin/${id}`);
-          if (!ok || !data?.succeeded) {
-            Toasts.show("Failed to load trip", "error");
-            return;
-          }
-          openModal("edit", data.data);
-        } else if (btn.dataset.action === "delete") {
-          if (!confirm("Are you sure you want to delete this trip?")) return;
-          const { ok, data } = await api(`/api/Trip/DeleteTrip/${id}`, {
-            method: "DELETE",
-          });
-          if (ok && data?.succeeded) {
-            Toasts.show("Trip deleted", "success");
-            fetchTrips(state.currentPage);
-          } else {
-            Toasts.show(data?.message || "Delete failed", "error");
-          }
-        }
+        .getElementById("editTripForm")
+        .addEventListener("submit", handleEditSubmit);
+      document.getElementById("editCancelBtn").addEventListener("click", () => {
+        document.getElementById("editTripModal").classList.add("hidden");
       });
-
-      // ---------- Images ----------
       document
-        .getElementById("imageUploadForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          if (!state.currentTripId) {
-            Toasts.show("Save the trip first", "warn");
-            return;
-          }
-          const files = Array.from(
-            document.getElementById("tripImages").files || []
-          );
-          if (!files.length) {
-            Toasts.show("Please select at least one image", "warn");
-            return;
-          }
-          const fd = new FormData();
-          files.forEach((file, idx) => {
-            const isMain = file.name === state.mainImageName;
-            fd.append(`images[${idx}].Image`, file);
-            fd.append(`images[${idx}].IsMainImage`, String(isMain));
-          });
-          const { ok, data } = await api(
-            `/api/Trip/AddImagesToTrip/${state.currentTripId}`,
-            { method: "POST", body: fd }
-          );
-          if (ok && data?.succeeded) {
-            Toasts.show("Images uploaded", "success");
-            document.getElementById("tripImages").value = "";
-            document.getElementById("imagePreview").innerHTML = "";
-          } else {
-            Toasts.show(data?.message || "Upload failed", "error");
-          }
+        .getElementById("editCancelBtn2")
+        .addEventListener("click", () => {
+          document.getElementById("editTripModal").classList.add("hidden");
         });
-
-      document.getElementById("tripImages").addEventListener("change", (e) => {
-        const container = document.getElementById("imagePreview");
-        container.innerHTML = "";
-        state.mainImageName = null;
-        const files = Array.from(e.target.files || []);
-        files.forEach((file) => {
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            const card = document.createElement("div");
-            card.className =
-              "relative border rounded-xl overflow-hidden shadow-sm";
-            card.innerHTML = `
-              <img src="${ev.target.result}" class="w-full h-36 object-cover"/>
-              <div class="absolute inset-x-0 bottom-0 bg-white/90 p-2 flex items-center gap-2">
-                <input type="checkbox" class="main-checkbox" data-filename="${file.name}" />
-                <label class="text-xs">Use as main image</label>
-              </div>`;
-            container.appendChild(card);
-            // single select
-            card
-              .querySelector(".main-checkbox")
-              .addEventListener("change", (ev2) => {
-                $$(".main-checkbox", container).forEach((cb) => {
-                  if (cb !== ev2.target) cb.checked = false;
-                });
-                state.mainImageName = ev2.target.checked
-                  ? ev2.target.dataset.filename
-                  : null;
-              });
-          };
-          reader.readAsDataURL(file);
-        });
-      });
-
-      // ---------- Buttons (add rows) ----------
       document
-        .getElementById("addNameTranslation")
+        .getElementById("editAddNameTranslation")
         .addEventListener("click", () => {
           document
-            .getElementById("nameTranslations")
+            .getElementById("editNameTranslations")
             .appendChild(createTranslationRow("name"));
         });
       document
-        .getElementById("addDescriptionTranslation")
+        .getElementById("editAddDescriptionTranslation")
         .addEventListener("click", () => {
           document
-            .getElementById("descriptionTranslations")
+            .getElementById("editDescriptionTranslations")
             .appendChild(createTranslationRow("description"));
         });
       document
-        .getElementById("addTripDate")
-        .addEventListener("click", () =>
-          addDateInput(document.getElementById("tripDatesContainer"))
-        );
-
-      // ---------- Init ----------
-      function escapeHtml(str) {
-        return String(str ?? "").replace(
-          /[&<>"]+/g,
-          (s) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[s])
-        );
-      }
-      document.addEventListener("DOMContentLoaded", () => {
-        iconify();
-        fetchTrips();
-      });
+        .getElementById("editAddTripDate")
+        .addEventListener("click", () => {
+          const container = document.getElementById("editTripDatesContainer");
+          const input = document.createElement("input");
+          input.type = "datetime-local";
+          input.name = "TripDates[]";
+          input.required = true;
+          input.className = "w-full border rounded-lg px-4 py-2";
+          container.appendChild(input);
+        });
     </script>
   </body>
 </html>
