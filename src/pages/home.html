@@ -495,30 +495,21 @@
       }
 
       // === Dynamic Translation Fields ===
-      function createTranslationRow(type) {
+      $1;
+      function createDateRow(value = "") {
         const wrapper = document.createElement("div");
         wrapper.className = "flex items-center gap-2 mt-2";
-        const select = document.createElement("select");
-        select.name = `${type}LangId`;
-        select.className = "border rounded px-2 py-1";
-        availableLanguages.forEach((lang) => {
-          const opt = document.createElement("option");
-          opt.value = lang.id;
-          opt.textContent = lang.name;
-          select.appendChild(opt);
-        });
-        const input = document.createElement(
-          type === "name" ? "input" : "textarea"
-        );
-        input.name = `${type}Value`;
-        input.className = "border rounded px-2 py-1 flex-1";
-        if (type === "description") input.rows = 2;
+        const input = document.createElement("input");
+        input.type = "datetime-local";
+        input.name = "TripDates[]";
+        input.required = true;
+        input.className = "w-full border rounded-lg px-4 py-2";
+        if (value) input.value = value;
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
         removeBtn.textContent = "✕";
         removeBtn.className = "text-red-500 font-bold";
         removeBtn.onclick = () => wrapper.remove();
-        wrapper.appendChild(select);
         wrapper.appendChild(input);
         wrapper.appendChild(removeBtn);
         return wrapper;
@@ -618,12 +609,7 @@
         // Reset dates
         const dates = document.getElementById("tripDatesContainer");
         dates.innerHTML = "";
-        const input = document.createElement("input");
-        input.type = "datetime-local";
-        input.name = "TripDates[]";
-        input.required = true;
-        input.className = "w-full border rounded-lg px-4 py-2";
-        dates.appendChild(input);
+        dates.appendChild(createDateRow());
         // Reset Choices selections
         [
           "activitiesSelect",
@@ -669,13 +655,7 @@
         const dates = document.getElementById("tripDatesContainer");
         dates.innerHTML = "";
         (data.tripDates || []).forEach((date) => {
-          const input = document.createElement("input");
-          input.type = "datetime-local";
-          input.name = "TripDates[]";
-          input.required = true;
-          input.className = "w-full border rounded-lg px-4 py-2";
-          input.value = isoToLocalInputValue(date);
-          dates.appendChild(input);
+          dates.appendChild(createDateRow(isoToLocalInputValue(date)));
         });
         // selects
         const activityIds = getIds(data.activities);
@@ -965,12 +945,7 @@
           });
         document.getElementById("addTripDate").addEventListener("click", () => {
           const container = document.getElementById("tripDatesContainer");
-          const input = document.createElement("input");
-          input.type = "datetime-local";
-          input.name = "TripDates[]";
-          input.required = true;
-          input.className = "w-full border rounded-lg px-4 py-2";
-          container.appendChild(input);
+          container.appendChild(createDateRow());
         });
         document
           .getElementById("tabImages")
