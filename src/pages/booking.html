@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="../output.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/style.css" />
     <script src="https://unpkg.com/lucide@latest"></script>
-
     <title>Tour Guide Admin Panel</title>
   </head>
   <body class="bg-gray-100 font-sans">
@@ -71,42 +71,56 @@
           class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
         >
           <h1 class="text-3xl font-bold text-gray-900">Manage Bookings</h1>
+          <button
+            id="refreshBtn"
+            class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+          >
+            <i data-lucide="refresh-ccw" class="h-4 w-4"></i> Refresh
+          </button>
         </div>
 
         <!-- Filters: Search + Status + Sort -->
-        <div class="mb-6 flex flex-col md:flex-row items-stretch gap-3">
+        <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
           <!-- Search -->
-          <div class="flex-1">
+          <div class="md:col-span-1">
             <label for="searchInput" class="sr-only">Search Booking</label>
-            <input
-              id="searchInput"
-              type="text"
-              placeholder="Search Booking..."
-              class="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-4 py-2"
-            />
+            <div class="relative">
+              <i
+                data-lucide="search"
+                class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+              ></i>
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Search name, phone, trip, ID…"
+                class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+              />
+            </div>
           </div>
 
           <!-- Booking Status -->
-          <div class="w-full md:w-56">
+          <div class="">
             <label for="statusFilter" class="sr-only">Booking status</label>
             <select
               id="statusFilter"
-              class="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-3 py-2 bg-white text-gray-800"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
               aria-label="Filter by booking status"
             >
               <option value="">All statuses</option>
               <option value="Pending">Pending</option>
               <option value="Declined">Declined</option>
               <option value="Confirmed">Confirmed</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
             </select>
           </div>
 
           <!-- Sort -->
-          <div class="w-full md:w-56">
+          <div class="">
             <label for="sortSelect" class="sr-only">Sort</label>
             <select
               id="sortSelect"
-              class="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-3 py-2 bg-white text-gray-800"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
               aria-label="Sort bookings"
             >
               <option value="">Sort by…</option>
@@ -120,27 +134,77 @@
           </div>
         </div>
 
+        <!-- Stats / Counts -->
+        <div id="pageStats" class="mb-4 text-sm text-gray-600"></div>
+
         <!-- Bookings Table -->
-        <div class="bg-white rounded-xl shadow overflow-x-auto">
-          <table class="min-w-full text-sm text-left">
-            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-              <tr>
-                <th class="px-6 py-4">Name</th>
-                <th class="px-6 py-4">Trip</th>
-                <th class="px-6 py-4">Cost</th>
-                <th class="px-6 py-4">Created At</th>
-                <th class="px-6 py-4">Status</th>
-              </tr>
-            </thead>
-            <tbody id="bookingTable" class="divide-y divide-gray-200 bg-white">
-              <!-- Trip rows go here -->
-            </tbody>
-          </table>
+        <div
+          class="bg-white rounded-2xl shadow ring-1 ring-gray-200 overflow-hidden"
+        >
+          <div
+            class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b"
+          >
+            <div class="text-sm text-gray-600">Bookings</div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead
+                class="sticky top-0 z-10 bg-gray-50/95 backdrop-blur supports-[backdrop-filter]:bg-gray-50/75 text-gray-600 text-xs uppercase"
+              >
+                <tr>
+                  <th class="px-6 py-3 text-left font-semibold tracking-wide">
+                    Name
+                  </th>
+                  <th class="px-6 py-3 text-left font-semibold tracking-wide">
+                    Trip
+                  </th>
+                  <th class="px-6 py-3 text-left font-semibold tracking-wide">
+                    <button
+                      class="flex items-center gap-1 group"
+                      data-sort="tripdate"
+                    >
+                      <span>Trip Date</span>
+                      <span
+                        class="ml-1 text-[10px] px-1 rounded bg-gray-200/70 text-gray-600 sort-badge hidden"
+                        >▲</span
+                      >
+                    </button>
+                  </th>
+                  <th class="px-6 py-3 text-left font-semibold tracking-wide">
+                    Cost
+                  </th>
+                  <th class="px-6 py-3 text-left font-semibold tracking-wide">
+                    <button
+                      class="flex items-center gap-1 group"
+                      data-sort="createdat"
+                    >
+                      <span>Created At</span>
+                      <span
+                        class="ml-1 text-[10px] px-1 rounded bg-gray-200/70 text-gray-600 sort-badge hidden"
+                        >▲</span
+                      >
+                    </button>
+                  </th>
+                  <th class="px-6 py-3 text-left font-semibold tracking-wide">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                id="bookingTable"
+                class="divide-y divide-gray-100 bg-white"
+              ></tbody>
+            </table>
+          </div>
         </div>
+
         <div
           id="pagination"
-          class="mt-6 flex justify-center items-center gap-3 text-sm font-medium"
-        ></div>
+          class="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm font-medium"
+        >
+          <!-- Filled by JS -->
+        </div>
       </main>
     </div>
 
@@ -159,7 +223,7 @@
       <!-- Overlay -->
       <div
         id="bookingModalOverlay"
-        class="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 transition-opacity"
+        class="absolute inset-0 bg-black/50 backdrop-blur-sm opacity-0 transition-opacity"
       ></div>
 
       <!-- Panel -->
@@ -170,7 +234,7 @@
         <div
           class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[90vh]"
         >
-          <!-- NEW: flex + cap height -->
+          <!-- Header -->
           <div class="px-6 py-4 border-b flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div
@@ -194,11 +258,11 @@
             </button>
           </div>
 
+          <!-- Body -->
           <div
-            class="px-6 py-5 flex-1 overflow-y-auto overscroll-contain"
+            class="px-6 py-5 flex-1 overflow-y-auto overscroll-contain custom-scroll"
             id="bm-body"
           >
-            <!-- NEW: scrollable body -->
             <div id="bm-loading" class="flex items-center gap-3 text-gray-500">
               <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
                 <circle
@@ -219,7 +283,7 @@
             </div>
 
             <div id="bm-content" class="hidden">
-              <!-- Read-only summary -->
+              <!-- Summary -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="rounded-xl border p-4">
                   <p class="text-xs text-gray-500 mb-1">Guest</p>
@@ -266,14 +330,14 @@
                 </div>
               </div>
 
-              <!-- Inline editor -->
+              <!-- Editor -->
               <div class="mt-6">
                 <div class="flex items-center justify-between mb-2">
                   <h4 class="text-sm font-semibold text-gray-900">
                     Adjust before confirming / declining
                   </h4>
                   <span class="text-xs text-gray-500"
-                    >These changes apply to this booking.</span
+                    >Times interpreted in <strong>Africa/Cairo</strong>.</span
                   >
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -318,10 +382,6 @@
                       type="datetime-local"
                       class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2"
                     />
-                    <p class="text-[11px] mt-1 text-gray-500">
-                      Times interpreted in
-                      <span class="font-medium">Africa/Cairo</span>.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -337,40 +397,37 @@
             </div>
           </div>
 
+          <!-- Footer -->
           <div
             class="px-6 py-4 border-t bg-gray-50 flex items-center justify-between"
           >
             <div class="text-xs text-gray-500">
-              Click outside or press
+              Press
               <kbd class="px-1.5 py-0.5 bg-white border rounded">Esc</kbd> to
               close.
             </div>
             <div class="flex items-center gap-2">
-              <!-- NEW: Delete -->
               <button
                 id="bm-delete"
                 class="inline-flex items-center gap-2 rounded-xl bg-white text-red-600 border border-red-200 px-4 py-2 font-semibold hover:bg-red-50 disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled
               >
-                <i data-lucide="trash-2" class="h-4 w-4"></i>
-                Delete
+                <i data-lucide="trash-2" class="h-4 w-4"></i> Delete
               </button>
-              <!-- UPDATED: Cancel -> Decline -->
               <button
                 id="bm-cancel"
                 class="inline-flex items-center gap-2 rounded-xl bg-rose-600 text-white px-4 py-2 font-semibold shadow hover:bg-rose-700 active:bg-rose-800 disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled
               >
-                <i data-lucide="x-circle" class="h-4 w-4"></i>
-                Decline
+                <i data-lucide="x-circle" class="h-4 w-4"></i> Decline
               </button>
               <button
                 id="bm-confirm"
                 class="inline-flex items-center gap-2 rounded-xl bg-green-600 text-white px-4 py-2 font-semibold shadow hover:bg-green-700 active:bg-green-800 disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled
               >
-                <i data-lucide="check-circle" class="h-4 w-4"></i>
-                Save & confirm
+                <i data-lucide="check-circle" class="h-4 w-4"></i> Save &
+                confirm
               </button>
             </div>
           </div>
@@ -379,6 +436,10 @@
     </div>
 
     <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.lucide?.createIcons) lucide.createIcons();
+      });
+
       // ---------- Config ----------
       const ENDPOINTS = {
         bookings: "/api/Booking/GetAllBookings",
@@ -396,7 +457,8 @@
       const pageSize = 8;
       let currentSearch = "";
       let currentStatus = ""; // BookingStatus
-      let currentSort = ""; // Sort
+      let currentSort = ""; // e.g. "tripdate:desc"
+      let loading = false;
 
       // ---------- Token helpers ----------
       function getStoredToken() {
@@ -461,6 +523,8 @@
       const statusFilter = document.getElementById("statusFilter");
       const sortSelect = document.getElementById("sortSelect");
       const paginationEl = document.getElementById("pagination");
+      const statsEl = document.getElementById("pageStats");
+      const refreshBtn = document.getElementById("refreshBtn");
 
       // Modal refs
       const modalRoot = document.getElementById("bookingModal");
@@ -499,7 +563,7 @@
       let pageRows = [];
       let totalCount = 0;
 
-      // Keep current modal booking
+      // Current modal booking
       let currentModalBooking = null;
       let modalBusy = false;
 
@@ -562,7 +626,7 @@
           Completed: "bg-blue-100 text-blue-800",
           Cancelled: "bg-red-100 text-red-700",
           Rejected: "bg-red-100 text-red-700",
-          Declined: "bg-red-100 text-red-700", // NEW
+          Declined: "bg-red-100 text-red-700",
         };
         const cls = map[status] || "bg-gray-100 text-gray-700";
         return `<span class="${base} ${cls}">${status ?? ""}</span>`;
@@ -574,7 +638,7 @@
           Completed: "bg-blue-100 text-blue-800",
           Cancelled: "bg-red-100 text-red-700",
           Rejected: "bg-red-100 text-red-700",
-          Declined: "bg-red-100 text-red-700", // NEW
+          Declined: "bg-red-100 text-red-700",
         };
         el.className =
           "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium " +
@@ -611,49 +675,84 @@
         }, 2200);
       }
 
+      // ---------- Skeleton ----------
+      function showTableSkeleton(rows = 8) {
+        const cells = `
+          <td class="px-6 py-4"><div class="h-4 w-44 rounded tg-shimmer"></div></td>
+          <td class="px-6 py-4"><div class="h-4 w-40 rounded tg-shimmer"></div></td>
+          <td class="px-6 py-4"><div class="h-4 w-36 rounded tg-shimmer"></div></td>
+          <td class="px-6 py-4"><div class="h-4 w-20 rounded tg-shimmer"></div></td>
+          <td class="px-6 py-4"><div class="h-4 w-36 rounded tg-shimmer"></div></td>
+          <td class="px-6 py-4"><div class="h-5 w-24 rounded-full tg-shimmer"></div></td>`;
+        tableBody.innerHTML = Array.from({ length: rows })
+          .map(() => `<tr class="hover:bg-gray-50/70">${cells}</tr>`)
+          .join("");
+      }
+
       // ---------- Renderers ----------
       function renderRows(rows) {
         if (!rows || rows.length === 0) {
           tableBody.innerHTML = `
             <tr>
-              <td colspan="5" class="px-6 py-6 text-center text-gray-500">No bookings found.</td>
+              <td colspan="6" class="px-6 py-8">
+                <div class="flex items-center justify-center gap-3 text-gray-600">
+                  <i data-lucide="calendar-x" class="h-5 w-5"></i>
+                  <span>No bookings found</span>
+                </div>
+              </td>
             </tr>`;
+          if (window.lucide?.createIcons) lucide.createIcons();
           return;
         }
 
         tableBody.innerHTML = rows
           .map(
             (b) => `
-            <tr class="hover:bg-gray-50 cursor-pointer" data-id="${b.id ?? ""}">
-              <td class="px-6 py-4">
-                <div class="font-medium text-gray-900">${b.userName ?? ""}</div>
-                <div class="text-xs text-gray-500">${b.phoneNumber ?? ""}</div>
-                <div class="text-[11px] text-gray-400">${
-                  b.bookingPublicId ?? ""
-                }</div>
-              </td>
-              <td class="px-6 py-4">${b.tripName ?? ""}</td>
-              <td class="px-6 py-4">${formatMoney(b.totalCost)}</td>
-              <td class="px-6 py-4">${formatDateLocal(b.createdAt)}</td>
-              <td class="px-6 py-4">${statusBadge(b.status)}</td>
-            </tr>
-          `
+          <tr class="hover:bg-gray-50 cursor-pointer transition-colors" data-id="${
+            b.id ?? ""
+          }">
+            <td class="px-6 py-4">
+              <div class="font-medium text-gray-900">${b.userName ?? ""}</div>
+              <div class="text-xs text-gray-500">${b.phoneNumber ?? ""}</div>
+              <div class="text-[11px] text-gray-400">${
+                b.bookingPublicId ?? ""
+              }</div>
+            </td>
+            <td class="px-6 py-4">${b.tripName ?? ""}</td>
+            <td class="px-6 py-4">${formatDateLocal(
+              b.tripdate || b.tripDate
+            )}</td>
+            <td class="px-6 py-4">${formatMoney(b.totalCost)}</td>
+            <td class="px-6 py-4">${formatDateLocal(b.createdAt)}</td>
+            <td class="px-6 py-4">${statusBadge(b.status)}</td>
+          </tr>
+        `
           )
           .join("");
 
-        if (window.lucide && typeof window.lucide.createIcons === "function") {
-          window.lucide.createIcons();
-        }
+        if (window.lucide?.createIcons) lucide.createIcons();
       }
 
-      function renderPagination(current, totalCount) {
-        const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+      function renderStats() {
+        const start = totalCount ? (currentPage - 1) * pageSize + 1 : 0;
+        const end = Math.min(currentPage * pageSize, totalCount);
+        statsEl.textContent = totalCount
+          ? `Showing ${start}–${end} of ${totalCount} bookings`
+          : "No bookings";
+      }
+
+      function renderPagination(current, total) {
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
         paginationEl.innerHTML = "";
+
+        const group = document.createElement("div");
+        group.className =
+          "inline-flex overflow-hidden rounded-xl ring-1 ring-gray-200 bg-white shadow-sm";
 
         const prevBtn = document.createElement("button");
         prevBtn.textContent = "Previous";
-        prevBtn.disabled = current === 1 || totalCount === 0;
-        prevBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+        prevBtn.disabled = current === 1 || total === 0;
+        prevBtn.className = "px-4 py-2 disabled:opacity-50 hover:bg-gray-50";
         prevBtn.onclick = () => {
           if (currentPage > 1) {
             currentPage--;
@@ -661,23 +760,39 @@
           }
         };
 
+        const info = document.createElement("span");
+        info.className = "px-4 py-2 text-gray-600 border-x border-gray-200";
+        info.textContent = `Page ${Math.min(
+          current,
+          totalPages
+        )} of ${totalPages}`;
+
         const nextBtn = document.createElement("button");
         nextBtn.textContent = "Next";
-        nextBtn.disabled = current === totalPages || totalCount === 0;
-        nextBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
+        nextBtn.disabled = current === totalPages || total === 0;
+        nextBtn.className = "px-4 py-2 disabled:opacity-50 hover:bg-gray-50";
         nextBtn.onclick = () => {
-          const tp = Math.max(1, Math.ceil(totalCount / pageSize));
+          const tp = Math.max(1, Math.ceil(total / pageSize));
           if (currentPage < tp) {
             currentPage++;
             loadBookings(currentPage);
           }
         };
 
-        paginationEl.appendChild(prevBtn);
-        paginationEl.append(
-          ` Page ${Math.min(current, totalPages)} of ${totalPages} `
-        );
-        paginationEl.appendChild(nextBtn);
+        group.appendChild(prevBtn);
+        group.appendChild(info);
+        group.appendChild(nextBtn);
+
+        // Place group + stats nicely
+        const left = document.createElement("div");
+        left.appendChild(group);
+
+        const right = document.createElement("div");
+        right.className = "text-gray-600";
+        right.textContent = total ? `${total} total` : "—";
+
+        paginationEl.appendChild(left);
+        paginationEl.appendChild(right);
       }
 
       // ---------- Data ----------
@@ -687,12 +802,15 @@
         params.set("PageSize", String(pageSize));
         if (currentSearch) params.set("Search", currentSearch);
         if (currentStatus) params.set("BookingStatus", currentStatus);
-        if (currentSort) params.set("Sort", currentSort); // e.g. tripdate:desc
+        if (currentSort) params.set("Sort", currentSort);
         return `${ENDPOINTS.bookings}?${params.toString()}`;
       }
 
       async function loadBookings(pageNumber = 1) {
         try {
+          loading = true;
+          showTableSkeleton(pageSize);
+          renderStats(); // update while we fetch
           const url = buildBookingsUrl(pageNumber, pageSize);
           const res = await authorizedFetch(url, { method: "GET" });
           if (!res.ok) {
@@ -700,22 +818,23 @@
             throw new Error(`Fetch failed (${res.status}) ${text}`);
           }
           const json = await res.json();
-
           const payload =
             json && json.data
               ? json.data
               : { pageNumber: 1, pageSize, count: 0, data: [] };
+
           currentPage = payload.pageNumber || pageNumber;
           totalCount = typeof payload.count === "number" ? payload.count : 0;
           pageRows = Array.isArray(payload.data) ? payload.data : [];
 
           renderRows(pageRows);
+          renderStats();
           renderPagination(currentPage, totalCount);
         } catch (err) {
           console.error(err);
           tableBody.innerHTML = `
             <tr>
-              <td colspan="5" class="px-6 py-6 text-center">
+              <td colspan="6" class="px-6 py-8 text-center">
                 <div class="text-red-600 font-medium">Couldn't load bookings.</div>
                 <div class="text-sm text-gray-500 mt-1">${
                   err?.message || "Unexpected error"
@@ -723,13 +842,16 @@
               </td>
             </tr>`;
           paginationEl.innerHTML = "";
+          statsEl.textContent = "";
+        } finally {
+          loading = false;
         }
       }
 
       // ---------- Modal logic ----------
       function openModal() {
         modalRoot.classList.remove("hidden");
-        document.documentElement.classList.add("overflow-hidden"); // prevent bg scroll
+        document.documentElement.classList.add("overflow-hidden");
         document.body.classList.add("overflow-hidden");
         requestAnimationFrame(() => {
           modalOverlay.classList.remove("opacity-0");
@@ -752,7 +874,7 @@
       function setActionBusy(busy) {
         modalBusy = busy;
         bmBtnDelete.disabled = busy || !currentModalBooking;
-        bmBtnCancel.disabled = busy || !currentModalBooking; // Decline
+        bmBtnCancel.disabled = busy || !currentModalBooking;
         bmBtnConfirm.disabled =
           busy || !currentModalBooking || !isEditorValid();
         bmCloseDisabled(busy);
@@ -763,8 +885,7 @@
               <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-              </svg>
-              Working…`;
+              </svg> Working…`;
           } else if (btn.dataset._label) {
             btn.innerHTML = btn.dataset._label;
             delete btn.dataset._label;
@@ -780,7 +901,6 @@
           modalCloseBtn.classList.remove("opacity-50", "cursor-not-allowed");
         }
       }
-
       function resetModalState() {
         currentModalBooking = null;
         bmTitle.textContent = "Booking";
@@ -792,15 +912,13 @@
         bmBtnCancel.disabled = true;
         bmBtnConfirm.disabled = true;
         bmCloseDisabled(false);
-        // clear editor
         bmEditAdults.value = "";
         bmEditChildren.value = "";
         bmEditDatetime.value = "";
-        bmEditAdults.classList.remove("ring-1", "ring-red-400");
-        bmEditChildren.classList.remove("ring-1", "ring-red-400");
-        bmEditDatetime.classList.remove("ring-1", "ring-red-400");
+        [bmEditAdults, bmEditChildren, bmEditDatetime].forEach((el) =>
+          el.classList.remove("ring-1", "ring-red-400")
+        );
       }
-
       function setEditorValuesFromBooking(d) {
         bmEditAdults.value = Number(
           typeof d.adults === "number" ? d.adults : Number(d.adults) || 0
@@ -816,7 +934,6 @@
         const tripIso = d.tripdate || d.tripDate || d.trip_date;
         bmEditDatetime.value = toDatetimeLocalValue(tripIso);
       }
-
       function isEditorValid() {
         const a = Number(bmEditAdults.value);
         const c = Number(bmEditChildren.value);
@@ -847,7 +964,6 @@
           const d = json?.data || json;
           currentModalBooking = d;
 
-          // Fill summary
           bmTitle.textContent = d.tripName || "Booking";
           bmSubtitle.textContent = `#${d.bookingPublicId ?? d.id ?? ""}`;
           bmUserName.textContent = d.userName ?? "—";
@@ -868,7 +984,6 @@
           bmPublicId.textContent = d.bookingPublicId ?? "—";
           bmCreated.textContent = formatDateLocal(d.createdAt);
 
-          // Fill editor
           setEditorValuesFromBooking(d);
 
           bmLoading.classList.add("hidden");
@@ -877,12 +992,7 @@
           bmBtnCancel.disabled = false;
           bmBtnConfirm.disabled = !isEditorValid();
 
-          if (
-            window.lucide &&
-            typeof window.lucide.createIcons === "function"
-          ) {
-            window.lucide.createIcons();
-          }
+          if (window.lucide?.createIcons) lucide.createIcons();
         } catch (err) {
           console.error(err);
           bmLoading.classList.add("hidden");
@@ -892,7 +1002,6 @@
         }
       }
 
-      // NEW: Decline (Cancel) via UpdateBooking with status "Declined"
       async function declineBooking() {
         if (!currentModalBooking || modalBusy) return;
         if (!isEditorValid()) return;
@@ -908,7 +1017,6 @@
               b.tripDate,
             status: "Declined",
           };
-
           const res = await authorizedFetch(ENDPOINTS.updateBooking(b.id), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -918,8 +1026,6 @@
             const text = await res.text();
             throw new Error(`(${res.status}) ${text}`);
           }
-
-          // Update UI
           applyStatusPill(bmStatusPill, "Declined");
           const idx = pageRows.findIndex((r) => String(r.id) === String(b.id));
           if (idx > -1) {
@@ -936,7 +1042,6 @@
         }
       }
 
-      // Permanent delete
       async function deleteBookingPermanently() {
         if (!currentModalBooking || modalBusy) return;
         if (!confirm("Permanently delete this booking? This cannot be undone."))
@@ -951,12 +1056,11 @@
             const text = await res.text();
             throw new Error(`(${res.status}) ${text}`);
           }
-          // Remove from table
           pageRows = pageRows.filter((r) => String(r.id) !== String(id));
           totalCount = Math.max(0, totalCount - 1);
           renderRows(pageRows);
+          renderStats();
           renderPagination(currentPage, totalCount);
-
           showToast("Booking deleted.", "success");
           closeModal();
         } catch (e) {
@@ -982,7 +1086,6 @@
               b.tripDate,
             status: "Confirmed",
           };
-
           const res = await authorizedFetch(ENDPOINTS.updateBooking(b.id), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -992,8 +1095,6 @@
             const text = await res.text();
             throw new Error(`(${res.status}) ${text}`);
           }
-
-          // Update UI
           applyStatusPill(bmStatusPill, "Confirmed");
           const idx = pageRows.findIndex((r) => String(r.id) === String(b.id));
           if (idx > -1) {
@@ -1026,11 +1127,32 @@
         };
       }
 
+      function setupHeaderSort() {
+        document.querySelectorAll("thead [data-sort]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const key = btn.dataset.sort; // "createdat" or "tripdate"
+            const current = sortSelect.value;
+            const asc = `${key}:asc`;
+            const desc = `${key}:desc`;
+            const next = current === asc ? desc : asc;
+            sortSelect.value = next;
+            sortSelect.dispatchEvent(new Event("change"));
+            // update badges
+            document
+              .querySelectorAll(".sort-badge")
+              .forEach((b) => b.classList.add("hidden"));
+            const badge = btn.querySelector(".sort-badge");
+            if (badge) {
+              badge.textContent = next.endsWith(":asc") ? "▲" : "▼";
+              badge.classList.remove("hidden");
+            }
+          });
+        });
+      }
+
       // ---------- Boot ----------
       document.addEventListener("DOMContentLoaded", () => {
-        if (window.lucide && typeof window.lucide.createIcons === "function") {
-          window.lucide.createIcons();
-        }
+        if (window.lucide?.createIcons) lucide.createIcons();
 
         loadBookings(currentPage);
 
@@ -1040,17 +1162,30 @@
           loadBookings(currentPage);
         }, 350);
         searchInput.addEventListener("input", onSearch);
+
         statusFilter.addEventListener("change", () => {
-          currentStatus = statusFilter.value; // "", "Pending", "Declined", "Confirmed"
+          currentStatus = statusFilter.value;
           currentPage = 1;
           loadBookings(currentPage);
         });
 
         sortSelect.addEventListener("change", () => {
-          currentSort = sortSelect.value; // "", "tripdate:asc", "tripdate:desc", "createdat:asc", "createdat:desc"
+          currentSort = sortSelect.value;
           currentPage = 1;
+          // update header badges UI
+          document.querySelectorAll("thead [data-sort]").forEach((btn) => {
+            const key = btn.dataset.sort;
+            const badge = btn.querySelector(".sort-badge");
+            if (!badge) return;
+            const isThis = currentSort.startsWith(`${key}:`);
+            badge.classList.toggle("hidden", !isThis);
+            if (isThis)
+              badge.textContent = currentSort.endsWith(":asc") ? "▲" : "▼";
+          });
           loadBookings(currentPage);
         });
+
+        refreshBtn.addEventListener("click", () => loadBookings(currentPage));
 
         // Row click -> open modal
         tableBody.addEventListener("click", (e) => {
@@ -1074,7 +1209,7 @@
           }
         });
         bmBtnDelete.addEventListener("click", deleteBookingPermanently);
-        bmBtnCancel.addEventListener("click", declineBooking); // UPDATED
+        bmBtnCancel.addEventListener("click", declineBooking);
         bmBtnConfirm.addEventListener("click", confirmBooking);
 
         // Live validation for editor
@@ -1084,6 +1219,8 @@
             bmBtnConfirm.disabled = !isEditorValid() || modalBusy;
           });
         });
+
+        setupHeaderSort();
       });
     </script>
   </body>
