@@ -4,10 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="../output.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/style.css" />
     <script src="https://unpkg.com/lucide@latest"></script>
-
     <title>Tour Guide Admin Panel</title>
   </head>
+
   <body class="bg-gray-100 font-sans">
     <div class="flex min-h-screen">
       <!-- Sidebar -->
@@ -72,53 +73,102 @@
         >
           <h1 class="text-3xl font-bold text-gray-900">Manage Includes</h1>
           <button
-            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow"
             id="addIncludeBtn"
+            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow"
           >
             <i data-lucide="plus"></i>
             Add Include
           </button>
         </div>
 
-        <div class="mb-6">
-          <input
-            id="searchInput"
-            type="text"
-            placeholder="Search Include..."
-            class="w-full border border-gray-300 focus:ring-2 focus:ring-blue-500 rounded-lg px-4 py-2"
-          />
-        </div>
+        <!-- Filters row -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <!-- Search -->
+          <div class="col-span-2">
+            <label for="searchInput" class="sr-only">Search Include</label>
+            <div class="relative">
+              <i
+                data-lucide="search"
+                class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+              ></i>
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Search Include..."
+                class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+              />
+            </div>
+          </div>
 
-        <div
-          class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4"
-        >
-          <div class="w-full md:w-1/3">
-            <label class="block mb-1 text-sm font-medium text-gray-700"
+          <!-- Language filter -->
+          <div>
+            <label
+              for="languageSelect"
+              class="block mb-1 text-sm font-medium text-gray-700"
               >Filter by Language</label
             >
             <select
               title="Select Language"
               id="languageSelect"
-              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+              class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
             ></select>
           </div>
         </div>
 
-        <!-- Trip Table -->
-        <div class="bg-white rounded-xl shadow overflow-x-auto">
-          <table class="min-w-full text-sm text-left">
-            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-              <tr>
-                <th class="px-6 py-4">ID</th>
-                <th class="px-6 py-4">Include</th>
-                <th class="px-6 py-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="includeTable" class="divide-y divide-gray-200 bg-white">
-              <!-- Trip rows go here -->
-            </tbody>
-          </table>
+        <!-- Table Card -->
+        <div
+          class="bg-white rounded-2xl shadow ring-1 ring-gray-200 overflow-hidden"
+        >
+          <div
+            class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b"
+          >
+            <div class="text-sm text-gray-600">Includes</div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead
+                class="sticky top-0 z-10 bg-gray-50/95 backdrop-blur supports-[backdrop-filter]:bg-gray-50/75 text-gray-600 text-xs uppercase"
+              >
+                <tr>
+                  <th class="px-6 py-3 text-left font-semibold tracking-wide">
+                    <button
+                      class="flex items-center gap-1 group"
+                      data-sort="id"
+                    >
+                      <span>ID</span>
+                      <span
+                        class="ml-1 text-[10px] px-1 rounded bg-gray-200/70 text-gray-600 sort-badge hidden"
+                        >▲</span
+                      >
+                    </button>
+                  </th>
+                  <th class="px-6 py-3 text-left font-semibold tracking-wide">
+                    <button
+                      class="flex items-center gap-1 group"
+                      data-sort="name"
+                    >
+                      <span>Include</span>
+                      <span
+                        class="ml-1 text-[10px] px-1 rounded bg-gray-200/70 text-gray-600 sort-badge hidden"
+                        >▲</span
+                      >
+                    </button>
+                  </th>
+                  <th class="px-6 py-3 text-left font-semibold tracking-wide">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                id="includeTable"
+                class="divide-y divide-gray-100 bg-white"
+              ></tbody>
+            </table>
+          </div>
         </div>
+
+        <!-- Pagination -->
         <div
           id="pagination"
           class="mt-6 flex justify-center items-center gap-3 text-sm font-medium"
@@ -126,89 +176,262 @@
       </main>
     </div>
 
-    <!-- Modal (hidden by default) -->
+    <!-- Overlay -->
     <div
-      id="includeModel"
-      class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out hidden"
+      id="sheetOverlay"
+      class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity"
+    ></div>
+
+    <!-- Side Sheet -->
+    <div
+      id="includeSheet"
+      class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-2xl ring-1 ring-black/5 hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="sheetTitle"
     >
-      <div class="p-6 flex flex-col h-full">
-        <div class="flex items-center justify-between mb-4">
-          <h2 id="modelTitle" class="text-xl font-semibold text-gray-800">
-            Add include
-          </h2>
-          <button
-            type="button"
-            id="cancelBtn"
-            class="text-gray-500 hover:text-gray-700 text-2xl leading-none"
-          >
-            &times;
-          </button>
-        </div>
-
-        <form id="includeForm" class="flex flex-col flex-1 gap-6 overflow-auto">
-          <input type="hidden" id="includeId" name="id" />
-
-          <div id="languageFields" class="flex flex-col gap-4"></div>
-
-          <div class="mt-auto flex justify-end space-x-3">
+      <div class="flex flex-col h-full">
+        <!-- header -->
+        <div
+          class="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+        >
+          <div class="px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span
+                class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20"
+              >
+                <i data-lucide="check-square" class="h-5 w-5"></i>
+              </span>
+              <h2 id="sheetTitle" class="text-lg font-semibold tracking-tight">
+                Add Include
+              </h2>
+            </div>
             <button
               type="button"
-              id="cancelBtn"
-              class="px-5 py-2 rounded bg-gray-200 hover:bg-gray-300"
+              class="btn-cancel rounded-xl p-2 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40"
+              aria-label="Close"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="px-5 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Save
+              <i data-lucide="x" class="h-5 w-5"></i>
             </button>
           </div>
+        </div>
+
+        <!-- body -->
+        <form
+          id="includeForm"
+          class="flex-1 overflow-y-auto custom-scroll p-6 space-y-5"
+        >
+          <input type="hidden" id="includeId" name="id" />
+          <div id="languageFields" class="flex flex-col gap-4"></div>
         </form>
+
+        <!-- footer -->
+        <div class="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
+          <button
+            type="button"
+            class="btn-cancel px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium shadow-sm"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="includeForm"
+            class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow"
+          >
+            Save
+          </button>
+        </div>
       </div>
     </div>
-    <script>
-      lucide.createIcons();
 
-      const modal = document.getElementById("includeModel");
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.lucide?.createIcons) lucide.createIcons();
+      });
+
+      // Elements
+      const sheet = document.getElementById("includeSheet");
+      const overlay = document.getElementById("sheetOverlay");
+      const sheetTitle = document.getElementById("sheetTitle");
       const form = document.getElementById("includeForm");
       const tableBody = document.getElementById("includeTable");
       const searchInput = document.getElementById("searchInput");
+      const languageSelect = document.getElementById("languageSelect");
 
+      // State
       let currentPage = 1;
       const pageSize = 8;
-
-      const languageSelect = document.getElementById("languageSelect");
       let selectedLanguageId = "";
       let availableLanguages = [];
+      let lastPageItems = [];
+      let sortState = { key: null, dir: "asc" }; // id | name
 
+      // ===== UI helpers =====
+      function showSkeleton(rows = 8) {
+        let html = "";
+        for (let i = 0; i < rows; i++) {
+          html += `
+            <tr class="hover:bg-gray-50/70">
+              <td class="px-6 py-4"><div class="h-4 w-16 rounded tg-shimmer"></div></td>
+              <td class="px-6 py-4"><div class="h-4 w-40 rounded tg-shimmer"></div></td>
+              <td class="px-6 py-4"><div class="h-8 w-24 rounded-lg tg-shimmer"></div></td>
+            </tr>`;
+        }
+        tableBody.innerHTML = html;
+      }
+
+      function actionButtons(id) {
+        return `
+          <div class="inline-flex overflow-hidden rounded-lg ring-1 ring-gray-200 bg-white shadow-sm">
+            <button class="px-2.5 py-2 text-blue-600 hover:bg-blue-50" title="Edit" onclick="editInclude(${id})">
+              <i data-lucide="pencil" class="h-4 w-4"></i>
+            </button>
+            <div class="w-px bg-gray-200"></div>
+            <button class="px-2.5 py-2 text-rose-600 hover:bg-rose-50" title="Delete" onclick="deleteInclude(${id})">
+              <i data-lucide="trash-2" class="h-4 w-4"></i>
+            </button>
+          </div>
+        `;
+      }
+
+      // ===== Sorting (client-side on the current page) =====
+      function applySort(items) {
+        if (!Array.isArray(items) || !sortState.key) return items || [];
+        const dir = sortState.dir === "desc" ? -1 : 1;
+        const key = sortState.key;
+        return [...items].sort((a, b) => {
+          let va = a[key];
+          let vb = b[key];
+          if (key === "id") {
+            va = Number(va);
+            vb = Number(vb);
+          }
+          va = (va ?? "").toString().toLowerCase();
+          vb = (vb ?? "").toString().toLowerCase();
+          if (va < vb) return -1 * dir;
+          if (va > vb) return 1 * dir;
+          return 0;
+        });
+      }
+
+      function setupTableSort() {
+        document.querySelectorAll("thead [data-sort]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const key = btn.dataset.sort;
+            if (!key) return;
+            if (sortState.key === key) {
+              sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+            } else {
+              sortState.key = key;
+              sortState.dir = "asc";
+            }
+            updateSortBadges();
+            renderTable(lastPageItems); // re-render
+          });
+        });
+      }
+
+      function updateSortBadges() {
+        document.querySelectorAll("thead [data-sort]").forEach((btn) => {
+          const badge = btn.querySelector(".sort-badge");
+          if (!badge) return;
+          const active = sortState.key === btn.dataset.sort;
+          badge.classList.toggle("hidden", !active);
+          if (active) badge.textContent = sortState.dir === "asc" ? "▲" : "▼";
+        });
+      }
+
+      // ===== Overlay/Sheet with focus trap =====
+      let lastFocused = null;
+      function openSheet(titleText) {
+        sheetTitle.textContent = titleText || "Add Include";
+        lastFocused = document.activeElement;
+
+        overlay.classList.remove("hidden");
+        sheet.classList.remove("hidden");
+        overlay.classList.remove("opacity-0");
+        sheet.classList.add("sheet-enter");
+        requestAnimationFrame(() => sheet.classList.add("sheet-enter-active"));
+        setTimeout(
+          () => sheet.classList.remove("sheet-enter", "sheet-enter-active"),
+          300
+        );
+
+        setTimeout(() => {
+          const first = sheet.querySelector(
+            "input, select, textarea, button:not(.btn-cancel)"
+          );
+          if (first) first.focus();
+        }, 50);
+
+        document.addEventListener("keydown", onEscClose);
+        document.addEventListener("keydown", trapTab);
+      }
+
+      function closeSheet() {
+        sheet.classList.add("sheet-exit");
+        requestAnimationFrame(() => sheet.classList.add("sheet-exit-active"));
+        overlay.classList.add("opacity-0");
+        setTimeout(() => {
+          sheet.classList.add("hidden");
+          sheet.classList.remove("sheet-exit", "sheet-exit-active");
+          overlay.classList.add("hidden");
+          if (lastFocused) lastFocused.focus();
+        }, 250);
+
+        document.removeEventListener("keydown", onEscClose);
+        document.removeEventListener("keydown", trapTab);
+      }
+
+      function onEscClose(e) {
+        if (e.key === "Escape") closeSheet();
+      }
+      function trapTab(e) {
+        if (e.key !== "Tab") return;
+        const focusables = sheet.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          last.focus();
+          e.preventDefault();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          first.focus();
+          e.preventDefault();
+        }
+      }
+
+      overlay.addEventListener("click", closeSheet);
+      document.addEventListener("click", (e) => {
+        if (e.target.closest(".btn-cancel")) closeSheet();
+      });
+
+      // ===== API: Languages =====
       async function fetchLanguages() {
         try {
           const res = await fetch("/api/Language/GetAllLanguages");
           const data = await res.json();
 
           if (res.ok && data.succeeded) {
-            availableLanguages = data.data;
+            availableLanguages = data.data || [];
 
-            // Populate dropdown
-            data.data.forEach((lang) => {
-              const option = document.createElement("option");
-              option.value = lang.id;
-              option.textContent = lang.name;
-              languageSelect.appendChild(option);
+            languageSelect.innerHTML = "";
+            availableLanguages.forEach((lang) => {
+              const opt = document.createElement("option");
+              opt.value = lang.id;
+              opt.textContent = lang.name;
+              languageSelect.appendChild(opt);
             });
 
-            // Optional: default to English
-            const defaultLang = data.data.find(
-              (l) => l.name.toLowerCase() === "english"
+            const english = availableLanguages.find(
+              (l) => (l.name || "").toLowerCase() === "english"
             );
-            if (defaultLang) {
-              selectedLanguageId = defaultLang.id;
-              languageSelect.value = defaultLang.id;
-            }
+            selectedLanguageId = english?.id ?? availableLanguages[0]?.id ?? "";
+            if (selectedLanguageId) languageSelect.value = selectedLanguageId;
 
-            loadIncludes(searchInput.value.trim(), currentPage);
+            await loadIncludes(searchInput.value.trim(), currentPage);
           } else {
             console.error("Failed to fetch languages");
           }
@@ -217,152 +440,236 @@
         }
       }
 
+      // ===== API: Includes =====
       async function loadIncludes(searchQuery = "", pageNumber = 1) {
         try {
+          showSkeleton();
           let url = `/api/Includes/GetAllIncludes/${selectedLanguageId}?pageNumber=${pageNumber}&pageSize=${pageSize}`;
-
-          if (searchQuery) {
-            url += `&Search=${encodeURIComponent(searchQuery)}`;
-          }
+          if (searchQuery) url += `&Search=${encodeURIComponent(searchQuery)}`;
 
           const res = await fetch(url);
           const data = await res.json();
-          console.log("API response:", data);
 
           if (res.ok && data.succeeded) {
-            const includes = data.data.data;
+            const includes = data.data?.data || [];
+            lastPageItems = includes.map((i) => ({ id: i.id, name: i.name }));
+            renderTable(lastPageItems);
             renderPagination(data.data.pageNumber, data.data.count);
-            tableBody.innerHTML = "";
-
-            includes.forEach((inc) => {
-              const row = document.createElement("tr");
-              row.innerHTML = `
-                <td class="px-6 py-3">${inc.id}</td>
-                <td class="px-6 py-3">${inc.name}</td>
-                <td class="px-6 py-3">
-                  <button class="text-blue-400 hover:text-blue-900" title="Edit" onclick="editInclude(${inc.id})"
-      >
-                    <i data-lucide="pencil"></i>
-                  </button>
-                  <button class="text-red-400 hover:text-red-900" title="Delete" onclick="deleteInclude(${inc.id})">
-                    <i data-lucide="trash-2"></i>
-                  </button>
-                </td>
-              `;
-              tableBody.appendChild(row);
-            });
-
-            lucide.createIcons();
           } else {
-            alert("Failed to load Includes");
+            tableBody.innerHTML = `
+              <tr>
+                <td colspan="3" class="px-6 py-8 text-center text-red-500">Failed to load includes</td>
+              </tr>`;
           }
         } catch (err) {
           console.error(err);
-          alert("Error loading Includes");
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="3" class="px-6 py-8 text-center text-red-500">Error loading includes</td>
+            </tr>`;
         }
       }
 
-      // 👇 Re-fetch includes when language is changed
+      function renderTable(items) {
+        const sorted = applySort(items);
+        tableBody.innerHTML = "";
+
+        if (!sorted || !sorted.length) {
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="3" class="px-6 py-12">
+                <div class="flex items-center justify-center gap-3 text-gray-600">
+                  <i data-lucide="check-square" class="h-5 w-5"></i>
+                  <span>No includes found</span>
+                  <button id="quickAdd" class="ml-3 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-white text-xs font-semibold hover:bg-blue-700">
+                    <i data-lucide="plus" class="h-4 w-4"></i> Add Include
+                  </button>
+                </div>
+              </td>
+            </tr>`;
+          if (window.lucide?.createIcons) lucide.createIcons();
+          const quickAdd = document.getElementById("quickAdd");
+          if (quickAdd) quickAdd.addEventListener("click", onAddIncludeClick);
+          return;
+        }
+
+        sorted.forEach((inc) => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-gray-50 transition-colors";
+          tr.innerHTML = `
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center justify-center h-7 w-10 rounded-lg bg-indigo-600/10 text-indigo-700 ring-1 ring-indigo-200 tabular-nums font-semibold">${
+                inc.id
+              }</span>
+            </td>
+            <td class="px-6 py-4">
+              <div class="font-medium text-gray-900">${inc.name}</div>
+            </td>
+            <td class="px-6 py-4">
+              ${actionButtons(inc.id)}
+            </td>
+          `;
+          tableBody.appendChild(tr);
+        });
+
+        if (window.lucide?.createIcons) lucide.createIcons();
+      }
+
+      function renderPagination(current, totalCount) {
+        const container = document.getElementById("pagination");
+        const totalPages = Math.ceil(totalCount / pageSize);
+        container.innerHTML = "";
+
+        const group = document.createElement("div");
+        group.className =
+          "inline-flex overflow-hidden rounded-xl ring-1 ring-gray-200 bg-white shadow-sm";
+
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "Previous";
+        prevBtn.disabled = current === 1;
+        prevBtn.className = "px-4 py-2 disabled:opacity-50 hover:bg-gray-50";
+        prevBtn.onclick = () => {
+          if (current > 1) {
+            currentPage--;
+            loadIncludes(searchInput.value.trim(), currentPage);
+          }
+        };
+
+        const info = document.createElement("span");
+        info.className = "px-4 py-2 text-gray-600 border-x border-gray-200";
+        info.textContent = `Page ${current} of ${totalPages}`;
+
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "Next";
+        nextBtn.disabled = current === totalPages;
+        nextBtn.className = "px-4 py-2 disabled:opacity-50 hover:bg-gray-50";
+        nextBtn.onclick = () => {
+          if (current < totalPages) {
+            currentPage++;
+            loadIncludes(searchInput.value.trim(), currentPage);
+          }
+        };
+
+        group.appendChild(prevBtn);
+        group.appendChild(info);
+        group.appendChild(nextBtn);
+        container.appendChild(group);
+      }
+
+      // ===== Handlers =====
       languageSelect.addEventListener("change", () => {
         selectedLanguageId = languageSelect.value;
         currentPage = 1;
         loadIncludes(searchInput.value.trim(), currentPage);
       });
 
-      function renderPagination(current, totalCount) {
-        const paginationContainer = document.getElementById("pagination");
-        const totalPages = Math.ceil(totalCount / pageSize);
-        paginationContainer.innerHTML = "";
-
-        const prevBtn = document.createElement("button");
-        prevBtn.textContent = "Previous";
-        prevBtn.disabled = current === 1;
-        prevBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
-        prevBtn.onclick = () => {
-          if (current > 1) {
-            currentPage--;
-            loadIncludes(searchInput.value.trim(), currentPage); // ✅ Fixed
-          }
-        };
-
-        const nextBtn = document.createElement("button");
-        nextBtn.textContent = "Next";
-        nextBtn.disabled = current === totalPages;
-        nextBtn.className = "px-4 py-2 bg-gray-200 rounded disabled:opacity-50";
-        nextBtn.onclick = () => {
-          if (current < totalPages) {
-            currentPage++;
-            loadIncludes(searchInput.value.trim(), currentPage); // ✅ Fixed
-          }
-        };
-
-        paginationContainer.appendChild(prevBtn);
-        paginationContainer.append(` Page ${current} of ${totalPages} `);
-        paginationContainer.appendChild(nextBtn);
-      }
-
-      // Update this to pass `currentPage`
       searchInput.addEventListener("input", () => {
         currentPage = 1;
         loadIncludes(searchInput.value.trim(), currentPage);
       });
 
-      async function editInclude(id) {
+      function onAddIncludeClick() {
+        sheetTitle.textContent = "Add Include";
+        form.reset();
+        document.getElementById("includeId").value = "";
+        const container = document.getElementById("languageFields");
+        container.innerHTML = "";
+
+        availableLanguages.forEach((lang) => {
+          const field = document.createElement("div");
+          field.className = "space-y-1";
+          field.innerHTML = `
+            <label class="block font-medium">${lang.name}</label>
+            <input
+              type="text"
+              name="lang-${lang.id}"
+              placeholder="Translation in ${lang.name}"
+              class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+              required
+            />
+          `;
+          container.appendChild(field);
+        });
+
+        openSheet("Add Include");
+        if (window.lucide?.createIcons) lucide.createIcons();
+      }
+
+      document
+        .getElementById("addIncludeBtn")
+        .addEventListener("click", onAddIncludeClick);
+
+      // Exposed for action buttons
+      window.editInclude = async function (id) {
         try {
           const res = await fetch(`/api/Includes/GetIncludeById/${id}`);
           const data = await res.json();
-          console.log("data: ", data);
-
           if (!res.ok || !data.succeeded) {
-            alert("Failed to load include for editing");
+            alert("Failed to load Include for editing");
             return;
           }
 
-          const include = data.data;
-          console.log("data.data: ", include.id);
-          form.elements["id"].value = include.id;
-
-          // Clear and populate language fields
-          document.getElementById("modelTitle").innerText = "Update Include";
-          const languageFieldsContainer =
-            document.getElementById("languageFields");
-          languageFieldsContainer.innerHTML = "";
+          form.reset();
+          document.getElementById("includeId").value = data.data.id;
+          sheetTitle.textContent = "Update Include";
+          const container = document.getElementById("languageFields");
+          container.innerHTML = "";
 
           availableLanguages.forEach((lang) => {
-            const existingTranslation = include.name.find(
+            const existing = (data.data.name || []).find(
               (n) => n.languageId === lang.id
             );
-
             const field = document.createElement("div");
             field.className = "space-y-1";
             field.innerHTML = `
               <label class="block font-medium">${lang.name}</label>
               <input
-              required
                 type="text"
                 name="lang-${lang.id}"
                 placeholder="Translation in ${lang.name}"
-                class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
                 value="${
-                  existingTranslation ? existingTranslation.translation : ""
+                  existing
+                    ? (existing.translation || "").replace(/"/g, "&quot;")
+                    : ""
                 }"
+                required
               />
               <input type="hidden" name="lang-nameid-${lang.id}" value="${
-              existingTranslation ? existingTranslation.id : ""
+              existing ? existing.id : ""
             }" />
             `;
-            languageFieldsContainer.appendChild(field);
+            container.appendChild(field);
           });
 
-          modal.classList.remove("hidden");
-          setTimeout(() => modal.classList.remove("translate-x-full"), 10);
+          openSheet("Update Include");
+          if (window.lucide?.createIcons) lucide.createIcons();
         } catch (err) {
           console.error("Error fetching include for edit:", err);
           alert("Error loading include");
         }
-      }
+      };
 
-      // Add a new Include
+      window.deleteInclude = async function (id) {
+        if (!confirm("Are you sure you want to delete this include?")) return;
+        try {
+          const res = await fetch(`/api/Includes/DeleteInclude/${id}`, {
+            method: "DELETE",
+          });
+          const data = await res.json();
+          if (res.ok && data.succeeded) {
+            alert("Include deleted");
+            loadIncludes(searchInput.value.trim(), currentPage);
+          } else {
+            alert("Failed to delete Include");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error deleting include");
+        }
+      };
+
+      // Form submit (Add or Update)
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -371,7 +678,7 @@
 
         try {
           if (!isEdit) {
-            // ADD mode: send full array of translations
+            // ADD: send all translations
             const name = availableLanguages.map((lang) => ({
               languageId: lang.id,
               translation: form.elements[`lang-${lang.id}`].value.trim(),
@@ -387,16 +694,16 @@
             if (res.ok && data.succeeded) {
               alert("Include added!");
               form.reset();
-              modal.classList.add("hidden");
+              closeSheet();
               loadIncludes(searchInput.value.trim(), currentPage);
             } else {
               alert("Failed: " + (data.message || "Unknown error"));
             }
           } else {
-            // EDIT mode: update each name[id] individually
+            // EDIT: update each translation by its nameId (kept as in your API)
             const updatePromises = availableLanguages.map(async (lang) => {
               const translation = form.elements[`lang-${lang.id}`].value.trim();
-              const nameId = form.elements[`lang-nameid-${lang.id}`].value;
+              const nameId = form.elements[`lang-nameid-${lang.id}`]?.value;
 
               if (nameId && translation) {
                 const response = await fetch(
@@ -404,37 +711,22 @@
                   {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: translation }),
+                    body: JSON.stringify({ name: translation }), // your backend expects { name }
                   }
                 );
-
-                if (!response.ok) {
-                  const errorText = await response.text();
-                  console.error(
-                    `Update failed for nameId ${nameId}:`,
-                    response.status,
-                    errorText
-                  );
-                }
-
-                return response;
+                return response.ok;
               } else {
-                console.warn(
-                  `Skipping update for lang ${lang.id} — missing nameId or translation`
-                );
-                return null;
+                // skip if missing id (or implement "create translation" if supported)
+                return true;
               }
-
-              return null;
             });
 
             const results = await Promise.all(updatePromises);
-            const allSucceeded = results.every((res) => res && res.ok);
+            const allOk = results.every(Boolean);
 
-            if (allSucceeded) {
-              // alert("Include updated!");
+            if (allOk) {
               form.reset();
-              modal.classList.add("hidden");
+              closeSheet();
               loadIncludes(searchInput.value.trim(), currentPage);
             } else {
               alert("Some translations failed to update.");
@@ -446,65 +738,8 @@
         }
       });
 
-      // Delete Include
-      async function deleteInclude(id) {
-        if (!confirm("Are you sure you want to delete this include?")) return;
-
-        try {
-          const res = await fetch(`/api/Includes/DeleteInclude/${id}`, {
-            method: "DELETE",
-          });
-
-          const data = await res.json();
-          if (res.ok && data.succeeded) {
-            alert("Include deleted");
-            loadIncludes(searchInput.value.trim(), currentPage);
-          } else {
-            alert("Failed to delete Include");
-          }
-        } catch (err) {
-          console.error(err);
-          alert("Error deleting include");
-        }
-      }
-
-      // Show modal
-      document.getElementById("addIncludeBtn").addEventListener("click", () => {
-        document.getElementById("modelTitle").innerText = "Add Include";
-        const languageFieldsContainer =
-          document.getElementById("languageFields");
-        languageFieldsContainer.innerHTML = ""; // Clear previous fields
-        form.elements["id"].value = ""; // ✅ Clear edit mode
-
-        availableLanguages.forEach((lang) => {
-          const field = document.createElement("div");
-          field.className = "space-y-1";
-          field.innerHTML = `
-          <label class="block font-medium">${lang.name}</label>
-          <input
-            type="text"
-            name="lang-${lang.id}"
-            placeholder="Translation in ${lang.name}"
-            class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        `;
-          languageFieldsContainer.appendChild(field);
-        });
-
-        modal.classList.remove("hidden");
-        setTimeout(() => modal.classList.remove("translate-x-full"), 10);
-      });
-
-      document.querySelectorAll("#cancelBtn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          modal.classList.add("translate-x-full");
-          setTimeout(() => modal.classList.add("hidden"), 300);
-          form.reset();
-        });
-      });
-
-      // Initial load
+      // Init
+      setupTableSort();
       fetchLanguages();
     </script>
   </body>
