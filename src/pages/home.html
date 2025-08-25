@@ -404,6 +404,25 @@
 
           <!-- === Images Tab === -->
           <div id="tabContentImages" class="tab-content hidden">
+            <!-- === Existing Images (read-only) === -->
+            <div id="existingImagesSection" class="space-y-3 hidden">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base font-semibold text-gray-900">
+                  Existing Images
+                </h3>
+                <span
+                  id="existingImagesCount"
+                  class="text-sm text-gray-500"
+                ></span>
+              </div>
+
+              <!-- Grid -->
+              <div
+                id="existingImagesGrid"
+                class="grid grid-cols-2 md:grid-cols-3 gap-4"
+              ></div>
+            </div>
+
             <form
               id="imageUploadForm"
               enctype="multipart/form-data"
@@ -461,6 +480,144 @@
       let sortState = { key: null, dir: "asc" }; // keys: name|category|price|duration|available
       let lastTripsPage = [];
 
+      function hideExistingImagesSection() {
+        const section = document.getElementById("existingImagesSection");
+        const grid = document.getElementById("existingImagesGrid");
+        const count = document.getElementById("existingImagesCount");
+        if (section) section.classList.add("hidden");
+        if (grid) grid.innerHTML = "";
+        if (count) count.textContent = "";
+      }
+
+      function existingImagesSkeleton(count = 6) {
+        let sk = "";
+        for (let i = 0; i < count; i++) {
+          sk += `
+      <div class="relative rounded-xl overflow-hidden ring-1 ring-gray-200 bg-white">
+        <div class="h-40 w-full tg-shimmer"></div>
+      </div>`;
+        }
+        return sk;
+      }
+
+      function createExistingImageCard(url, isMain = false) {
+        const card = document.createElement("div");
+        card.className =
+          "relative rounded-xl overflow-hidden ring-1 ring-gray-200 shadow-sm bg-white";
+
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Trip image";
+        img.loading = "lazy";
+        img.className = "w-full h-40 object-cover";
+
+        // top-left badge if main
+        if (isMain) {
+          const badge = document.createElement("div");
+          badge.className =
+            "absolute top-2 left-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 bg-amber-50 text-amber-700 ring-amber-100";
+          badge.innerHTML = `<i data-lucide="star" class="h-3.5 w-3.5"></i> Main`;
+          card.appendChild(badge);
+        }
+
+        card.appendChild(img);
+        queueMicrotask(() => {
+          if (window.lucide?.createIcons) lucide.createIcons();
+        });
+        return card;
+      }
+
+      function renderExistingImages(data) {
+        const section = document.getElementById("existingImagesSection");
+        const grid = document.getElementById("existingImagesGrid");
+        const count = document.getElementById("existingImagesCount");
+        if (!section || !grid) return;
+
+        // Build a deduped list: main first (if present), then the rest
+        const main = data?.mainImage;
+        const others = Array.isArray(data?.images) ? data.images : [];
+        const rest = main ? others.filter((im) => im.id !== main.id) : others;
+
+        grid.innerHTML = "";
+
+        if (!main && rest.length === 0) {
+          grid.innerHTML = `
+      <div class="col-span-full">
+        <div class="flex items-center justify-center gap-2 text-gray-600 bg-gray-50 border border-dashed border-gray-200 rounded-xl py-8">
+          <i data-lucide="image-off" class="h-5 w-5"></i>
+          <span>No images yet</span>
+        </div>
+      </div>`;
+          section.classList.remove("hidden");
+          if (count) count.textContent = "0 images";
+          if (window.lucide?.createIcons) lucide.createIcons();
+          return;
+        }
+
+        // Main image first
+        if (main?.imageURL) {
+          grid.appendChild(createExistingImageCard(main.imageURL, true));
+        }
+
+        // Remaining images
+        rest.forEach((im) => {
+          if (im?.imageURL) {
+            grid.appendChild(createExistingImageCard(im.imageURL, false));
+          }
+        });
+
+        const total = (main ? 1 : 0) + rest.length;
+        if (count)
+          count.textContent = `${total} image${total === 1 ? "" : "s"}`;
+        section.classList.remove("hidden");
+      }
+
+      async function fetchAndRenderTripMedia(tripId) {
+        const section = document.getElementById("existingImagesSection");
+        const grid = document.getElementById("existingImagesGrid");
+        if (!section || !grid) return;
+
+        section.classList.remove("hidden");
+        grid.innerHTML = existingImagesSkeleton();
+
+        try {
+          const token = localStorage.getItem("accessToken");
+          const res = await fetch(`/api/Trip/GetTripById/${tripId}`, {
+            headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          });
+          let result, text;
+          try {
+            result = await res.json();
+          } catch {
+            text = await res.text();
+          }
+
+          if (!res.ok || !result?.succeeded) {
+            console.error("GetTripById failed", res.status, text || result);
+            grid.innerHTML = `
+        <div class="col-span-full">
+          <div class="flex items-center justify-center gap-2 text-rose-600 bg-rose-50 border border-dashed border-rose-200 rounded-xl py-8">
+            <i data-lucide="alert-triangle" class="h-5 w-5"></i>
+            <span>Failed to load images.</span>
+          </div>
+        </div>`;
+            if (window.lucide?.createIcons) lucide.createIcons();
+            return;
+          }
+          renderExistingImages(result.data);
+        } catch (err) {
+          console.error("Media fetch error:", err);
+          grid.innerHTML = `
+      <div class="col-span-full">
+        <div class="flex items-center justify-center gap-2 text-rose-600 bg-rose-50 border border-dashed border-rose-200 rounded-xl py-8">
+          <i data-lucide="wifi-off" class="h-5 w-5"></i>
+          <span>Network error while loading images.</span>
+        </div>
+      </div>`;
+          if (window.lucide?.createIcons) lucide.createIcons();
+        }
+      }
+
       // --- NEW: helpers for pretty cells ---
       function badge(text, color = "blue") {
         const cls =
@@ -489,9 +646,9 @@
           2
         )}</span>`;
       }
-      function durationPill(hours) {
+      function durationPill(minutes) {
         return `<span class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-gray-200 bg-gray-50 text-gray-700">
-              <i data-lucide="clock-3" class="h-3.5 w-3.5"></i>${hours}h
+              <i data-lucide="clock-3" class="h-3.5 w-3.5"></i>${minutes}m
             </span>`;
       }
       function initialBubble(name) {
@@ -1000,6 +1157,7 @@
         document.getElementById("modalTitle").textContent = "Add Trip";
         document.getElementById("submitBtn").textContent = "Save";
         resetTripForm();
+        hideExistingImagesSection(); // 🔵 hide images section in Add mode
         showInfoTab();
         openModal();
         if (window.lucide?.createIcons) lucide.createIcons();
@@ -1021,6 +1179,10 @@
           const result = await res.json();
           if (res.ok && result.succeeded) {
             await loadTripIntoForm(result.data);
+
+            // 🔵 Load images (read-only)
+            fetchAndRenderTripMedia(tripId);
+
             showInfoTab();
             openModal();
             if (window.lucide?.createIcons) lucide.createIcons();
@@ -1065,6 +1227,7 @@
         if (fileInput) fileInput.value = "";
         document.getElementById("imagePreview").innerHTML = "";
         refreshNotIncludesOptions();
+        hideExistingImagesSection();
       }
 
       async function loadTripIntoForm(data) {
