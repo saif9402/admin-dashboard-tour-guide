@@ -220,7 +220,6 @@
                     <button
                       class="flex items-center gap-1 group"
                       data-sort="price"
-                      title="Server-sorted"
                     >
                       <span>Price</span>
                       <span
@@ -1472,17 +1471,17 @@
         const thButtons = document.querySelectorAll("thead [data-sort]");
         thButtons.forEach((btn) => {
           btn.addEventListener("click", () => {
-            const map = {
+            const keyMap = {
               name: "name",
               category: "category",
               price: "price",
               duration: "duration",
               available: "available",
             };
-            const key = map[btn.dataset.sort];
+            const key = keyMap[btn.dataset.sort];
             if (!key) return;
 
-            // Toggle direction
+            // toggle direction or set new key
             if (sortState.key === key) {
               sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
             } else {
@@ -1490,21 +1489,8 @@
               sortState.dir = "asc";
             }
 
-            // If price header clicked => drive server sort
-            if (key === "price") {
-              const desired = `price:${sortState.dir}`;
-              // replace current server sorts with just the price sort
-              sortChoices.removeActiveItems();
-              sortChoices.setChoiceByValue([desired]);
-              activeServerSorts = [desired];
-              currentPage = 1;
-              updateSortBadges();
-              fetchTrips(currentPage);
-              return;
-            }
-
-            // otherwise: client sort
             updateSortBadges();
+            // purely client-side: rerender current page from cached data
             renderTrips(lastTripsPage);
           });
         });
