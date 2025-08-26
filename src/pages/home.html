@@ -86,7 +86,7 @@
         </div>
 
         <!-- Filters row (outside the table) -->
-        <div class="mb-6 grid grid-cols-1 md:grid-cols-6 gap-4">
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Search -->
           <div>
             <label for="tripSearch" class="sr-only">Search Trips</label>
@@ -126,63 +126,130 @@
             </select>
           </div>
 
-          <!-- Availability -->
-          <div>
-            <label for="availableFilter" class="sr-only">Availability</label>
-            <select
-              id="availableFilter"
-              class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
-              aria-label="Filter by availability"
+          <!-- Filters button + popover -->
+          <div class="relative">
+            <button
+              id="openFiltersBtn"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="filtersPopover"
+              class="w-full inline-flex items-center justify-center gap-2 border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
             >
-              <option value="">All trips</option>
-              <option value="true">Available only</option>
-              <option value="false">Unavailable only</option>
-            </select>
-          </div>
+              <i data-lucide="sliders-horizontal" class="h-4 w-4"></i>
+              Filters
+              <!-- tiny active dot -->
+              <span
+                id="activeFiltersDot"
+                class="ml-1 inline-block h-2 w-2 rounded-full bg-blue-600 hidden"
+              ></span>
+            </button>
 
-          <!-- Top rated -->
-          <div>
-            <label for="topRatedFilter" class="sr-only">Top rated</label>
-            <select
-              id="topRatedFilter"
-              class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
-              aria-label="Filter by top rated"
+            <!-- Popover panel -->
+            <div
+              id="filtersPopover"
+              class="absolute right-0 z-20 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 hidden"
             >
-              <option value="">All trips</option>
-              <option value="true">Top rated only</option>
-              <option value="false">Not top rated</option>
-            </select>
-          </div>
-          <!-- Best seller -->
-          <div>
-            <label for="bestSellerFilter" class="sr-only">Best seller</label>
-            <select
-              id="bestSellerFilter"
-              class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
-              aria-label="Filter by best seller"
-            >
-              <option value="">All trips</option>
-              <option value="true">Best sellers only</option>
-              <option value="false">Not best sellers</option>
-            </select>
-          </div>
+              <div class="space-y-4">
+                <!-- Sort -->
+                <div>
+                  <label
+                    for="tripSortSelectPopover"
+                    class="block text-sm font-medium mb-1"
+                    >Sort by</label
+                  >
+                  <select
+                    id="tripSortSelectPopover"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+                  >
+                    <option value="">None</option>
+                    <option value="price:asc">Price ↑ (low → high)</option>
+                    <option value="price:desc">Price ↓ (high → low)</option>
+                    <option value="rating:asc">Rating ↑ (low → high)</option>
+                    <option value="rating:desc">Rating ↓ (high → low)</option>
+                    <option value="date:asc">Date ↑ (oldest first)</option>
+                    <option value="date:desc">Date ↓ (newest first)</option>
+                  </select>
+                </div>
 
-          <!-- Sort (single select, like Booking) -->
-          <div>
-            <label for="tripSortSelect" class="sr-only">Sort</label>
-            <select
-              id="tripSortSelect"
-              class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
-              aria-label="Sort trips"
-            >
-              <option value="">Sort by…</option>
-              <option value="price:asc">Price ↑ (low → high)</option>
-              <option value="price:desc">Price ↓ (high → low)</option>
-              <option value="rating:asc">Rating ↑ (low → high)</option>
-              <option value="rating:desc">Rating ↓ (high → low)</option>
-              <option value="date:asc">Date ↑ (oldest first)</option>
-              <option value="date:desc">Date ↓ (newest first)</option>
-            </select>
+                <!-- Availability -->
+                <div>
+                  <label
+                    for="availableFilterPopover"
+                    class="block text-sm font-medium mb-1"
+                    >Availability</label
+                  >
+                  <select
+                    id="availableFilterPopover"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+                  >
+                    <option value="">All</option>
+                    <option value="true">Available only</option>
+                    <option value="false">Unavailable only</option>
+                  </select>
+                </div>
+
+                <!-- Flags -->
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      for="topRatedFilterPopover"
+                      class="block text-sm font-medium mb-1"
+                      >Top rated</label
+                    >
+                    <select
+                      id="topRatedFilterPopover"
+                      class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+                    >
+                      <option value="">All</option>
+                      <option value="true">Top rated only</option>
+                      <option value="false">Not top rated</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label
+                      for="bestSellerFilterPopover"
+                      class="block text-sm font-medium mb-1"
+                      >Best seller</label
+                    >
+                    <select
+                      id="bestSellerFilterPopover"
+                      class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+                    >
+                      <option value="">All</option>
+                      <option value="true">Best sellers only</option>
+                      <option value="false">Not best sellers</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-1">
+                  <button
+                    id="resetFiltersBtn"
+                    type="button"
+                    class="px-3 py-2 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium"
+                  >
+                    Reset
+                  </button>
+                  <div class="space-x-2">
+                    <button
+                      id="closeFiltersBtn"
+                      type="button"
+                      class="px-3 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      id="applyFiltersBtn"
+                      type="button"
+                      class="px-3 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-semibold"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -637,11 +704,27 @@
       let currentIsAvailable = ""; // "", "true", or "false"
       let currentIsTopRated = ""; // "", "true", or "false"
       let currentIsBestSeller = ""; // "", "true", or "false"
-      const bestSellerFilter = document.getElementById("bestSellerFilter");
+      // Filters popover controls
+      const openFiltersBtn = document.getElementById("openFiltersBtn");
+      const filtersPopover = document.getElementById("filtersPopover");
+      const sortSelectPopover = document.getElementById(
+        "tripSortSelectPopover"
+      );
+      const availableFilterPopover = document.getElementById(
+        "availableFilterPopover"
+      );
+      const topRatedFilterPopover = document.getElementById(
+        "topRatedFilterPopover"
+      );
+      const bestSellerFilterPopover = document.getElementById(
+        "bestSellerFilterPopover"
+      );
+      const applyFiltersBtn = document.getElementById("applyFiltersBtn");
+      const closeFiltersBtn = document.getElementById("closeFiltersBtn");
+      const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+      const activeFiltersDot = document.getElementById("activeFiltersDot");
 
-      const topRatedFilter = document.getElementById("topRatedFilter");
-
-      const availableFilter = document.getElementById("availableFilter");
+      let _filtersOutsideClick; // for cleanup
 
       // Simple debounce
       function debounce(fn, delay = 400) {
@@ -675,6 +758,65 @@
           html += `<i data-lucide="star" class="h-4 w-4 ${cls}"></i>`;
         }
         return html;
+      }
+      function syncPopoverFromState() {
+        if (sortSelectPopover) sortSelectPopover.value = filters.sort || "";
+        if (availableFilterPopover)
+          availableFilterPopover.value = currentIsAvailable || "";
+        if (topRatedFilterPopover)
+          topRatedFilterPopover.value = currentIsTopRated || "";
+        if (bestSellerFilterPopover)
+          bestSellerFilterPopover.value = currentIsBestSeller || "";
+      }
+
+      function anyFiltersActive() {
+        return Boolean(
+          filters.sort ||
+            currentIsAvailable ||
+            currentIsTopRated ||
+            currentIsBestSeller
+        );
+      }
+
+      function updateFiltersDot() {
+        if (!activeFiltersDot) return;
+        activeFiltersDot.classList.toggle("hidden", !anyFiltersActive());
+      }
+
+      function openFilters() {
+        if (!filtersPopover || !openFiltersBtn) return;
+        syncPopoverFromState();
+        filtersPopover.classList.remove("hidden");
+        openFiltersBtn.setAttribute("aria-expanded", "true");
+
+        // outside-click & ESC to close
+        _filtersOutsideClick = (e) => {
+          if (
+            !filtersPopover.contains(e.target) &&
+            e.target !== openFiltersBtn
+          ) {
+            closeFilters();
+          }
+        };
+        document.addEventListener("mousedown", _filtersOutsideClick);
+
+        document.addEventListener("keydown", onFiltersEsc);
+      }
+
+      function closeFilters() {
+        if (!filtersPopover || !openFiltersBtn) return;
+        filtersPopover.classList.add("hidden");
+        openFiltersBtn.setAttribute("aria-expanded", "false");
+
+        document.removeEventListener("keydown", onFiltersEsc);
+        if (_filtersOutsideClick) {
+          document.removeEventListener("mousedown", _filtersOutsideClick);
+          _filtersOutsideClick = null;
+        }
+      }
+
+      function onFiltersEsc(e) {
+        if (e.key === "Escape") closeFilters();
       }
 
       function reviewsSkeleton(count = 3) {
@@ -1236,9 +1378,10 @@
         if (e.target === overlay) closeModal();
       });
 
-      // === Fetch Trips (now respects filters/search/server sort) ===
+      // === Fetch Trips (respects search/language/sort/availability/topRated/bestSeller) ===
       async function fetchTrips(page = 1) {
         showTableSkeleton(); // loading skeleton
+        currentPage = page; // keep global in sync
         const token = localStorage.getItem("accessToken");
 
         // Build query string
@@ -1252,32 +1395,48 @@
           params.append("LanguageId", String(filters.languageId));
         if (filters.sort) params.append("Sort", filters.sort);
         if (currentIsAvailable !== "")
-          params.append("IsAvailable", currentIsAvailable);
-
+          params.append("IsAvailable", currentIsAvailable); // "true"/"false"
         if (currentIsTopRated !== "")
-          params.append("IsTopRated", currentIsTopRated);
-
+          params.append("IsTopRated", currentIsTopRated); // "true"/"false"
         if (currentIsBestSeller !== "")
-          params.append("IsBestSeller", currentIsBestSeller);
+          params.append("IsBestSeller", currentIsBestSeller); // "true"/"false"
 
         try {
-          const response = await fetch(`${baseUrl}?${params.toString()}`, {
+          const res = await fetch(`${baseUrl}?${params.toString()}`, {
             method: "GET",
             headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
           });
 
-          const result = await response.json();
-          if (response.ok && result.succeeded) {
-            renderTrips(result.data.data);
-            renderPagination(result.data.pageNumber, result.data.count);
-          } else {
-            document.getElementById("tripTable").innerHTML =
-              '<tr><td colspan="6" class="text-center text-red-500 py-6">Failed to load trips</td></tr>';
+          let result, text;
+          try {
+            result = await res.json();
+          } catch {
+            text = await res.text();
           }
+
+          if (!res.ok || !result?.succeeded) {
+            console.error("GetAllTrips failed", res.status, text || result);
+            tripTable.innerHTML =
+              '<tr><td colspan="6" class="text-center text-red-500 py-6">Failed to load trips</td></tr>';
+            return;
+          }
+
+          const pageData = result.data || {};
+          const items = Array.isArray(pageData.data) ? pageData.data : [];
+
+          renderTrips(items);
+          renderPagination(
+            pageData.pageNumber || page,
+            pageData.count || items.length
+          );
         } catch (e) {
-          document.getElementById("tripTable").innerHTML =
+          console.error("Trips fetch error:", e);
+          tripTable.innerHTML =
             '<tr><td colspan="6" class="text-center text-red-500 py-6">Network error</td></tr>';
-          console.error(e);
+        } finally {
+          // reflect active filters on the button dot (if present)
+          if (typeof updateFiltersDot === "function") updateFiltersDot();
+          if (window.lucide?.createIcons) lucide.createIcons();
         }
       }
 
@@ -2158,32 +2317,6 @@
           });
         }
 
-        // Availability filter
-        if (availableFilter) {
-          availableFilter.addEventListener("change", () => {
-            currentIsAvailable = availableFilter.value; // "", "true", "false"
-            currentPage = 1;
-            fetchTrips(currentPage);
-          });
-        }
-
-        // Top rated filter
-        if (topRatedFilter) {
-          topRatedFilter.addEventListener("change", () => {
-            currentIsTopRated = topRatedFilter.value; // "", "true", "false"
-            currentPage = 1;
-            fetchTrips(currentPage);
-          });
-        }
-        // Best seller filter
-        if (bestSellerFilter) {
-          bestSellerFilter.addEventListener("change", () => {
-            currentIsBestSeller = bestSellerFilter.value; // "", "true", "false"
-            currentPage = 1;
-            fetchTrips(currentPage);
-          });
-        }
-
         // Language filter
         if (langFilter) {
           langFilter.addEventListener("change", () => {
@@ -2195,13 +2328,53 @@
           });
         }
 
-        const sortSelect = document.getElementById("tripSortSelect");
+        // Filters button toggle
+        if (openFiltersBtn) {
+          openFiltersBtn.addEventListener("click", () => {
+            const isOpen =
+              openFiltersBtn.getAttribute("aria-expanded") === "true";
+            if (isOpen) closeFilters();
+            else openFilters();
+          });
+        }
 
-        if (sortSelect) {
-          sortSelect.addEventListener("change", () => {
-            filters.sort = sortSelect.value || "";
+        if (closeFiltersBtn) {
+          closeFiltersBtn.addEventListener("click", closeFilters);
+        }
+
+        if (applyFiltersBtn) {
+          applyFiltersBtn.addEventListener("click", () => {
+            // push values from popover -> state
+            filters.sort = sortSelectPopover?.value || "";
+            currentIsAvailable = availableFilterPopover?.value || "";
+            currentIsTopRated = topRatedFilterPopover?.value || "";
+            currentIsBestSeller = bestSellerFilterPopover?.value || "";
+
             currentPage = 1;
             fetchTrips(currentPage);
+            updateFiltersDot();
+            closeFilters();
+          });
+        }
+
+        if (resetFiltersBtn) {
+          resetFiltersBtn.addEventListener("click", () => {
+            // reset UI controls
+            if (sortSelectPopover) sortSelectPopover.value = "";
+            if (availableFilterPopover) availableFilterPopover.value = "";
+            if (topRatedFilterPopover) topRatedFilterPopover.value = "";
+            if (bestSellerFilterPopover) bestSellerFilterPopover.value = "";
+
+            // reset state
+            filters.sort = "";
+            currentIsAvailable = "";
+            currentIsTopRated = "";
+            currentIsBestSeller = "";
+
+            currentPage = 1;
+            fetchTrips(currentPage);
+            updateFiltersDot();
+            // keep popover open so user can see it's cleared (or close if you prefer)
           });
         }
 
@@ -2346,4 +2519,3 @@
     </script>
   </body>
 </html>
-```
