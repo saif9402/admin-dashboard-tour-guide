@@ -2629,7 +2629,14 @@
           });
         }
 
-        handleDeleteReview(btn.dataset.userId || null);
+        const list = document.getElementById("reviewsList");
+        if (list) {
+          list.addEventListener("click", (e) => {
+            const btn = e.target.closest("[data-action='delete-review']");
+            if (!btn) return;
+            handleDeleteReview(btn.dataset.userId || null);
+          });
+        }
       }
 
       // === Initialization ===
