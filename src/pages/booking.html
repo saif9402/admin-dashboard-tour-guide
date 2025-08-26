@@ -630,7 +630,6 @@
       const bmTitle = document.getElementById("bm-title");
       const bmSubtitle = document.getElementById("bm-subtitle");
       const bmLoading = document.getElementById("bm-loading");
-      const bmContent = document.getElementById("bm-content");
       const bmError = document.getElementById("bm-error");
       const bmErrorMsg = document.getElementById("bm-errorMsg");
 
@@ -1051,13 +1050,20 @@
         currentModalBooking = null;
         bmTitle.textContent = "Booking";
         bmSubtitle.textContent = "—";
+
+        // show loader, hide error + both panes
         bmLoading.classList.remove("hidden");
-        bmContent.classList.add("hidden");
         bmError.classList.add("hidden");
+        bmPaneSummary.classList.add("hidden");
+        bmPaneEdit.classList.add("hidden");
+
+        // buttons & close state
         bmBtnDelete.disabled = true;
         bmBtnCancel.disabled = true;
         bmBtnConfirm.disabled = true;
         bmCloseDisabled(false);
+
+        // clear editor inputs + validation highlights
         bmEditAdults.value = "";
         bmEditChildren.value = "";
         bmEditDatetime.value = "";
@@ -1065,6 +1071,7 @@
           el.classList.remove("ring-1", "ring-red-400")
         );
       }
+
       function setEditorValuesFromBooking(d) {
         bmEditAdults.value = Number(
           typeof d.adults === "number" ? d.adults : Number(d.adults) || 0
@@ -1138,7 +1145,6 @@
 
           // show content and default tab
           bmLoading.classList.add("hidden");
-          bmContent?.classList.add("hidden"); // older block no longer used
           document.getElementById("bm-error")?.classList.add("hidden");
           showBookingTab("summary"); // << new
           bmBtnDelete.disabled = false;
