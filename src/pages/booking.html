@@ -1017,8 +1017,7 @@
         modalBusy = busy;
         bmBtnDelete.disabled = busy || !currentModalBooking;
         bmBtnCancel.disabled = busy || !currentModalBooking;
-        bmBtnConfirm.disabled =
-          busy || !currentModalBooking || !isEditorValid();
+
         bmCloseDisabled(busy);
         [bmBtnDelete, bmBtnCancel, bmBtnConfirm].forEach((btn) => {
           if (busy) {
@@ -1173,12 +1172,6 @@
           bmBtnCancel.disabled = false;
 
           syncConfirmButtonState();
-
-          // Let the tab/validation decide confirm state (no hard-disable).
-          bmBtnConfirm.disabled =
-            modalBusy ||
-            bmPaneEdit.classList.contains("hidden") ||
-            !isEditorValid();
 
           if (window.lucide?.createIcons) lucide.createIcons();
         } catch (err) {
