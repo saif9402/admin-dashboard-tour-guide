@@ -85,7 +85,76 @@
           </button>
         </div>
 
-        <!-- Trip Table -->
+        <!-- Filters row (outside the table) -->
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Search -->
+          <div>
+            <label for="tripSearch" class="sr-only">Search Trips</label>
+            <div class="relative">
+              <i
+                data-lucide="search"
+                class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+              ></i>
+              <input
+                id="tripSearch"
+                type="text"
+                placeholder="Search trips…"
+                class="w-full border border-gray-200 rounded-xl pl-10 pr-10 py-2.5 bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+              />
+              <button
+                id="clearSearchBtn"
+                type="button"
+                class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                aria-label="Clear search"
+              >
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Language filter -->
+          <div>
+            <label for="langFilter" class="sr-only">Filter by language</label>
+            <select
+              id="langFilter"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+              aria-label="Filter by language"
+            >
+              <option value="">All languages</option>
+              <option value="1">German</option>
+              <option value="2">English</option>
+            </select>
+          </div>
+
+          <!-- Server-side sort + Reset -->
+          <div class="flex gap-3">
+            <select
+              id="serverSortSelect"
+              multiple
+              class="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+              aria-label="Server-side sort"
+              title="Server-side sort (optional)"
+            >
+              <option value="price:asc">Price ↑</option>
+              <option value="price:desc">Price ↓</option>
+              <option value="rating:asc">Rating ↑</option>
+              <option value="rating:desc">Rating ↓</option>
+              <option value="date:asc">Date ↑</option>
+              <option value="date:desc">Date ↓</option>
+            </select>
+
+            <button
+              id="resetFiltersBtn"
+              type="button"
+              class="inline-flex items-center gap-2 rounded-xl bg-gray-100 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-200 ring-1 ring-gray-200"
+              title="Reset filters"
+            >
+              <i data-lucide="rotate-ccw" class="h-4 w-4"></i>
+              Reset
+            </button>
+          </div>
+        </div>
+
         <!-- Enhanced Table Card -->
         <div
           class="bg-white rounded-2xl shadow ring-1 ring-gray-200 overflow-hidden"
@@ -556,6 +625,21 @@
       let currentMainImageId = null;
       let reviewsSortValue = "date:desc";
       let lastReviews = [];
+      // --- Filters state (server query params) ---
+      let filters = {
+        search: "",
+        languageId: "", // "", 1, or 2
+        serverSort: [], // array of strings e.g. ["price:asc","rating:desc"]
+      };
+
+      // Simple debounce
+      function debounce(fn, delay = 400) {
+        let t;
+        return (...args) => {
+          clearTimeout(t);
+          t = setTimeout(() => fn(...args), delay);
+        };
+      }
 
       function formatDateCairo(iso) {
         if (!iso) return "";
@@ -1141,20 +1225,28 @@
         if (e.target === overlay) closeModal();
       });
 
-      // === Fetch Trips (define normally; no patching) ===
+      // === Fetch Trips (now respects filters/search/server sort) ===
       async function fetchTrips(page = 1) {
-        showTableSkeleton(); // show skeleton while loading
+        showTableSkeleton(); // loading skeleton
         const token = localStorage.getItem("accessToken");
+
+        // Build query string
+        const params = new URLSearchParams();
+        params.set("pageNumber", String(page));
+        params.set("pageSize", String(pageSize));
+
+        if (filters.search?.trim())
+          params.append("Search", filters.search.trim());
+        if (filters.languageId)
+          params.append("LanguageId", String(filters.languageId));
+        (filters.serverSort || []).forEach((s) => params.append("Sort", s));
+
         try {
-          const response = await fetch(
-            `${baseUrl}?pageNumber=${page}&pageSize=${pageSize}`,
-            {
-              method: "GET",
-              headers: {
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-              },
-            }
-          );
+          const response = await fetch(`${baseUrl}?${params.toString()}`, {
+            method: "GET",
+            headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          });
+
           const result = await response.json();
           if (response.ok && result.succeeded) {
             renderTrips(result.data.data);
@@ -2021,6 +2113,82 @@
 
       // === Event Listeners ===
       function setupEventListeners() {
+        // --- Filters wiring ---
+        const searchInput = document.getElementById("tripSearch");
+        const clearSearchBtn = document.getElementById("clearSearchBtn");
+        const langFilter = document.getElementById("langFilter");
+        const serverSortEl = document.getElementById("serverSortSelect");
+        const resetBtn = document.getElementById("resetFiltersBtn");
+
+        // Enhance server sort with Choices (multi-select tags)
+        const serverSortChoices = getChoicesInstance(serverSortEl, {
+          removeItemButton: true,
+          shouldSort: false,
+          placeholder: true,
+          placeholderValue: "Server sort…",
+        });
+
+        // Search (debounced)
+        const applySearch = debounce(() => {
+          filters.search = searchInput.value || "";
+          currentPage = 1;
+          fetchTrips(currentPage);
+        }, 400);
+
+        if (searchInput) {
+          searchInput.addEventListener("input", applySearch);
+        }
+
+        if (clearSearchBtn) {
+          clearSearchBtn.addEventListener("click", () => {
+            if (!searchInput) return;
+            searchInput.value = "";
+            filters.search = "";
+            currentPage = 1;
+            fetchTrips(currentPage);
+          });
+        }
+
+        // Language filter
+        if (langFilter) {
+          langFilter.addEventListener("change", () => {
+            filters.languageId = langFilter.value
+              ? Number(langFilter.value)
+              : "";
+            currentPage = 1;
+            fetchTrips(currentPage);
+          });
+        }
+
+        // Server sort (multi) — send as &Sort=... per item
+        if (serverSortEl) {
+          serverSortEl.addEventListener("change", () => {
+            const selected = Array.from(serverSortEl.selectedOptions).map(
+              (o) => o.value
+            );
+            filters.serverSort = selected;
+            currentPage = 1;
+            fetchTrips(currentPage);
+          });
+        }
+
+        // Reset all
+        if (resetBtn) {
+          resetBtn.addEventListener("click", () => {
+            // reset state
+            filters = { search: "", languageId: "", serverSort: [] };
+            // reset UI
+            if (searchInput) searchInput.value = "";
+            if (langFilter) langFilter.value = "";
+            if (serverSortChoices) {
+              serverSortChoices.removeActiveItems();
+              serverSortChoices.setChoiceByValue([]);
+            }
+            currentPage = 1;
+            fetchTrips(currentPage);
+          });
+        }
+
         document
           .getElementById("addTripBtn")
           .addEventListener("click", openAddTripModal);
