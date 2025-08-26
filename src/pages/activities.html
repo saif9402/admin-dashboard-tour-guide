@@ -245,6 +245,8 @@
       </div>
     </div>
 
+    <script src="../js/ui.js" defer></script>
+
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         if (window.lucide?.createIcons) lucide.createIcons();
@@ -442,9 +444,17 @@
             await loadActivity(searchInput.value.trim(), currentPage);
           } else {
             console.error("Failed to fetch languages");
+            tgToast({
+              variant: "error",
+              message: "Failed to fetch languages.",
+            });
           }
         } catch (err) {
           console.error("Error fetching languages:", err);
+          tgToast({
+            variant: "error",
+            message: "Network error while fetching languages.",
+          });
         }
       }
 
@@ -464,12 +474,22 @@
             renderTable(lastPageItems);
             renderPagination(data.data.pageNumber, data.data.count);
           } else {
+            tgToast({
+              variant: "error",
+              message: "Failed to load activities.",
+            });
+
             tableBody.innerHTML = `
               <tr>
                 <td colspan="3" class="px-6 py-8 text-center text-red-500">Failed to load activities</td>
               </tr>`;
           }
         } catch (err) {
+          tgToast({
+            variant: "error",
+            message: "Network error while loading activities.",
+          });
+
           console.error(err);
           tableBody.innerHTML = `
             <tr>
@@ -613,7 +633,10 @@
           const res = await fetch(`/api/Activity/GetActivityById/${id}`);
           const data = await res.json();
           if (!res.ok || !data.succeeded) {
-            alert("Failed to load Activity for editing");
+            tgToast({
+              variant: "error",
+              message: "Failed to load activity for editing.",
+            });
             return;
           }
 
@@ -630,23 +653,21 @@
             const field = document.createElement("div");
             field.className = "space-y-1";
             field.innerHTML = `
-              <label class="block font-medium">${lang.name}</label>
-              <input
-                type="text"
-                name="lang-${lang.id}"
-                placeholder="Translation in ${lang.name}"
-                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
-                value="${
-                  existing
-                    ? (existing.translation || "").replace(/"/g, "&quot;")
-                    : ""
-                }"
-                required
-              />
-              <input type="hidden" name="lang-nameid-${lang.id}" value="${
+        <label class="block font-medium">${lang.name}</label>
+        <input
+          type="text"
+          name="lang-${lang.id}"
+          placeholder="Translation in ${lang.name}"
+          class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+          value="${
+            existing ? (existing.translation || "").replace(/"/g, "&quot;") : ""
+          }"
+          required
+        />
+        <input type="hidden" name="lang-nameid-${lang.id}" value="${
               existing ? existing.id : ""
             }" />
-            `;
+      `;
             container.appendChild(field);
           });
 
@@ -654,26 +675,43 @@
           if (window.lucide?.createIcons) lucide.createIcons();
         } catch (err) {
           console.error("Error fetching Activity for edit:", err);
-          alert("Error loading Activity");
+          tgToast({
+            variant: "error",
+            message: "Network error while loading activity.",
+          });
         }
       };
 
       window.deleteActivity = async function (id) {
-        if (!confirm("Are you sure you want to delete this Activity?")) return;
+        const ok = await tgConfirm({
+          title: "Delete this activity?",
+          body: "This action cannot be undone.",
+          confirmText: "Delete",
+          cancelText: "Cancel",
+          danger: true,
+        });
+        if (!ok) return;
+
         try {
           const res = await fetch(`/api/Activity/DeleteActivity/${id}`, {
             method: "DELETE",
           });
           const data = await res.json();
           if (res.ok && data.succeeded) {
-            alert("Activity deleted");
+            tgToast({ variant: "success", message: "Activity deleted." });
             loadActivity(searchInput.value.trim(), currentPage);
           } else {
-            alert("Failed to delete Activity");
+            tgToast({
+              variant: "error",
+              message: data.message || "Failed to delete activity.",
+            });
           }
         } catch (err) {
           console.error(err);
-          alert("Error deleting Activity");
+          tgToast({
+            variant: "error",
+            message: "Network error while deleting activity.",
+          });
         }
       };
 
@@ -686,7 +724,7 @@
 
         try {
           if (!isEdit) {
-            // ADD mode: send full array of translations
+            // ADD
             const name = availableLanguages.map((lang) => ({
               languageId: lang.id,
               translation: form.elements[`lang-${lang.id}`].value.trim(),
@@ -700,49 +738,59 @@
 
             const data = await res.json();
             if (res.ok && data.succeeded) {
-              alert("Activity added!");
+              tgToast({ variant: "success", message: "Activity added." });
               form.reset();
               closeSheet();
               loadActivity(searchInput.value.trim(), currentPage);
             } else {
-              alert("Failed: " + (data.message || "Unknown error"));
+              tgToast({
+                variant: "error",
+                message:
+                  "Failed to add activity: " +
+                  (data.message || "Unknown error"),
+              });
             }
           } else {
-            // EDIT mode: update each name[id] individually
-            const updatePromises = availableLanguages.map(async (lang) => {
-              const translation = form.elements[`lang-${lang.id}`].value.trim();
-              const nameId = form.elements[`lang-nameid-${lang.id}`]?.value;
-
-              if (nameId && translation) {
-                const response = await fetch(
-                  `/api/Activity/UpdateActivity/${nameId}`,
-                  {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ translation }),
-                  }
-                );
-                return response.ok;
-              } else {
-                // If there's no existing nameId, we skip here (or you can create a new translation if your API supports it)
+            // UPDATE (per-translation)
+            const results = await Promise.all(
+              availableLanguages.map(async (lang) => {
+                const translation =
+                  form.elements[`lang-${lang.id}`].value.trim();
+                const nameId = form.elements[`lang-nameid-${lang.id}`]?.value;
+                if (nameId && translation) {
+                  const response = await fetch(
+                    `/api/Activity/UpdateActivity/${nameId}`,
+                    {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ translation }),
+                    }
+                  );
+                  return response.ok;
+                }
                 return true;
-              }
-            });
+              })
+            );
 
-            const results = await Promise.all(updatePromises);
             const allOk = results.every(Boolean);
-
             if (allOk) {
+              tgToast({ variant: "success", message: "Activity updated." });
               form.reset();
               closeSheet();
               loadActivity(searchInput.value.trim(), currentPage);
             } else {
-              alert("Some translations failed to update.");
+              tgToast({
+                variant: "warning",
+                message: "Some translations failed to update.",
+              });
             }
           }
         } catch (err) {
           console.error(err);
-          alert("Error while saving Activity.");
+          tgToast({
+            variant: "error",
+            message: "Error while saving activity.",
+          });
         }
       });
 
