@@ -246,6 +246,8 @@
       </div>
     </div>
 
+    <script src="../js/ui.js" defer></script>
+
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         if (window.lucide?.createIcons) lucide.createIcons();
@@ -442,9 +444,17 @@
             await loadCategory(searchInput.value.trim(), currentPage);
           } else {
             console.error("Failed to fetch languages");
+            tgToast({
+              variant: "error",
+              message: "Failed to fetch languages.",
+            });
           }
         } catch (err) {
           console.error("Error fetching languages:", err);
+          tgToast({
+            variant: "error",
+            message: "Network error while fetching languages.",
+          });
         }
       }
 
@@ -464,6 +474,11 @@
             renderTable(lastPageItems);
             renderPagination(data.data.pageNumber, data.data.count);
           } else {
+            tgToast({
+              variant: "error",
+              message: "Failed to load categories.",
+            });
+
             tableBody.innerHTML = `
               <tr>
                 <td colspan="3" class="px-6 py-8 text-center text-red-500">Failed to load categories</td>
@@ -471,6 +486,11 @@
           }
         } catch (err) {
           console.error(err);
+          tgToast({
+            variant: "error",
+            message: "Network error while loading categories.",
+          });
+
           tableBody.innerHTML = `
             <tr>
               <td colspan="3" class="px-6 py-8 text-center text-red-500">Error loading categories</td>
@@ -613,7 +633,10 @@
           const res = await fetch(`/api/Category/GetCategoryById/${id}`);
           const data = await res.json();
           if (!res.ok || !data.succeeded) {
-            alert("Failed to load Category for editing");
+            tgToast({
+              variant: "error",
+              message: "Failed to load category for editing.",
+            });
             return;
           }
 
@@ -630,21 +653,21 @@
             const field = document.createElement("div");
             field.className = "space-y-1";
             field.innerHTML = `
-              <label class="block font-medium">${lang.name}</label>
-              <input
-                type="text"
-                name="lang-${lang.id}"
-                placeholder="Translation in ${lang.name}"
-                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
-                value="${
-                  existing ? existing.translation.replace(/"/g, "&quot;") : ""
-                }"
-                required
-              />
-              <input type="hidden" name="lang-nameid-${lang.id}" value="${
+        <label class="block font-medium">${lang.name}</label>
+        <input
+          type="text"
+          name="lang-${lang.id}"
+          placeholder="Translation in ${lang.name}"
+          class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+          value="${
+            existing ? (existing.translation || "").replace(/"/g, "&quot;") : ""
+          }"
+          required
+        />
+        <input type="hidden" name="lang-nameid-${lang.id}" value="${
               existing ? existing.id : ""
             }" />
-            `;
+      `;
             container.appendChild(field);
           });
 
@@ -652,26 +675,43 @@
           if (window.lucide?.createIcons) lucide.createIcons();
         } catch (err) {
           console.error("Error fetching Category for edit:", err);
-          alert("Error loading Category");
+          tgToast({
+            variant: "error",
+            message: "Network error while loading category.",
+          });
         }
       };
 
       window.deleteCategory = async function (id) {
-        if (!confirm("Are you sure you want to delete this Category?")) return;
+        const ok = await tgConfirm({
+          title: "Delete this category?",
+          body: "This action cannot be undone.",
+          confirmText: "Delete",
+          cancelText: "Cancel",
+          danger: true,
+        });
+        if (!ok) return;
+
         try {
           const res = await fetch(`/api/Category/DeleteCategory/${id}`, {
             method: "DELETE",
           });
           const data = await res.json();
           if (res.ok && data.succeeded) {
-            alert("Category deleted");
+            tgToast({ variant: "success", message: "Category deleted." });
             loadCategory(searchInput.value.trim(), currentPage);
           } else {
-            alert("Failed to delete Category");
+            tgToast({
+              variant: "error",
+              message: data.message || "Failed to delete category.",
+            });
           }
         } catch (err) {
           console.error(err);
-          alert("Error deleting Category");
+          tgToast({
+            variant: "error",
+            message: "Network error while deleting category.",
+          });
         }
       };
 
@@ -684,7 +724,7 @@
 
         try {
           if (!isEdit) {
-            // ADD mode: send full array of translations
+            // ADD
             const name = availableLanguages.map((lang) => ({
               languageId: lang.id,
               translation: form.elements[`lang-${lang.id}`].value.trim(),
@@ -698,49 +738,60 @@
 
             const data = await res.json();
             if (res.ok && data.succeeded) {
-              alert("Category added!");
+              tgToast({ variant: "success", message: "Category added." });
               form.reset();
               closeSheet();
               loadCategory(searchInput.value.trim(), currentPage);
             } else {
-              alert("Failed: " + (data.message || "Unknown error"));
+              tgToast({
+                variant: "error",
+                message:
+                  "Failed to add category: " +
+                  (data.message || "Unknown error"),
+              });
             }
           } else {
-            // EDIT mode: update each name[id] individually
-            const updatePromises = availableLanguages.map(async (lang) => {
-              const translation = form.elements[`lang-${lang.id}`].value.trim();
-              const nameId = form.elements[`lang-nameid-${lang.id}`]?.value;
+            // UPDATE each translation
+            const results = await Promise.all(
+              availableLanguages.map(async (lang) => {
+                const translation =
+                  form.elements[`lang-${lang.id}`].value.trim();
+                const nameId = form.elements[`lang-nameid-${lang.id}`]?.value;
 
-              if (nameId && translation) {
-                const response = await fetch(
-                  `/api/Category/UpdateCategory/${nameId}`,
-                  {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ translation }),
-                  }
-                );
-                return response.ok;
-              } else {
-                // No existing translation ID => skip or handle create here if API supports it
-                return true; // don't fail the batch
-              }
-            });
+                if (nameId && translation) {
+                  const response = await fetch(
+                    `/api/Category/UpdateCategory/${nameId}`,
+                    {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ translation }),
+                    }
+                  );
+                  return response.ok;
+                }
+                return true; // skip/new create not handled here
+              })
+            );
 
-            const results = await Promise.all(updatePromises);
             const allOk = results.every(Boolean);
-
             if (allOk) {
+              tgToast({ variant: "success", message: "Category updated." });
               form.reset();
               closeSheet();
               loadCategory(searchInput.value.trim(), currentPage);
             } else {
-              alert("Some translations failed to update.");
+              tgToast({
+                variant: "warning",
+                message: "Some translations failed to update.",
+              });
             }
           }
         } catch (err) {
           console.error(err);
-          alert("Error while saving Category.");
+          tgToast({
+            variant: "error",
+            message: "Error while saving category.",
+          });
         }
       });
 
