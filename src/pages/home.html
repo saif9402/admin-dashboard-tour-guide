@@ -1519,7 +1519,7 @@
         if (filters.search?.trim())
           params.append("Search", filters.search.trim());
         if (filters.languageId)
-          params.append("LanguageId", String(filters.languageId));
+          params.append("TranslationLanguageId", String(filters.languageId));
         if (filters.sort) params.append("Sort", filters.sort);
         if (currentIsAvailable !== "")
           params.append("IsAvailable", currentIsAvailable); // "true"/"false"
