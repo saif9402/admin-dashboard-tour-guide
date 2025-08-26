@@ -667,6 +667,7 @@
       // show tab
       function showBookingTab(which = "summary") {
         const isSummary = which === "summary";
+
         bmTabSummary.setAttribute(
           "aria-selected",
           isSummary ? "true" : "false"
@@ -683,8 +684,8 @@
         bmPaneSummary.classList.toggle("hidden", !isSummary);
         bmPaneEdit.classList.toggle("hidden", isSummary);
 
-        // enable/disable confirm button depending on tab + validity
-        bmBtnConfirm.disabled = isSummary || !isEditorValid() || modalBusy;
+        // NEW: compute enable/disable based on tab, status and validity
+        syncConfirmButtonState();
       }
 
       // wire buttons
@@ -810,6 +811,27 @@
       }
 
       // ---------- Renderers ----------
+      function canConfirmFromSummary(status) {
+        const s = String(status || "").toLowerCase();
+        // allow quick confirm from summary for these states
+        return ["pending", "declined", "rejected", "cancelled"].includes(s);
+      }
+
+      function syncConfirmButtonState() {
+        const onSummary =
+          bmPaneSummary && !bmPaneSummary.classList.contains("hidden");
+        const status = currentModalBooking?.status || "";
+        const allowFromSummary = onSummary && canConfirmFromSummary(status);
+        const allowFromEdit = !onSummary; // on Edit tab, always allowed if valid
+
+        const enabled =
+          !modalBusy &&
+          isEditorValid() &&
+          (allowFromSummary || allowFromEdit) &&
+          !!currentModalBooking;
+        bmBtnConfirm.disabled = !enabled;
+      }
+
       function renderRows(rows) {
         if (!rows || rows.length === 0) {
           tableBody.innerHTML = `
@@ -1011,6 +1033,7 @@
             delete btn.dataset._label;
           }
         });
+        syncConfirmButtonState();
       }
       function bmCloseDisabled(disabled) {
         if (disabled) {
@@ -1139,14 +1162,17 @@
           bmLoading.classList.add("hidden");
           document.getElementById("bm-error")?.classList.add("hidden");
 
-          // If it's declined/rejected/cancelled, jump straight to Edit so confirm is available.
-          const isDeclinedLike = /^(declined|rejected|cancelled)$/i.test(
-            d.status || ""
+          const s = String(d.status || "").toLowerCase();
+          const isDeclinedLike = ["declined", "rejected", "cancelled"].includes(
+            s
           );
+
           showBookingTab(isDeclinedLike ? "edit" : "summary");
 
           bmBtnDelete.disabled = false;
           bmBtnCancel.disabled = false;
+
+          syncConfirmButtonState();
 
           // Let the tab/validation decide confirm state (no hard-disable).
           bmBtnConfirm.disabled =
@@ -1378,9 +1404,7 @@
         [bmEditAdults, bmEditChildren, bmEditDatetime].forEach((el) => {
           el.addEventListener("input", () => {
             if (!currentModalBooking) return;
-            const onEditTab =
-              bmPaneEdit && !bmPaneEdit.classList.contains("hidden");
-            bmBtnConfirm.disabled = !onEditTab || !isEditorValid() || modalBusy;
+            syncConfirmButtonState();
           });
         });
 
