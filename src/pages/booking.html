@@ -228,41 +228,76 @@
 
       <!-- Panel -->
       <div
-        class="relative mx-auto my-10 w-[min(96vw,820px)] opacity-0 translate-y-6 transition-all"
         id="bookingModalPanel"
+        class="relative mx-auto my-10 w-[min(96vw,860px)] opacity-0 translate-y-6 transition-all"
       >
         <div
-          class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[90vh]"
+          class="bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden flex flex-col max-h-[90vh]"
         >
           <!-- Header -->
-          <div class="px-6 py-4 border-b flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div
-                class="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center"
-              >
-                <i data-lucide="calendar-check" class="text-blue-600"></i>
+          <div
+            class="px-6 pt-5 pb-3 border-b bg-gradient-to-r from-blue-600/5 to-indigo-600/5"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 ring-1 ring-blue-100"
+                >
+                  <i data-lucide="calendar-check" class="text-blue-600"></i>
+                </span>
+                <div>
+                  <h3 id="bm-title" class="text-lg font-semibold text-gray-900">
+                    Booking
+                  </h3>
+                  <p id="bm-subtitle" class="text-xs text-gray-500">—</p>
+                </div>
               </div>
-              <div>
-                <h3 id="bm-title" class="text-lg font-semibold text-gray-900">
-                  Booking
-                </h3>
-                <p id="bm-subtitle" class="text-xs text-gray-500">—</p>
+              <button
+                id="bm-close"
+                class="p-2 rounded-lg hover:bg-gray-100 transition"
+                aria-label="Close"
+              >
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+
+            <!-- Segmented tabs -->
+            <div class="mt-3">
+              <div
+                class="inline-flex rounded-full bg-white/60 p-1 ring-1 ring-gray-200"
+                role="tablist"
+                aria-label="Booking views"
+              >
+                <button
+                  id="bm-tab-summary"
+                  class="rounded-full px-4 py-1.5 text-sm font-medium bg-white text-gray-900 shadow"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="bm-pane-summary"
+                  type="button"
+                >
+                  Summary
+                </button>
+                <button
+                  id="bm-tab-edit"
+                  class="rounded-full px-4 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="bm-pane-edit"
+                  type="button"
+                >
+                  Edit
+                </button>
               </div>
             </div>
-            <button
-              id="bm-close"
-              class="p-2 rounded-lg hover:bg-gray-100 transition"
-              aria-label="Close"
-            >
-              <i data-lucide="x"></i>
-            </button>
           </div>
 
           <!-- Body -->
           <div
-            class="px-6 py-5 flex-1 overflow-y-auto overscroll-contain custom-scroll"
             id="bm-body"
+            class="px-6 py-5 flex-1 overflow-y-auto overscroll-contain custom-scroll"
           >
+            <!-- Loading -->
             <div id="bm-loading" class="flex items-center gap-3 text-gray-500">
               <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
                 <circle
@@ -282,14 +317,52 @@
               Loading details…
             </div>
 
-            <div id="bm-content" class="hidden">
-              <!-- Summary -->
+            <!-- Error -->
+            <div id="bm-error" class="hidden">
+              <div
+                class="rounded-xl bg-red-50 text-red-700 border border-red-200 p-4"
+              >
+                <div class="font-medium">Couldn’t load booking.</div>
+                <div id="bm-errorMsg" class="text-sm opacity-90 mt-1"></div>
+              </div>
+            </div>
+
+            <!-- SUMMARY PANE -->
+            <section
+              id="bm-pane-summary"
+              role="tabpanel"
+              aria-labelledby="bm-tab-summary"
+              class="hidden"
+            >
+              <!-- Top cards -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="rounded-xl border p-4">
                   <p class="text-xs text-gray-500 mb-1">Guest</p>
-                  <p class="font-medium text-gray-900" id="bm-userName">—</p>
-                  <p class="text-sm text-gray-600" id="bm-phone">—</p>
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="h-9 w-9 rounded-lg bg-indigo-600/10 text-indigo-700 ring-1 ring-indigo-200 flex items-center justify-center font-semibold"
+                    >
+                      <span id="bm-userInitial">?</span>
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-900" id="bm-userName">
+                        —
+                      </p>
+                      <div class="flex items-center gap-2">
+                        <span id="bm-phone" class="text-sm text-gray-600"
+                          >—</span
+                        >
+                        <button
+                          id="bm-copyPhone"
+                          class="text-xs text-blue-600 hover:underline"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
                 <div class="rounded-xl border p-4">
                   <p class="text-xs text-gray-500 mb-1">Trip</p>
                   <p class="font-medium text-gray-900" id="bm-tripName">—</p>
@@ -297,6 +370,7 @@
                     <span id="bm-tripDate">—</span>
                   </p>
                 </div>
+
                 <div class="rounded-xl border p-4">
                   <p class="text-xs text-gray-500 mb-1">Party</p>
                   <p class="text-sm text-gray-800">
@@ -304,6 +378,7 @@
                     Children: <span id="bm-children">0</span>
                   </p>
                 </div>
+
                 <div class="rounded-xl border p-4">
                   <p class="text-xs text-gray-500 mb-1">Status</p>
                   <div
@@ -315,86 +390,104 @@
                 </div>
               </div>
 
-              <div class="mt-4 rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
+              <!-- Meta strip -->
+              <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="rounded-xl bg-gray-50 border p-3 text-sm">
+                  <div class="text-gray-500 text-xs mb-0.5">Total</div>
+                  <div id="bm-total" class="font-semibold text-gray-900">—</div>
+                </div>
+                <div class="rounded-xl bg-gray-50 border p-3 text-sm">
+                  <div class="text-gray-500 text-xs mb-0.5">Booking ID</div>
+                  <div class="flex items-center gap-2">
+                    <span id="bm-publicId" class="text-gray-900">—</span>
+                    <button
+                      id="bm-copyId"
+                      class="text-xs text-blue-600 hover:underline"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+                <div class="rounded-xl bg-gray-50 border p-3 text-sm">
+                  <div class="text-gray-500 text-xs mb-0.5">Created</div>
+                  <div id="bm-created" class="text-gray-900">—</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- EDIT PANE -->
+            <section
+              id="bm-pane-edit"
+              role="tabpanel"
+              aria-labelledby="bm-tab-edit"
+              class="hidden"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="text-sm font-semibold text-gray-900">
+                  Adjust before confirming / declining
+                </h4>
+                <span class="text-xs text-gray-500"
+                  >Times interpreted in <strong>Africa/Cairo</strong>.</span
+                >
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <span class="text-gray-500">Total:</span>
-                  <span id="bm-total" class="font-semibold text-gray-900"
-                    >—</span
+                  <label
+                    for="bm-edit-adults"
+                    class="block text-xs text-gray-600 mb-1"
+                    >Adults</label
                   >
+                  <input
+                    id="bm-edit-adults"
+                    type="number"
+                    min="0"
+                    max="2147483647"
+                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2"
+                    placeholder="0"
+                  />
                 </div>
-                <div class="text-xs text-gray-500 mt-1">
-                  Booking ID: <span id="bm-publicId">—</span>
+                <div>
+                  <label
+                    for="bm-edit-children"
+                    class="block text-xs text-gray-600 mb-1"
+                    >Children</label
+                  >
+                  <input
+                    id="bm-edit-children"
+                    type="number"
+                    min="0"
+                    max="2147483647"
+                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2"
+                    placeholder="0"
+                  />
                 </div>
-                <div class="text-xs text-gray-500">
-                  Created: <span id="bm-created">—</span>
+                <div>
+                  <label
+                    for="bm-edit-datetime"
+                    class="block text-xs text-gray-600 mb-1"
+                    >Trip date & time</label
+                  >
+                  <input
+                    id="bm-edit-datetime"
+                    type="datetime-local"
+                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2"
+                  />
                 </div>
               </div>
 
-              <!-- Editor -->
-              <div class="mt-6">
-                <div class="flex items-center justify-between mb-2">
-                  <h4 class="text-sm font-semibold text-gray-900">
-                    Adjust before confirming / declining
-                  </h4>
-                  <span class="text-xs text-gray-500"
-                    >Times interpreted in <strong>Africa/Cairo</strong>.</span
-                  >
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label
-                      for="bm-edit-adults"
-                      class="block text-xs text-gray-600 mb-1"
-                      >Adults</label
-                    >
-                    <input
-                      id="bm-edit-adults"
-                      type="number"
-                      min="0"
-                      max="2147483647"
-                      class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2"
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      for="bm-edit-children"
-                      class="block text-xs text-gray-600 mb-1"
-                      >Children</label
-                    >
-                    <input
-                      id="bm-edit-children"
-                      type="number"
-                      min="0"
-                      max="2147483647"
-                      class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2"
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      for="bm-edit-datetime"
-                      class="block text-xs text-gray-600 mb-1"
-                      >Trip date & time</label
-                    >
-                    <input
-                      id="bm-edit-datetime"
-                      type="datetime-local"
-                      class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2"
-                    />
-                  </div>
-                </div>
+              <!-- Optional admin note (local only) -->
+              <div class="mt-4">
+                <label for="bm-note" class="block text-xs text-gray-600 mb-1"
+                  >Internal note (optional)</label
+                >
+                <textarea
+                  id="bm-note"
+                  rows="2"
+                  class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2"
+                  placeholder="e.g. guest asked for stroller; confirm pickup time"
+                ></textarea>
               </div>
-            </div>
-
-            <div id="bm-error" class="hidden">
-              <div
-                class="rounded-xl bg-red-50 text-red-700 border border-red-200 p-4"
-              >
-                <div class="font-medium">Couldn’t load booking.</div>
-                <div id="bm-errorMsg" class="text-sm opacity-90 mt-1"></div>
-              </div>
-            </div>
+            </section>
           </div>
 
           <!-- Footer -->
@@ -412,22 +505,24 @@
                 class="inline-flex items-center gap-2 rounded-xl bg-white text-red-600 border border-red-200 px-4 py-2 font-semibold hover:bg-red-50 disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled
               >
-                <i data-lucide="trash-2" class="h-4 w-4"></i> Delete
+                <i data-lucide="trash-2" class="h-4 w-4"></i>
+                Delete
               </button>
               <button
                 id="bm-cancel"
                 class="inline-flex items-center gap-2 rounded-xl bg-rose-600 text-white px-4 py-2 font-semibold shadow hover:bg-rose-700 active:bg-rose-800 disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled
               >
-                <i data-lucide="x-circle" class="h-4 w-4"></i> Decline
+                <i data-lucide="x-circle" class="h-4 w-4"></i>
+                Decline
               </button>
               <button
                 id="bm-confirm"
                 class="inline-flex items-center gap-2 rounded-xl bg-green-600 text-white px-4 py-2 font-semibold shadow hover:bg-green-700 active:bg-green-800 disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled
               >
-                <i data-lucide="check-circle" class="h-4 w-4"></i> Save &
-                confirm
+                <i data-lucide="check-circle" class="h-4 w-4"></i>
+                Save & confirm
               </button>
             </div>
           </div>
@@ -558,6 +653,57 @@
       const bmEditAdults = document.getElementById("bm-edit-adults");
       const bmEditChildren = document.getElementById("bm-edit-children");
       const bmEditDatetime = document.getElementById("bm-edit-datetime");
+
+      // ---- NEW: refs for tabs/panes + helpers
+      const bmTabSummary = document.getElementById("bm-tab-summary");
+      const bmTabEdit = document.getElementById("bm-tab-edit");
+      const bmPaneSummary = document.getElementById("bm-pane-summary");
+      const bmPaneEdit = document.getElementById("bm-pane-edit");
+      const bmUserInitial = document.getElementById("bm-userInitial");
+      const bmCopyPhone = document.getElementById("bm-copyPhone");
+      const bmCopyId = document.getElementById("bm-copyId");
+      const bmNote = document.getElementById("bm-note"); // local only (not sent)
+
+      // show tab
+      function showBookingTab(which = "summary") {
+        const isSummary = which === "summary";
+        bmTabSummary.setAttribute(
+          "aria-selected",
+          isSummary ? "true" : "false"
+        );
+        bmTabEdit.setAttribute("aria-selected", isSummary ? "false" : "true");
+
+        bmTabSummary.classList.toggle("bg-white", isSummary);
+        bmTabSummary.classList.toggle("text-gray-900", isSummary);
+        bmTabSummary.classList.toggle("shadow", isSummary);
+        bmTabEdit.classList.toggle("bg-white", !isSummary);
+        bmTabEdit.classList.toggle("text-gray-900", !isSummary);
+        bmTabEdit.classList.toggle("shadow", !isSummary);
+
+        bmPaneSummary.classList.toggle("hidden", !isSummary);
+        bmPaneEdit.classList.toggle("hidden", isSummary);
+
+        // enable/disable confirm button depending on tab + validity
+        bmBtnConfirm.disabled = isSummary || !isEditorValid() || modalBusy;
+      }
+
+      // wire buttons
+      bmTabSummary?.addEventListener("click", () => showBookingTab("summary"));
+      bmTabEdit?.addEventListener("click", () => showBookingTab("edit"));
+
+      // copy helpers
+      bmCopyPhone?.addEventListener("click", () => {
+        const txt = (bmPhone?.textContent || "").trim();
+        if (!txt) return;
+        navigator.clipboard
+          .writeText(txt)
+          .then(() => showToast("Phone copied"));
+      });
+      bmCopyId?.addEventListener("click", () => {
+        const txt = (bmPublicId?.textContent || "").trim();
+        if (!txt) return;
+        navigator.clipboard.writeText(txt).then(() => showToast("ID copied"));
+      });
 
       // Server-paged data for the current page
       let pageRows = [];
@@ -986,11 +1132,18 @@
 
           setEditorValuesFromBooking(d);
 
+          // set the initial bubble letter
+          const n = (d.userName || "").trim();
+          bmUserInitial.textContent = n ? n.charAt(0).toUpperCase() : "?";
+
+          // show content and default tab
           bmLoading.classList.add("hidden");
-          bmContent.classList.remove("hidden");
+          bmContent?.classList.add("hidden"); // older block no longer used
+          document.getElementById("bm-error")?.classList.add("hidden");
+          showBookingTab("summary"); // << new
           bmBtnDelete.disabled = false;
           bmBtnCancel.disabled = false;
-          bmBtnConfirm.disabled = !isEditorValid();
+          bmBtnConfirm.disabled = true; // summary tab
 
           if (window.lucide?.createIcons) lucide.createIcons();
         } catch (err) {
@@ -1216,7 +1369,9 @@
         [bmEditAdults, bmEditChildren, bmEditDatetime].forEach((el) => {
           el.addEventListener("input", () => {
             if (!currentModalBooking) return;
-            bmBtnConfirm.disabled = !isEditorValid() || modalBusy;
+            const onEditTab =
+              bmPaneEdit && !bmPaneEdit.classList.contains("hidden");
+            bmBtnConfirm.disabled = !onEditTab || !isEditorValid() || modalBusy;
           });
         });
 
