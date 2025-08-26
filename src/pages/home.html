@@ -126,32 +126,22 @@
             </select>
           </div>
 
-          <!-- Server-side sort + Reset -->
-          <div class="flex gap-3">
+          <!-- Sort (single select, like Booking) -->
+          <div>
+            <label for="tripSortSelect" class="sr-only">Sort</label>
             <select
-              id="serverSortSelect"
-              multiple
-              class="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
-              aria-label="Server-side sort"
-              title="Server-side sort (optional)"
+              id="tripSortSelect"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+              aria-label="Sort trips"
             >
-              <option value="price:asc">Price ↑</option>
-              <option value="price:desc">Price ↓</option>
-              <option value="rating:asc">Rating ↑</option>
-              <option value="rating:desc">Rating ↓</option>
-              <option value="date:asc">Date ↑</option>
-              <option value="date:desc">Date ↓</option>
+              <option value="">Sort by…</option>
+              <option value="price:asc">Price ↑ (low → high)</option>
+              <option value="price:desc">Price ↓ (high → low)</option>
+              <option value="rating:asc">Rating ↑ (low → high)</option>
+              <option value="rating:desc">Rating ↓ (high → low)</option>
+              <option value="date:asc">Date ↑ (oldest first)</option>
+              <option value="date:desc">Date ↓ (newest first)</option>
             </select>
-
-            <button
-              id="resetFiltersBtn"
-              type="button"
-              class="inline-flex items-center gap-2 rounded-xl bg-gray-100 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-200 ring-1 ring-gray-200"
-              title="Reset filters"
-            >
-              <i data-lucide="rotate-ccw" class="h-4 w-4"></i>
-              Reset
-            </button>
           </div>
         </div>
 
@@ -625,11 +615,10 @@
       let currentMainImageId = null;
       let reviewsSortValue = "date:desc";
       let lastReviews = [];
-      // --- Filters state (server query params) ---
       let filters = {
         search: "",
-        languageId: "", // "", 1, or 2
-        serverSort: [], // array of strings e.g. ["price:asc","rating:desc"]
+        languageId: "",
+        sort: "", // single value like "price:asc"
       };
 
       // Simple debounce
@@ -1239,7 +1228,7 @@
           params.append("Search", filters.search.trim());
         if (filters.languageId)
           params.append("LanguageId", String(filters.languageId));
-        (filters.serverSort || []).forEach((s) => params.append("Sort", s));
+        if (filters.sort) params.append("Sort", filters.sort);
 
         try {
           const response = await fetch(`${baseUrl}?${params.toString()}`, {
@@ -2117,16 +2106,7 @@
         const searchInput = document.getElementById("tripSearch");
         const clearSearchBtn = document.getElementById("clearSearchBtn");
         const langFilter = document.getElementById("langFilter");
-        const serverSortEl = document.getElementById("serverSortSelect");
         const resetBtn = document.getElementById("resetFiltersBtn");
-
-        // Enhance server sort with Choices (multi-select tags)
-        const serverSortChoices = getChoicesInstance(serverSortEl, {
-          removeItemButton: true,
-          shouldSort: false,
-          placeholder: true,
-          placeholderValue: "Server sort…",
-        });
 
         // Search (debounced)
         const applySearch = debounce(() => {
@@ -2160,30 +2140,11 @@
           });
         }
 
-        // Server sort (multi) — send as &Sort=... per item
-        if (serverSortEl) {
-          serverSortEl.addEventListener("change", () => {
-            const selected = Array.from(serverSortEl.selectedOptions).map(
-              (o) => o.value
-            );
-            filters.serverSort = selected;
-            currentPage = 1;
-            fetchTrips(currentPage);
-          });
-        }
+        const sortSelect = document.getElementById("tripSortSelect");
 
-        // Reset all
-        if (resetBtn) {
-          resetBtn.addEventListener("click", () => {
-            // reset state
-            filters = { search: "", languageId: "", serverSort: [] };
-            // reset UI
-            if (searchInput) searchInput.value = "";
-            if (langFilter) langFilter.value = "";
-            if (serverSortChoices) {
-              serverSortChoices.removeActiveItems();
-              serverSortChoices.setChoiceByValue([]);
-            }
+        if (sortSelect) {
+          sortSelect.addEventListener("change", () => {
+            filters.sort = sortSelect.value || "";
             currentPage = 1;
             fetchTrips(currentPage);
           });
