@@ -3,9 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html[data-auth="checking"] body {
+        visibility: hidden;
+      }
+    </style>
+    <script>
+      document.documentElement.setAttribute("data-auth", "checking");
+    </script>
     <link href="../output.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/style.css" />
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script
+      src="../js/auth-guard.js"
+      defer
+      data-redirect="../index.html"
+    ></script>
+
     <title>Tour Guide Admin Panel</title>
   </head>
 
