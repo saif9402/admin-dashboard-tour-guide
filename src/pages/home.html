@@ -188,41 +188,15 @@
                     </button>
                   </th>
                   <th class="px-6 py-3 text-left font-semibold tracking-wide">
-                    <button
-                      class="flex items-center gap-1 group"
-                      data-sort="price"
-                    >
-                      <span>Price</span>
-                      <span
-                        class="ml-1 text-[10px] px-1 rounded bg-gray-200/70 text-gray-600 sort-badge hidden"
-                        >▲</span
-                      >
-                    </button>
+                    <span>Price</span>
                   </th>
                   <th class="px-6 py-3 text-left font-semibold tracking-wide">
-                    <button
-                      class="flex items-center gap-1 group"
-                      data-sort="duration"
-                    >
-                      <span>Duration</span>
-                      <span
-                        class="ml-1 text-[10px] px-1 rounded bg-gray-200/70 text-gray-600 sort-badge hidden"
-                        >▲</span
-                      >
-                    </button>
+                    <span>Duration</span>
                   </th>
                   <th class="px-6 py-3 text-left font-semibold tracking-wide">
-                    <button
-                      class="flex items-center gap-1 group"
-                      data-sort="available"
-                    >
-                      <span>Available</span>
-                      <span
-                        class="ml-1 text-[10px] px-1 rounded bg-gray-200/70 text-gray-600 sort-badge hidden"
-                        >▲</span
-                      >
-                    </button>
+                    <span>Available</span>
                   </th>
+
                   <th class="px-6 py-3 text-left font-semibold tracking-wide">
                     Actions
                   </th>
@@ -1381,21 +1355,23 @@
       function applySort(list) {
         if (!Array.isArray(list)) return [];
         if (!sortState.key) return list;
+
         const dir = sortState.dir === "desc" ? -1 : 1;
         const key = sortState.key;
+
         return [...list].sort((a, b) => {
           let va = a[key];
           let vb = b[key];
-          if (key === "available") {
-            va = !!a.isAvailable;
-            vb = !!b.isAvailable;
-          }
+
+          // price/duration no longer sortable by header, but harmless to keep
           if (key === "price" || key === "duration") {
             va = Number(va);
             vb = Number(vb);
           }
+
           va = (va ?? "").toString().toLowerCase();
           vb = (vb ?? "").toString().toLowerCase();
+
           if (va < vb) return -1 * dir;
           if (va > vb) return 1 * dir;
           return 0;
@@ -1409,9 +1385,6 @@
             const keyMap = {
               name: "name",
               category: "category",
-              price: "price",
-              duration: "duration",
-              available: "available",
             };
             const key = keyMap[btn.dataset.sort];
             if (!key) return;
