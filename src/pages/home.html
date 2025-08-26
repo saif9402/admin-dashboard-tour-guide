@@ -21,6 +21,9 @@
       href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"
     />
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="../js/fetch-auth-interceptor.js"></script>
+    <!-- must run before any fetch -->
+
     <script
       src="../js/auth-guard.js"
       defer
@@ -779,71 +782,6 @@
         return html;
       }
 
-      // === Auth helpers: auto-attach token, refresh on 401/403, and retry ===
-      const AUTH = {
-        get token() {
-          return localStorage.getItem("accessToken");
-        },
-        set token(v) {
-          if (v) localStorage.setItem("accessToken", v);
-        },
-      };
-
-      async function refreshAccessToken() {
-        // If your backend expects POST, change method accordingly.
-        const res = await fetch("/api/Auth/GetToken", {
-          credentials: "include",
-        });
-        // Try best-effort to extract a token from common shapes
-        let json = null,
-          text = null;
-        try {
-          json = await res.clone().json();
-        } catch (_) {
-          text = await res.text();
-        }
-
-        const newToken =
-          json?.data?.accessToken ||
-          json?.data?.token ||
-          json?.token ||
-          json?.accessToken ||
-          (typeof text === "string" && text.trim() ? text.trim() : null);
-
-        if (!res.ok || !newToken) {
-          throw new Error("Failed to refresh token");
-        }
-        AUTH.token = newToken;
-        return newToken;
-      }
-
-      async function fetchWithAuth(
-        url,
-        options = {},
-        { retryOnAuthError = true } = {}
-      ) {
-        const headers = new Headers(options.headers || {});
-        if (AUTH.token && !headers.has("Authorization")) {
-          headers.set("Authorization", `Bearer ${AUTH.token}`);
-        }
-        const opts = { ...options, headers };
-
-        let res = await fetch(url, opts);
-
-        // If unauthorized, try to refresh token once, then retry
-        if ((res.status === 401 || res.status === 403) && retryOnAuthError) {
-          try {
-            await refreshAccessToken();
-            headers.set("Authorization", `Bearer ${AUTH.token}`);
-            res = await fetch(url, { ...options, headers });
-          } catch (_) {
-            // refresh failed – return original unauthorized response
-            return res;
-          }
-        }
-        return res;
-      }
-
       function syncPopoverFromState() {
         if (sortSelectPopover) sortSelectPopover.value = filters.sort || "";
         if (availableFilterPopover)
@@ -908,20 +846,20 @@
         let sk = "";
         for (let i = 0; i < count; i++) {
           sk += `
-    <div class="rounded-xl border border-gray-200 bg-white p-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <div class="h-8 w-8 rounded-full tg-shimmer"></div>
-          <div>
-            <div class="h-3 w-28 rounded tg-shimmer"></div>
-            <div class="h-3 w-20 rounded tg-shimmer mt-1"></div>
-          </div>
-        </div>
-        <div class="h-6 w-20 rounded tg-shimmer"></div>
-      </div>
-      <div class="h-4 w-full rounded tg-shimmer mt-3"></div>
-      <div class="h-4 w-2/3 rounded tg-shimmer mt-2"></div>
-    </div>`;
+          <div class="rounded-xl border border-gray-200 bg-white p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="h-8 w-8 rounded-full tg-shimmer"></div>
+                <div>
+                  <div class="h-3 w-28 rounded tg-shimmer"></div>
+                  <div class="h-3 w-20 rounded tg-shimmer mt-1"></div>
+                </div>
+              </div>
+              <div class="h-6 w-20 rounded tg-shimmer"></div>
+            </div>
+            <div class="h-4 w-full rounded tg-shimmer mt-3"></div>
+            <div class="h-4 w-2/3 rounded tg-shimmer mt-2"></div>
+          </div>`;
         }
         return sk;
       }
@@ -946,43 +884,47 @@
           card.className = "rounded-xl border border-gray-200 bg-white p-4";
 
           card.innerHTML = `
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600/10 text-indigo-700 font-semibold ring-1 ring-indigo-200">
-            ${(rv.userName || "?").trim().charAt(0).toUpperCase()}
-          </span>
-          <div>
-            <div class="text-sm font-semibold text-gray-900">${
-              rv.userName || "Anonymous"
-            }</div>
-            <div class="text-xs text-gray-500">${formatDateCairo(
-              rv.createdAt
-            )}</div>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="flex items-center gap-0.5">${starsRow(rv.rating)}</div>
-          <span class="text-xs text-gray-500">(${rv.rating ?? "-"}/5)</span>
-          <button
-            type="button"
-            class="ml-3 inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 ring-1 ring-rose-200 hover:bg-rose-100 disabled:opacity-50"
-            data-action="delete-review"
-            ${userId != null ? "" : "disabled"}
-            data-user-id="${userId ?? ""}"
-            title="${
-              userId != null
-                ? "Delete review"
-                : "Delete not available (no userId)"
-            }"
-          >
-            <i data-lucide="trash-2" class="h-3.5 w-3.5"></i> Delete
-          </button>
-        </div>
-      </div>
-      <p class="mt-3 text-sm text-gray-700 whitespace-pre-line">${
-        rv.comment || ""
-      }</p>
-    `;
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600/10 text-indigo-700 font-semibold ring-1 ring-indigo-200">
+                  ${(rv.userName || "?").trim().charAt(0).toUpperCase()}
+                </span>
+                <div>
+                  <div class="text-sm font-semibold text-gray-900">${
+                    rv.userName || "Anonymous"
+                  }</div>
+                  <div class="text-xs text-gray-500">${formatDateCairo(
+                    rv.createdAt
+                  )}</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="flex items-center gap-0.5">${starsRow(
+                  rv.rating
+                )}</div>
+                <span class="text-xs text-gray-500">(${
+                  rv.rating ?? "-"
+                }/5)</span>
+                <button
+                  type="button"
+                  class="ml-3 inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 ring-1 ring-rose-200 hover:bg-rose-100 disabled:opacity-50"
+                  data-action="delete-review"
+                  ${userId != null ? "" : "disabled"}
+                  data-user-id="${userId ?? ""}"
+                  title="${
+                    userId != null
+                      ? "Delete review"
+                      : "Delete not available (no userId)"
+                  }"
+                >
+                  <i data-lucide="trash-2" class="h-3.5 w-3.5"></i> Delete
+                </button>
+              </div>
+            </div>
+            <p class="mt-3 text-sm text-gray-700 whitespace-pre-line">${
+              rv.comment || ""
+            }</p>
+          `;
           wrap.appendChild(card);
         });
 
@@ -1027,10 +969,10 @@
             tgToast({ variant: "error", message: "Failed to load reviews." });
 
             list.innerHTML = `
-              <div class="rounded-xl border border-rose-200 bg-rose-50 text-rose-700 p-4 flex items-center gap-2">
-                <i data-lucide="alert-triangle" class="h-4 w-4"></i>
-                <span>Failed to load reviews.</span>
-              </div>`;
+                    <div class="rounded-xl border border-rose-200 bg-rose-50 text-rose-700 p-4 flex items-center gap-2">
+                      <i data-lucide="alert-triangle" class="h-4 w-4"></i>
+                      <span>Failed to load reviews.</span>
+                    </div>`;
             if (window.lucide?.createIcons) lucide.createIcons();
             return;
           }
@@ -1041,10 +983,10 @@
         } catch (err) {
           console.error("Reviews fetch error:", err);
           list.innerHTML = `
-            <div class="rounded-xl border border-rose-200 bg-rose-50 text-rose-700 p-4 flex items-center gap-2">
-              <i data-lucide="wifi-off" class="h-4 w-4"></i>
-              <span>Network error while loading reviews.</span>
-            </div>`;
+                  <div class="rounded-xl border border-rose-200 bg-rose-50 text-rose-700 p-4 flex items-center gap-2">
+                    <i data-lucide="wifi-off" class="h-4 w-4"></i>
+                    <span>Network error while loading reviews.</span>
+                  </div>`;
           if (window.lucide?.createIcons) lucide.createIcons();
         }
       }
@@ -1072,7 +1014,7 @@
         if (!ok) return;
 
         try {
-          const res = await fetchWithAuth(
+          const res = await fetch(
             `/api/Reviews/DeleteReview/${currentTripId}`,
             {
               method: "DELETE",
@@ -1208,9 +1150,9 @@
         let sk = "";
         for (let i = 0; i < count; i++) {
           sk += `
-      <div class="relative rounded-xl overflow-hidden ring-1 ring-gray-200 bg-white">
-        <div class="h-40 w-full tg-shimmer"></div>
-      </div>`;
+            <div class="relative rounded-xl overflow-hidden ring-1 ring-gray-200 bg-white">
+              <div class="h-40 w-full tg-shimmer"></div>
+            </div>`;
         }
         return sk;
       }
@@ -1285,12 +1227,12 @@
 
         if (!main && rest.length === 0) {
           grid.innerHTML = `
-      <div class="col-span-full">
-        <div class="flex items-center justify-center gap-2 text-gray-600 bg-gray-50 border border-dashed border-gray-200 rounded-xl py-8">
-          <i data-lucide="image-off" class="h-5 w-5"></i>
-          <span>No images yet</span>
-        </div>
-      </div>`;
+            <div class="col-span-full">
+              <div class="flex items-center justify-center gap-2 text-gray-600 bg-gray-50 border border-dashed border-gray-200 rounded-xl py-8">
+                <i data-lucide="image-off" class="h-5 w-5"></i>
+                <span>No images yet</span>
+              </div>
+            </div>`;
           section.classList.remove("hidden");
           if (count) count.textContent = "0 images";
           if (window.lucide?.createIcons) lucide.createIcons();
@@ -1342,12 +1284,12 @@
           if (!res.ok || !result?.succeeded) {
             console.error("GetTripById failed", res.status, text || result);
             grid.innerHTML = `
-        <div class="col-span-full">
-          <div class="flex items-center justify-center gap-2 text-rose-600 bg-rose-50 border border-dashed border-rose-200 rounded-xl py-8">
-            <i data-lucide="alert-triangle" class="h-5 w-5"></i>
-            <span>Failed to load images.</span>
-          </div>
-        </div>`;
+              <div class="col-span-full">
+                <div class="flex items-center justify-center gap-2 text-rose-600 bg-rose-50 border border-dashed border-rose-200 rounded-xl py-8">
+                  <i data-lucide="alert-triangle" class="h-5 w-5"></i>
+                  <span>Failed to load images.</span>
+                </div>
+              </div>`;
             if (window.lucide?.createIcons) lucide.createIcons();
             return;
           }
@@ -1355,12 +1297,12 @@
         } catch (err) {
           console.error("Media fetch error:", err);
           grid.innerHTML = `
-      <div class="col-span-full">
-        <div class="flex items-center justify-center gap-2 text-rose-600 bg-rose-50 border border-dashed border-rose-200 rounded-xl py-8">
-          <i data-lucide="wifi-off" class="h-5 w-5"></i>
-          <span>Network error while loading images.</span>
-        </div>
-      </div>`;
+            <div class="col-span-full">
+              <div class="flex items-center justify-center gap-2 text-rose-600 bg-rose-50 border border-dashed border-rose-200 rounded-xl py-8">
+                <i data-lucide="wifi-off" class="h-5 w-5"></i>
+                <span>Network error while loading images.</span>
+              </div>
+            </div>`;
           if (window.lucide?.createIcons) lucide.createIcons();
         }
       }
@@ -1381,11 +1323,11 @@
       function availabilityBadge(val) {
         return val
           ? `<span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 bg-emerald-50 text-emerald-700 ring-emerald-100">
-           <i data-lucide="check-circle-2" class="h-3.5 w-3.5"></i> Yes
-         </span>`
+                 <i data-lucide="check-circle-2" class="h-3.5 w-3.5"></i> Yes
+               </span>`
           : `<span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 bg-rose-50 text-rose-700 ring-rose-100">
-           <i data-lucide="x-circle" class="h-3.5 w-3.5"></i> No
-         </span>`;
+                 <i data-lucide="x-circle" class="h-3.5 w-3.5"></i> No
+               </span>`;
       }
       function formatPrice(n) {
         const num = Number(n ?? 0);
@@ -1395,8 +1337,8 @@
       }
       function durationPill(minutes) {
         return `<span class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-gray-200 bg-gray-50 text-gray-700">
-              <i data-lucide="clock-3" class="h-3.5 w-3.5"></i>${minutes}m
-            </span>`;
+                    <i data-lucide="clock-3" class="h-3.5 w-3.5"></i>${minutes}m
+                  </span>`;
       }
       function initialBubble(name) {
         const ch = (name || "?").trim().charAt(0).toUpperCase() || "?";
@@ -1409,14 +1351,14 @@
         let html = "";
         for (let i = 0; i < rows; i++) {
           html += `
-        <tr class="hover:bg-gray-50/70">
-          <td class="px-6 py-4"><div class="h-4 w-40 rounded tg-shimmer"></div></td>
-          <td class="px-6 py-4"><div class="h-4 w-24 rounded tg-shimmer"></div></td>
-          <td class="px-6 py-4"><div class="h-4 w-16 rounded tg-shimmer"></div></td>
-          <td class="px-6 py-4"><div class="h-4 w-12 rounded tg-shimmer"></div></td>
-          <td class="px-6 py-4"><div class="h-5 w-20 rounded-full tg-shimmer"></div></td>
-          <td class="px-6 py-4"><div class="h-8 w-24 rounded-lg tg-shimmer"></div></td>
-        </tr>`;
+              <tr class="hover:bg-gray-50/70">
+                <td class="px-6 py-4"><div class="h-4 w-40 rounded tg-shimmer"></div></td>
+                <td class="px-6 py-4"><div class="h-4 w-24 rounded tg-shimmer"></div></td>
+                <td class="px-6 py-4"><div class="h-4 w-16 rounded tg-shimmer"></div></td>
+                <td class="px-6 py-4"><div class="h-4 w-12 rounded tg-shimmer"></div></td>
+                <td class="px-6 py-4"><div class="h-5 w-20 rounded-full tg-shimmer"></div></td>
+                <td class="px-6 py-4"><div class="h-8 w-24 rounded-lg tg-shimmer"></div></td>
+              </tr>`;
         }
         tbody.innerHTML = html;
       }
@@ -1580,18 +1522,18 @@
 
         if (!toRender || toRender.length === 0) {
           tbody.innerHTML = `
-        <tr>
-          <td colspan="6" class="px-6 py-12">
-            <div class="flex items-center justify-center gap-3 text-gray-600">
-              <i data-lucide="map" class="h-5 w-5"></i>
-              <span>No trips found</span>
-              <button class="ml-3 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-white text-xs font-semibold hover:bg-blue-700"
-                      onclick="openAddTripModal()">
-                <i data-lucide="plus" class="h-4 w-4"></i> Add Trip
-              </button>
-            </div>
-          </td>
-        </tr>`;
+              <tr>
+                <td colspan="6" class="px-6 py-12">
+                  <div class="flex items-center justify-center gap-3 text-gray-600">
+                    <i data-lucide="map" class="h-5 w-5"></i>
+                    <span>No trips found</span>
+                    <button class="ml-3 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-white text-xs font-semibold hover:bg-blue-700"
+                            onclick="openAddTripModal()">
+                      <i data-lucide="plus" class="h-4 w-4"></i> Add Trip
+                    </button>
+                  </div>
+                </td>
+              </tr>`;
           if (window.lucide?.createIcons) lucide.createIcons();
           return;
         }
@@ -1600,54 +1542,54 @@
           const row = document.createElement("tr");
           row.className = "hover:bg-gray-50 transition-colors";
           row.innerHTML = `
-        <!-- Name -->
-        <td class="px-6 py-4">
-          <div class="flex items-center gap-3">
-            ${initialBubble(trip.name)}
-            <div>
-              <div class="font-medium text-gray-900">${trip.name}</div>
-              <div class="text-xs text-gray-500">#${trip.id}</div>
-            </div>
-          </div>
-        </td>
+              <!-- Name -->
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  ${initialBubble(trip.name)}
+                  <div>
+                    <div class="font-medium text-gray-900">${trip.name}</div>
+                    <div class="text-xs text-gray-500">#${trip.id}</div>
+                  </div>
+                </div>
+              </td>
 
-        <!-- Category -->
-        <td class="px-6 py-4">
-          ${badge(trip.category || "Uncategorized", "violet")}
-        </td>
+              <!-- Category -->
+              <td class="px-6 py-4">
+                ${badge(trip.category || "Uncategorized", "violet")}
+              </td>
 
-        <!-- Price -->
-        <td class="px-6 py-4">
-          ${formatPrice(trip.price)}
-        </td>
+              <!-- Price -->
+              <td class="px-6 py-4">
+                ${formatPrice(trip.price)}
+              </td>
 
-        <!-- Duration -->
-        <td class="px-6 py-4">
-          ${durationPill(trip.duration)}
-        </td>
+              <!-- Duration -->
+              <td class="px-6 py-4">
+                ${durationPill(trip.duration)}
+              </td>
 
-        <!-- Available -->
-        <td class="px-6 py-4">
-          ${availabilityBadge(!!trip.isAvailable)}
-        </td>
+              <!-- Available -->
+              <td class="px-6 py-4">
+                ${availabilityBadge(!!trip.isAvailable)}
+              </td>
 
-        <!-- Actions -->
-        <td class="px-6 py-4">
-          <div class="inline-flex overflow-hidden rounded-lg ring-1 ring-gray-200 bg-white shadow-sm">
-            <button class="px-2.5 py-2 text-blue-600 hover:bg-blue-50" title="Edit" onclick="openEditTripModal(${
-              trip.id
-            })">
-              <i data-lucide="pencil" class="h-4 w-4"></i>
-            </button>
-            <div class="w-px bg-gray-200"></div>
-            <button class="px-2.5 py-2 text-rose-600 hover:bg-rose-50" title="Delete" onclick="handleDeleteTrip(${
-              trip.id
-            })">
-              <i data-lucide="trash-2" class="h-4 w-4"></i>
-            </button>
-          </div>
-        </td>
-      `;
+              <!-- Actions -->
+              <td class="px-6 py-4">
+                <div class="inline-flex overflow-hidden rounded-lg ring-1 ring-gray-200 bg-white shadow-sm">
+                  <button class="px-2.5 py-2 text-blue-600 hover:bg-blue-50" title="Edit" onclick="openEditTripModal(${
+                    trip.id
+                  })">
+                    <i data-lucide="pencil" class="h-4 w-4"></i>
+                  </button>
+                  <div class="w-px bg-gray-200"></div>
+                  <button class="px-2.5 py-2 text-rose-600 hover:bg-rose-50" title="Delete" onclick="handleDeleteTrip(${
+                    trip.id
+                  })">
+                    <i data-lucide="trash-2" class="h-4 w-4"></i>
+                  </button>
+                </div>
+              </td>
+            `;
           tbody.appendChild(row);
         });
         if (window.lucide?.createIcons) lucide.createIcons();
@@ -2640,7 +2582,7 @@
       }
 
       // === Initialization ===
-      (async function init() {
+      async function init() {
         await fetchLanguages();
         // First-time default rows
         document
@@ -2686,7 +2628,10 @@
         setupEventListeners();
         setupTableSort();
         fetchTrips();
-      })();
+      }
+      if (document.documentElement.getAttribute("data-auth") === "ready")
+        init();
+      else document.addEventListener("auth:ready", init, { once: true });
 
       // Expose for inline handlers (edit)
       window.openEditTripModal = openEditTripModal;
