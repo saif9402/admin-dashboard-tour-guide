@@ -516,6 +516,8 @@
       </div>
     </div>
 
+    <script src="../js/ui.js" defer></script>
+
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         if (window.lucide?.createIcons) lucide.createIcons();
@@ -681,14 +683,17 @@
         if (!txt) return;
         navigator.clipboard
           .writeText(txt)
-          .then(() => showToast("Phone copied"));
+          .then(() =>
+            tgToast({ variant: "success", message: "Phone copied." })
+          );
       });
       bmCopyId?.addEventListener("click", () => {
         const txt = (bmPublicId?.textContent || "").trim();
         if (!txt) return;
-        navigator.clipboard.writeText(txt).then(() => showToast("ID copied"));
+        navigator.clipboard
+          .writeText(txt)
+          .then(() => tgToast({ variant: "success", message: "ID copied." }));
       });
-
       // Server-paged data for the current page
       let pageRows = [];
       let totalCount = 0;
@@ -774,35 +779,6 @@
           "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium " +
           (classes[status] || "bg-gray-100 text-gray-700");
         el.textContent = status ?? "—";
-      }
-
-      // ---------- Toast ----------
-      function showToast(message, type = "success") {
-        const root = document.getElementById("toastRoot");
-        const id = "t_" + Math.random().toString(36).slice(2);
-        const color =
-          type === "error"
-            ? "bg-red-600"
-            : type === "warn"
-            ? "bg-yellow-600"
-            : "bg-green-600";
-        const el = document.createElement("div");
-        el.id = id;
-        el.className =
-          "pointer-events-auto text-white " +
-          color +
-          " rounded-xl shadow-lg px-4 py-3 flex items-center gap-2";
-        el.innerHTML = `
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M12 9v4m0 4h.01M4.93 19.07a10 10 0 1114.14 0 10 10 0 01-14.14 0z"/>
-          </svg>
-          <span class="text-sm">${message}</span>
-        `;
-        root.appendChild(el);
-        setTimeout(() => {
-          el.classList.add("opacity-0", "translate-x-2");
-          setTimeout(() => el.remove(), 250);
-        }, 2200);
       }
 
       // ---------- Skeleton ----------
@@ -1176,11 +1152,11 @@
             pageRows[idx] = { ...pageRows[idx], status: "Declined" };
             renderRows(pageRows);
           }
-          showToast("Booking declined.", "success");
+          tgToast({ variant: "success", message: "Booking declined." });
           closeModal();
         } catch (e) {
           console.error(e);
-          showToast("Failed to decline booking.", "error");
+          tgToast({ variant: "error", message: "Failed to decline booking." });
         } finally {
           setActionBusy(false);
         }
@@ -1205,11 +1181,11 @@
           renderRows(pageRows);
           renderStats();
           renderPagination(currentPage, totalCount);
-          showToast("Booking deleted.", "success");
+          tgToast({ variant: "success", message: "Booking deleted." });
           closeModal();
         } catch (e) {
           console.error(e);
-          showToast("Failed to delete booking.", "error");
+          tgToast({ variant: "error", message: "Failed to delete booking." });
         } finally {
           setActionBusy(false);
         }
@@ -1252,11 +1228,11 @@
             };
             renderRows(pageRows);
           }
-          showToast("Booking confirmed.", "success");
+          tgToast({ variant: "success", message: "Booking confirmed." });
           closeModal();
         } catch (e) {
           console.error(e);
-          showToast("Failed to confirm booking.", "error");
+          tgToast({ variant: "error", message: "Failed to confirm booking." });
         } finally {
           setActionBusy(false);
         }
