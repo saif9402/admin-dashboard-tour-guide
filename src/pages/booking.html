@@ -1065,15 +1065,32 @@
       function isEditorValid() {
         const a = Number(bmEditAdults.value);
         const c = Number(bmEditChildren.value);
-        const dt = bmEditDatetime.value;
+        const inputDt = bmEditDatetime.value;
+
+        // allow fallback to existing trip date from the booking
+        const existingISO =
+          currentModalBooking?.tripdate ||
+          currentModalBooking?.tripDate ||
+          currentModalBooking?.trip_date ||
+          "";
+        const fallbackDt = existingISO ? toDatetimeLocalValue(existingISO) : "";
+
+        const effectiveDt = inputDt || fallbackDt;
+
         const okInt = (n) => Number.isInteger(n) && n >= 0 && n <= 2147483647;
-        const ok = okInt(a) && okInt(c) && !!dt;
+        const ok = okInt(a) && okInt(c) && !!effectiveDt;
+
+        // highlight only if NOTHING (input or existing) is available
         bmEditAdults.classList.toggle("ring-1", !okInt(a));
         bmEditAdults.classList.toggle("ring-red-400", !okInt(a));
         bmEditChildren.classList.toggle("ring-1", !okInt(c));
         bmEditChildren.classList.toggle("ring-red-400", !okInt(c));
-        bmEditDatetime.classList.toggle("ring-1", !dt);
-        bmEditDatetime.classList.toggle("ring-red-400", !dt);
+        bmEditDatetime.classList.toggle("ring-1", !inputDt && !fallbackDt);
+        bmEditDatetime.classList.toggle(
+          "ring-red-400",
+          !inputDt && !fallbackDt
+        );
+
         return ok;
       }
 
@@ -1121,10 +1138,21 @@
           // show content and default tab
           bmLoading.classList.add("hidden");
           document.getElementById("bm-error")?.classList.add("hidden");
-          showBookingTab("summary"); // << new
+
+          // If it's declined/rejected/cancelled, jump straight to Edit so confirm is available.
+          const isDeclinedLike = /^(declined|rejected|cancelled)$/i.test(
+            d.status || ""
+          );
+          showBookingTab(isDeclinedLike ? "edit" : "summary");
+
           bmBtnDelete.disabled = false;
           bmBtnCancel.disabled = false;
-          bmBtnConfirm.disabled = true; // summary tab
+
+          // Let the tab/validation decide confirm state (no hard-disable).
+          bmBtnConfirm.disabled =
+            modalBusy ||
+            bmPaneEdit.classList.contains("hidden") ||
+            !isEditorValid();
 
           if (window.lucide?.createIcons) lucide.createIcons();
         } catch (err) {
