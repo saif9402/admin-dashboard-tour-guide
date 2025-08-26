@@ -39,13 +39,62 @@
           <label for="password" class="block text-sm font-medium text-gray-700"
             >Password</label
           >
-          <input
-            type="password"
-            id="password"
-            name="password"
-            required
-            class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div class="relative">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              class="mt-1 w-full px-4 py-2 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="button"
+              id="togglePassword"
+              class="absolute inset-y-0 right-3 flex items-center justify-center text-gray-400 hover:text-gray-600 focus:outline-none"
+              aria-label="Show password"
+              aria-pressed="false"
+            >
+              <!-- Eye (show) -->
+              <svg
+                id="icon-eye"
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.345 5 12 5c4.655 0 8.577 2.51 9.964 6.678a1 1 0 010 .644C20.577 16.49 16.655 19 12 19c-4.655 0-8.577-2.51-9.964-6.678z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              <!-- Eye off (hide) -->
+              <svg
+                id="icon-eye-off"
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 hidden"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M3 3l18 18M10.584 10.586A3 3 0 0012 15a3 3 0 002.828-4.001M9.88 4.6A9.994 9.994 0 0112 4c4.655 0 8.577 2.51 9.964 6.678a1 1 0 010 .644 10.05 10.05 0 01-2.218 3.442M6.52 6.52A10.05 10.05 0 002.036 12.322a1 1 0 000 .644C3.423 16.49 7.345 19 12 19a9.97 9.97 0 003.12-.493"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div id="errorMsg" class="text-red-500 text-sm hidden">
@@ -65,6 +114,26 @@
       </p>
     </div>
     <script>
+      const passwordInput = document.getElementById("password");
+      const togglePasswordBtn = document.getElementById("togglePassword");
+      const iconEye = document.getElementById("icon-eye");
+      const iconEyeOff = document.getElementById("icon-eye-off");
+
+      togglePasswordBtn.addEventListener("click", () => {
+        const isHidden = passwordInput.type === "password";
+        passwordInput.type = isHidden ? "text" : "password";
+
+        // swap icons
+        iconEye.classList.toggle("hidden", isHidden);
+        iconEyeOff.classList.toggle("hidden", !isHidden);
+
+        // accessibility labels
+        togglePasswordBtn.setAttribute(
+          "aria-label",
+          isHidden ? "Hide password" : "Show password"
+        );
+        togglePasswordBtn.setAttribute("aria-pressed", String(isHidden));
+      });
       document
         .getElementById("loginForm")
         .addEventListener("submit", async function (e) {
