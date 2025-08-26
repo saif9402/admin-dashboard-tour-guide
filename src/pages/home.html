@@ -86,7 +86,7 @@
         </div>
 
         <!-- Filters row (outside the table) -->
-        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-6 gap-4">
           <!-- Search -->
           <div>
             <label for="tripSearch" class="sr-only">Search Trips</label>
@@ -123,6 +123,47 @@
               <option value="">All languages</option>
               <option value="1">German</option>
               <option value="2">English</option>
+            </select>
+          </div>
+
+          <!-- Availability -->
+          <div>
+            <label for="availableFilter" class="sr-only">Availability</label>
+            <select
+              id="availableFilter"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+              aria-label="Filter by availability"
+            >
+              <option value="">All trips</option>
+              <option value="true">Available only</option>
+              <option value="false">Unavailable only</option>
+            </select>
+          </div>
+
+          <!-- Top rated -->
+          <div>
+            <label for="topRatedFilter" class="sr-only">Top rated</label>
+            <select
+              id="topRatedFilter"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+              aria-label="Filter by top rated"
+            >
+              <option value="">All trips</option>
+              <option value="true">Top rated only</option>
+              <option value="false">Not top rated</option>
+            </select>
+          </div>
+          <!-- Best seller -->
+          <div>
+            <label for="bestSellerFilter" class="sr-only">Best seller</label>
+            <select
+              id="bestSellerFilter"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+              aria-label="Filter by best seller"
+            >
+              <option value="">All trips</option>
+              <option value="true">Best sellers only</option>
+              <option value="false">Not best sellers</option>
             </select>
           </div>
 
@@ -259,7 +300,6 @@
             </button>
           </div>
 
-          <!-- tabs as segmented control -->
           <!-- tabs as segmented control -->
           <div class="px-6 pb-4">
             <div
@@ -594,6 +634,14 @@
         languageId: "",
         sort: "", // single value like "price:asc"
       };
+      let currentIsAvailable = ""; // "", "true", or "false"
+      let currentIsTopRated = ""; // "", "true", or "false"
+      let currentIsBestSeller = ""; // "", "true", or "false"
+      const bestSellerFilter = document.getElementById("bestSellerFilter");
+
+      const topRatedFilter = document.getElementById("topRatedFilter");
+
+      const availableFilter = document.getElementById("availableFilter");
 
       // Simple debounce
       function debounce(fn, delay = 400) {
@@ -1203,6 +1251,14 @@
         if (filters.languageId)
           params.append("LanguageId", String(filters.languageId));
         if (filters.sort) params.append("Sort", filters.sort);
+        if (currentIsAvailable !== "")
+          params.append("IsAvailable", currentIsAvailable);
+
+        if (currentIsTopRated !== "")
+          params.append("IsTopRated", currentIsTopRated);
+
+        if (currentIsBestSeller !== "")
+          params.append("IsBestSeller", currentIsBestSeller);
 
         try {
           const response = await fetch(`${baseUrl}?${params.toString()}`, {
@@ -2097,6 +2153,32 @@
             if (!searchInput) return;
             searchInput.value = "";
             filters.search = "";
+            currentPage = 1;
+            fetchTrips(currentPage);
+          });
+        }
+
+        // Availability filter
+        if (availableFilter) {
+          availableFilter.addEventListener("change", () => {
+            currentIsAvailable = availableFilter.value; // "", "true", "false"
+            currentPage = 1;
+            fetchTrips(currentPage);
+          });
+        }
+
+        // Top rated filter
+        if (topRatedFilter) {
+          topRatedFilter.addEventListener("change", () => {
+            currentIsTopRated = topRatedFilter.value; // "", "true", "false"
+            currentPage = 1;
+            fetchTrips(currentPage);
+          });
+        }
+        // Best seller filter
+        if (bestSellerFilter) {
+          bestSellerFilter.addEventListener("change", () => {
+            currentIsBestSeller = bestSellerFilter.value; // "", "true", "false"
             currentPage = 1;
             fetchTrips(currentPage);
           });
