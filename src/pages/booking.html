@@ -474,19 +474,6 @@
                   />
                 </div>
               </div>
-
-              <!-- Optional admin note (local only) -->
-              <div class="mt-4">
-                <label for="bm-note" class="block text-xs text-gray-600 mb-1"
-                  >Internal note (optional)</label
-                >
-                <textarea
-                  id="bm-note"
-                  rows="2"
-                  class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 px-3 py-2"
-                  placeholder="e.g. guest asked for stroller; confirm pickup time"
-                ></textarea>
-              </div>
             </section>
           </div>
 
@@ -661,7 +648,6 @@
       const bmUserInitial = document.getElementById("bm-userInitial");
       const bmCopyPhone = document.getElementById("bm-copyPhone");
       const bmCopyId = document.getElementById("bm-copyId");
-      const bmNote = document.getElementById("bm-note"); // local only (not sent)
 
       // show tab
       function showBookingTab(which = "summary") {
