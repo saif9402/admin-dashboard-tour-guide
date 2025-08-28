@@ -7,15 +7,42 @@
       html[data-auth="checking"] body {
         visibility: hidden;
       }
+      /* tiny helper for shimmering */
+      .tg-shimmer {
+        position: relative;
+        overflow: hidden;
+        background: #e5e7eb;
+      }
+      .tg-shimmer::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.6),
+          transparent
+        );
+        animation: shimmer 1.2s infinite;
+      }
+      @keyframes shimmer {
+        100% {
+          transform: translateX(100%);
+        }
+      }
     </style>
     <script>
       document.documentElement.setAttribute("data-auth", "checking");
     </script>
+
     <link href="../output.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/style.css" />
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="../js/fetch-auth-interceptor.js"></script>
 
+    <!-- your token/401 refresher -->
+    <script src="../js/fetch-auth-interceptor.js"></script>
+    <!-- auth guard -->
     <script
       src="../js/auth-guard.js"
       defer
@@ -24,6 +51,7 @@
 
     <title>Tour Guide Admin Panel</title>
   </head>
+
   <body class="bg-gray-100 font-sans">
     <div class="flex min-h-screen">
       <!-- Sidebar -->
@@ -56,7 +84,7 @@
           </a>
           <a
             href="Languages.html"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 bg-blue-100 shadow-inner font-medium"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
           >
             <i data-lucide="languages"></i> <span>Languages</span>
           </a>
@@ -74,7 +102,7 @@
           </a>
           <a
             href="slider.html"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 bg-blue-100 shadow-inner font-medium"
           >
             <i data-lucide="image"></i> <span>Slider Images</span>
           </a>
@@ -94,15 +122,47 @@
           class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
         >
           <h1 class="text-3xl font-bold text-gray-900">Manage Slider Images</h1>
-          <button
-            id="refreshBtn"
-            class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-          >
-            <i data-lucide="refresh-ccw" class="h-4 w-4"></i> Refresh
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              id="addImageBtn"
+              class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow"
+            >
+              <i data-lucide="plus"></i> Add Image
+            </button>
+            <button
+              id="refreshBtn"
+              class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+            >
+              <i data-lucide="refresh-ccw" class="h-4 w-4"></i> Refresh
+            </button>
+          </div>
         </div>
 
-        <!-- Table Card -->
+        <!-- Filters row -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div class="md:col-span-2">
+            <label for="searchInput" class="sr-only">Search by URL</label>
+            <div class="relative">
+              <i
+                data-lucide="search"
+                class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+              ></i>
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Search by image URL…"
+                class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+              />
+            </div>
+          </div>
+          <div class="flex items-center justify-end">
+            <div class="text-sm text-gray-600">
+              <span id="countLabel">0</span> images
+            </div>
+          </div>
+        </div>
+
+        <!-- Card -->
         <div
           class="bg-white rounded-2xl shadow ring-1 ring-gray-200 overflow-hidden"
         >
@@ -112,13 +172,12 @@
             <div class="text-sm text-gray-600">Images</div>
           </div>
 
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-              <thead
-                class="sticky top-0 z-10 bg-gray-50/95 backdrop-blur supports-[backdrop-filter]:bg-gray-50/75 text-gray-600 text-xs uppercase"
-              ></thead>
-              <tbody class="divide-y divide-gray-100 bg-white"></tbody>
-            </table>
+          <!-- Grid -->
+          <div id="gridWrap" class="p-4">
+            <div
+              id="grid"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            ></div>
           </div>
         </div>
 
@@ -130,6 +189,484 @@
       </main>
     </div>
 
+    <!-- Overlay -->
+    <div
+      id="sheetOverlay"
+      class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity"
+    ></div>
+
+    <!-- Side Sheet: Add Image -->
+    <div
+      id="imageSheet"
+      class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-2xl ring-1 ring-black/5 hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="sheetTitle"
+    >
+      <div class="flex flex-col h-full">
+        <!-- header -->
+        <div
+          class="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+        >
+          <div class="px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span
+                class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20"
+              >
+                <i data-lucide="image" class="h-5 w-5"></i>
+              </span>
+              <h2 id="sheetTitle" class="text-lg font-semibold tracking-tight">
+                Add Image
+              </h2>
+            </div>
+            <button
+              type="button"
+              class="btn-cancel rounded-xl p-2 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40"
+              aria-label="Close"
+            >
+              <i data-lucide="x" class="h-5 w-5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- body -->
+        <form
+          id="imageForm"
+          class="flex-1 overflow-y-auto custom-scroll p-6 space-y-5"
+        >
+          <div class="rounded-xl border border-gray-200 p-2 bg-gray-50">
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                data-tab="url"
+                class="tab-btn px-3 py-2 rounded-lg bg-white ring-1 ring-gray-200 text-gray-800 font-medium"
+              >
+                From URL
+              </button>
+              <button
+                type="button"
+                data-tab="file"
+                class="tab-btn px-3 py-2 rounded-lg bg-transparent hover:bg-white ring-1 ring-transparent text-gray-700"
+              >
+                Upload File
+              </button>
+            </div>
+          </div>
+
+          <!-- URL mode -->
+          <div id="tab-url" class="space-y-3">
+            <label class="block text-sm font-medium text-gray-700"
+              >Image URL</label
+            >
+            <input
+              type="url"
+              id="imageURL"
+              name="imageURL"
+              placeholder="https://example.com/slider.jpg"
+              class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
+            />
+          </div>
+
+          <!-- File mode -->
+          <div id="tab-file" class="space-y-3 hidden">
+            <label class="block text-sm font-medium text-gray-700"
+              >Select an image</label
+            >
+            <input
+              type="file"
+              id="imageFile"
+              accept="image/*"
+              class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm"
+            />
+          </div>
+
+          <!-- Preview -->
+          <div
+            id="preview"
+            class="rounded-xl border border-gray-200 overflow-hidden"
+          >
+            <div
+              class="aspect-[16/9] bg-gray-100 flex items-center justify-center"
+            >
+              <span class="text-gray-400 text-sm">Preview</span>
+            </div>
+          </div>
+        </form>
+
+        <!-- footer -->
+        <div class="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
+          <button
+            type="button"
+            class="btn-cancel px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium shadow-sm"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="imageForm"
+            class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script src="../js/logout.js" defer></script>
+
+    <script>
+      // ------- helpers -------
+      const $ = (id) => document.getElementById(id);
+      const FALLBACK_DATA_IMG =
+        "data:image/svg+xml;utf8," +
+        encodeURIComponent(
+          "<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='900'>" +
+            "<defs><linearGradient id='g' x1='0' x2='1'><stop offset='0%' stop-color='#f3f4f6'/>" +
+            "<stop offset='50%' stop-color='#e5e7eb'/><stop offset='100%' stop-color='#f3f4f6'/></linearGradient></defs>" +
+            "<rect width='100%' height='100%' fill='url(#g)'/>" +
+            "<text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' font-size='36' fill='#9ca3af' font-family='system-ui,Segoe UI,Roboto'>No image</text></svg>"
+        );
+
+      function toast(msg, variant = "info") {
+        if (typeof tgToast === "function") tgToast({ variant, message: msg });
+        else alert(msg);
+      }
+
+      // ------- state -------
+      let allImages = []; // { id, imageURL }[]
+      let filtered = [];
+      let currentPage = 1;
+      const pageSize = 12;
+
+      // ------- UI elements -------
+      const grid = $("grid");
+      const gridWrap = $("gridWrap");
+      const pagination = $("pagination");
+      const searchInput = $("searchInput");
+      const countLabel = $("countLabel");
+
+      const overlay = $("sheetOverlay");
+      const sheet = $("imageSheet");
+      const form = $("imageForm");
+      const preview = $("preview");
+      const urlInput = $("imageURL");
+      const fileInput = $("imageFile");
+      const tabURL = $("tab-url");
+      const tabFile = $("tab-file");
+
+      // ------- fetch list -------
+      async function fetchImages() {
+        try {
+          showSkeleton();
+          const res = await fetch("/api/SliderImages/GetSliderImages");
+          const data = await res.json();
+
+          if (!res.ok || !data?.succeeded) {
+            throw new Error(data?.message || "Failed to load images");
+          }
+
+          // API returns data: [{id, imageURL}]
+          allImages = Array.isArray(data.data) ? data.data : [];
+          applyFilter();
+        } catch (err) {
+          console.error(err);
+          grid.innerHTML = `
+            <div class="col-span-full">
+              <div class="px-6 py-12 text-center text-red-500">Failed to load slider images.</div>
+            </div>`;
+          pagination.innerHTML = "";
+          countLabel.textContent = "0";
+          toast("Failed to load images.", "error");
+        } finally {
+          if (window.lucide?.createIcons) lucide.createIcons();
+        }
+      }
+
+      function showSkeleton(rows = 8) {
+        grid.innerHTML = "";
+        for (let i = 0; i < rows; i++) {
+          const sk = document.createElement("div");
+          sk.className =
+            "rounded-2xl overflow-hidden ring-1 ring-gray-200 bg-white";
+          sk.innerHTML = `
+            <div class="aspect-[16/9] tg-shimmer"></div>
+            <div class="p-4 space-y-2">
+              <div class="h-3 w-2/3 rounded tg-shimmer"></div>
+              <div class="h-8 w-24 rounded-lg tg-shimmer"></div>
+            </div>`;
+          grid.appendChild(sk);
+        }
+        pagination.innerHTML = "";
+      }
+
+      // ------- render -------
+      function applyFilter() {
+        const q = searchInput.value.trim().toLowerCase();
+        filtered = q
+          ? allImages.filter((i) =>
+              (i.imageURL || "").toLowerCase().includes(q)
+            )
+          : [...allImages];
+        currentPage = 1;
+        renderPage();
+      }
+
+      function renderPage() {
+        const total = filtered.length;
+        countLabel.textContent = total;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+        const start = (currentPage - 1) * pageSize;
+        const pageItems = filtered.slice(start, start + pageSize);
+        renderGrid(pageItems);
+        renderPagination(currentPage, totalPages);
+      }
+
+      function renderGrid(items) {
+        grid.innerHTML = "";
+
+        if (!items.length) {
+          grid.innerHTML = `
+            <div class="col-span-full">
+              <div class="flex items-center justify-center gap-3 text-gray-600 py-12">
+                <i data-lucide="image" class="h-5 w-5"></i>
+                <span>No images found</span>
+                <button id="quickAdd" class="ml-3 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-white text-xs font-semibold hover:bg-blue-700">
+                  <i data-lucide="plus" class="h-4 w-4"></i> Add Image
+                </button>
+              </div>
+            </div>`;
+          if (window.lucide?.createIcons) lucide.createIcons();
+          const qa = $("quickAdd");
+          if (qa) qa.addEventListener("click", openAddSheet);
+          return;
+        }
+
+        items.forEach((item) => {
+          const card = document.createElement("div");
+          card.className =
+            "group bg-white rounded-2xl ring-1 ring-gray-200 overflow-hidden shadow-sm hover:shadow-md transition";
+
+          const safeURL = item.imageURL || "";
+          const idBadge = `<span class="absolute left-2 top-2 inline-flex items-center justify-center h-7 rounded-lg bg-black/60 text-white px-2 text-xs ring-1 ring-white/30 tabular-nums">#${item.id}</span>`;
+          const actions = `
+            <div class="absolute right-2 top-2 hidden group-hover:flex gap-1">
+              <a href="${safeURL}" target="_blank" rel="noopener" title="Open" class="p-2 rounded-lg bg-white/90 hover:bg-white ring-1 ring-gray-200 shadow-sm">
+                <i data-lucide="external-link" class="h-4 w-4"></i>
+              </a>
+              <button title="Copy URL" class="p-2 rounded-lg bg-white/90 hover:bg-white ring-1 ring-gray-200 shadow-sm"
+                      onclick="copyURL('${encodeURIComponent(
+                        safeURL
+                      )}'); return false;">
+                <i data-lucide="copy" class="h-4 w-4"></i>
+              </button>
+            </div>`;
+
+          card.innerHTML = `
+            <div class="relative aspect-[16/9] bg-gray-100 overflow-hidden">
+              <img src="${safeURL}" alt="slider image ${
+            item.id
+          }" class="h-full w-full object-cover"
+                   onerror="this.src='${FALLBACK_DATA_IMG}'" />
+              ${idBadge}
+              ${actions}
+              <div class="absolute bottom-2 right-2 hidden group-hover:block">
+                <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium shadow"
+                        onclick="deleteSliderImage(${item.id})">
+                  <i data-lucide="trash-2" class="h-4 w-4"></i> Delete
+                </button>
+              </div>
+            </div>
+            <div class="px-4 py-3 flex items-center justify-between gap-3">
+              <div class="truncate text-gray-700 text-xs" title="${safeURL}">${safeURL}</div>
+              <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white ring-1 ring-gray-200 hover:bg-gray-50 text-gray-700 text-xs shadow-sm"
+                      onclick="copyURL('${encodeURIComponent(safeURL)}')">
+                <i data-lucide="clipboard" class="h-4 w-4"></i> Copy
+              </button>
+            </div>`;
+          grid.appendChild(card);
+        });
+
+        if (window.lucide?.createIcons) lucide.createIcons();
+      }
+
+      function renderPagination(current, totalPages) {
+        pagination.innerHTML = "";
+        const group = document.createElement("div");
+        group.className =
+          "inline-flex overflow-hidden rounded-xl ring-1 ring-gray-200 bg-white shadow-sm";
+
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "Previous";
+        prevBtn.disabled = current === 1;
+        prevBtn.className = "px-4 py-2 disabled:opacity-50 hover:bg-gray-50";
+        prevBtn.onclick = () => {
+          if (current > 1) {
+            currentPage--;
+            renderPage();
+          }
+        };
+
+        const info = document.createElement("span");
+        info.className = "px-4 py-2 text-gray-600 border-x border-gray-200";
+        info.textContent = `Page ${current} of ${totalPages}`;
+
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "Next";
+        nextBtn.disabled = current === totalPages;
+        nextBtn.className = "px-4 py-2 disabled:opacity-50 hover:bg-gray-50";
+        nextBtn.onclick = () => {
+          if (current < totalPages) {
+            currentPage++;
+            renderPage();
+          }
+        };
+
+        group.appendChild(prevBtn);
+        group.appendChild(info);
+        group.appendChild(nextBtn);
+        pagination.appendChild(group);
+      }
+
+      // ------- actions -------
+      window.copyURL = async function (encoded) {
+        const url = decodeURIComponent(encoded || "");
+        try {
+          await navigator.clipboard.writeText(url);
+          toast("Image URL copied.", "success");
+        } catch {
+          toast("Failed to copy.", "error");
+        }
+      };
+
+      window.deleteSliderImage = async function (id) {
+        // PLACEHOLDER: we'll wire to your DELETE endpoint in the next step
+        const ok = confirm(`Delete image #${id}?`);
+        if (!ok) return;
+        toast(
+          "Delete endpoint not wired yet. Share it and I'll plug it in.",
+          "warning"
+        );
+      };
+
+      function openAddSheet() {
+        openSheet("Add Image");
+        // default to URL tab
+        setActiveTab("url");
+        urlInput.focus();
+      }
+
+      // ------- sheet/overlay -------
+      let lastFocused = null;
+      function openSheet(titleText) {
+        $("sheetTitle").textContent = titleText || "Add Image";
+        lastFocused = document.activeElement;
+        overlay.classList.remove("hidden");
+        sheet.classList.remove("hidden");
+        requestAnimationFrame(() => {
+          overlay.classList.remove("opacity-0");
+        });
+        document.addEventListener("keydown", onEscClose);
+      }
+      function closeSheet() {
+        overlay.classList.add("opacity-0");
+        setTimeout(() => {
+          overlay.classList.add("hidden");
+          sheet.classList.add("hidden");
+          if (lastFocused) lastFocused.focus();
+        }, 200);
+        document.removeEventListener("keydown", onEscClose);
+      }
+      function onEscClose(e) {
+        if (e.key === "Escape") closeSheet();
+      }
+      overlay.addEventListener("click", closeSheet);
+      document.addEventListener("click", (e) => {
+        if (e.target.closest(".btn-cancel")) closeSheet();
+      });
+
+      // tabs
+      function setActiveTab(which) {
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          const active = btn.dataset.tab === which;
+          btn.classList.toggle("bg-white", active);
+          btn.classList.toggle("ring-gray-200", active);
+          btn.classList.toggle("bg-transparent", !active);
+          btn.classList.toggle("text-gray-700", !active);
+        });
+        tabURL.classList.toggle("hidden", which !== "url");
+        tabFile.classList.toggle("hidden", which !== "file");
+        updatePreview();
+      }
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
+      });
+
+      // preview
+      function updatePreview() {
+        const url = urlInput.value.trim();
+        const file = fileInput.files?.[0];
+        let src = "";
+        if (!tabURL.classList.contains("hidden") && url) {
+          src = url;
+        } else if (!tabFile.classList.contains("hidden") && file) {
+          src = URL.createObjectURL(file);
+        }
+        if (!src) {
+          preview.innerHTML = `<div class="aspect-[16/9] bg-gray-100 flex items-center justify-center">
+                                 <span class="text-gray-400 text-sm">Preview</span></div>`;
+          return;
+        }
+        preview.innerHTML = `<img src="${src}" alt="preview" class="w-full h-auto object-cover aspect-[16/9]" onerror="this.src='${FALLBACK_DATA_IMG}'" />`;
+      }
+      urlInput.addEventListener("input", updatePreview);
+      fileInput.addEventListener("change", updatePreview);
+
+      // form submit (ADD)
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const useURL = !tabURL.classList.contains("hidden");
+        if (useURL) {
+          const imageURL = urlInput.value.trim();
+          if (!imageURL) {
+            toast("Please enter an image URL.", "error");
+            return;
+          }
+          // PLACEHOLDER POST (URL)
+          console.log("READY TO POST (URL):", { imageURL });
+          toast(
+            "Add (URL) not wired yet. Share the POST endpoint & payload.",
+            "warning"
+          );
+          // After wiring: closeSheet(); await fetchImages();
+        } else {
+          const file = fileInput.files?.[0];
+          if (!file) {
+            toast("Please choose a file.", "error");
+            return;
+          }
+          // PLACEHOLDER POST (FILE upload)
+          console.log("READY TO POST (FILE):", file);
+          toast(
+            "Add (file) not wired yet. Share the upload endpoint.",
+            "warning"
+          );
+          // After wiring: closeSheet(); await fetchImages();
+        }
+      });
+
+      // header actions
+      $("addImageBtn").addEventListener("click", openAddSheet);
+      $("refreshBtn").addEventListener("click", fetchImages);
+      searchInput.addEventListener("input", applyFilter);
+
+      // boot
+      function boot() {
+        if (window.lucide?.createIcons) lucide.createIcons();
+        fetchImages();
+      }
+      if (document.documentElement.getAttribute("data-auth") === "ready")
+        boot();
+      else document.addEventListener("auth:ready", boot, { once: true });
+    </script>
   </body>
 </html>
