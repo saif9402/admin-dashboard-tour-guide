@@ -82,66 +82,68 @@
     return t;
   }
 
+  // ---- patch global fetch
   window.fetch = async (input, init = {}) => {
-    const nativeFetch =
-      window.__nativeFetch ||
-      (window.__nativeFetch = window.fetch.bind(window));
-    const originalInput = input;
-    const urlStr = input instanceof Request ? input.url : String(input);
-    const doAuth = isSameOriginApi(urlStr);
+    // Always work with a Request we can clone (so we can retry safely)
+    const originalReq =
+      input instanceof Request ? input : new Request(input, init);
 
-    // Pre-emptive refresh
+    const url = originalReq.url;
+    const doAuth = isSameOriginApi(url);
+
+    // Build a request with Authorization header if needed
+    const makeAuthedRequest = (token) => {
+      const headers = new Headers(originalReq.headers);
+      if (doAuth && token) headers.set("Authorization", `Bearer ${token}`);
+
+      // If body is a plain object (from init), set JSON content-type once.
+      // (When originalReq was created from init with a plain object body)
+      const maybeJsonBody =
+        !(init instanceof Request) &&
+        init &&
+        init.body &&
+        typeof init.body === "object" &&
+        !(init.body instanceof FormData) &&
+        !(init.body instanceof Blob) &&
+        !(init.body instanceof URLSearchParams);
+
+      if (maybeJsonBody && !headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+      }
+
+      // Rebuild request so body is re-readable on retry
+      return new Request(originalReq, { headers });
+    };
+
+    // Pre-emptive refresh if token is missing/near expiry
     if (doAuth) {
       try {
         await ensureFreshTokenIfNeeded();
-      } catch {}
+      } catch {
+        // ignore here; the request may still go through or we'll handle 401 below
+      }
     }
 
     let token = getStoredToken();
+    let req = makeAuthedRequest(token);
 
-    // Build final headers without touching the body
-    const baseHeaders = new Headers(
-      (init && init.headers) ||
-        (input instanceof Request ? input.headers : undefined)
-    );
-    if (doAuth && token) baseHeaders.set("Authorization", `Bearer ${token}`);
+    // First attempt
+    let res = await nativeFetch(req);
 
-    // Only set JSON content-type when the body is a plain object (NOT FormData)
-    const body = init && init.body;
-    const isJsonLike =
-      body &&
-      typeof body === "object" &&
-      !(body instanceof FormData) &&
-      !(body instanceof Blob) &&
-      !(body instanceof URLSearchParams);
-
-    if (isJsonLike && !baseHeaders.has("Content-Type")) {
-      baseHeaders.set("Content-Type", "application/json");
-    }
-
-    const finalInit = { ...init, headers: baseHeaders };
-
-    // First attempt (IMPORTANT: do not wrap Request; keep FormData as-is)
-    let res = await nativeFetch(originalInput, finalInit);
-
-    // On 401, refresh once then retry with the same body
+    // On 401, refresh once then retry
     if (doAuth && res.status === 401) {
       try {
+        // coalesce concurrent refreshes
         refreshingPromise ||= refreshToken().finally(
           () => (refreshingPromise = null)
         );
         await refreshingPromise;
 
         token = getStoredToken();
-        const retryHeaders = new Headers(finalInit.headers || {});
-        if (token) retryHeaders.set("Authorization", `Bearer ${token}`);
-
-        res = await nativeFetch(originalInput, {
-          ...finalInit,
-          headers: retryHeaders,
-        });
-      } catch {
-        // purge tokens and bounce (same as your code)
+        req = makeAuthedRequest(token);
+        res = await nativeFetch(req);
+      } catch (e) {
+        // Refresh failed → clear tokens and bounce to login
         localStorage.removeItem("accessToken");
         localStorage.removeItem("token");
         localStorage.removeItem("jwt");
@@ -156,6 +158,7 @@
           "/login.html";
         const next = encodeURIComponent(location.pathname + location.search);
         location.replace(`${redirect}?next=${next}`);
+        // Return the original 401 response in case someone awaits it
         return res;
       }
     }
