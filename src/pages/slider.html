@@ -7,6 +7,7 @@
       html[data-auth="checking"] body {
         visibility: hidden;
       }
+
       /* tiny helper for shimmering */
       .tg-shimmer {
         position: relative;
@@ -32,6 +33,7 @@
         }
       }
     </style>
+
     <script>
       document.documentElement.setAttribute("data-auth", "checking");
     </script>
@@ -39,10 +41,6 @@
     <link href="../output.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/style.css" />
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- your token/401 refresher -->
-    <!-- <script src="../js/fetch-auth-interceptor.js"></script> -->
-    <!-- auth guard -->
     <script
       src="../js/auth-guard.js"
       defer
@@ -129,36 +127,6 @@
             >
               <i data-lucide="plus"></i> Add Image
             </button>
-            <button
-              id="refreshBtn"
-              class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-            >
-              <i data-lucide="refresh-ccw" class="h-4 w-4"></i> Refresh
-            </button>
-          </div>
-        </div>
-
-        <!-- Filters row -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div class="md:col-span-2">
-            <label for="searchInput" class="sr-only">Search by URL</label>
-            <div class="relative">
-              <i
-                data-lucide="search"
-                class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
-              ></i>
-              <input
-                id="searchInput"
-                type="text"
-                placeholder="Search by image URL…"
-                class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 bg-white shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
-              />
-            </div>
-          </div>
-          <div class="flex items-center justify-end">
-            <div class="text-sm text-gray-600">
-              <span id="countLabel">0</span> images
-            </div>
           </div>
         </div>
 
@@ -173,19 +141,13 @@
           </div>
 
           <!-- Grid -->
-          <div id="gridWrap" class="p-4">
+          <div class="p-4">
             <div
               id="grid"
               class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
             ></div>
           </div>
         </div>
-
-        <!-- Pagination -->
-        <div
-          id="pagination"
-          class="mt-6 flex justify-center items-center gap-3 text-sm font-medium"
-        ></div>
       </main>
     </div>
 
@@ -195,7 +157,7 @@
       class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity"
     ></div>
 
-    <!-- Side Sheet: Add Image -->
+    <!-- Side Sheet: Add Image (File only) -->
     <div
       id="imageSheet"
       class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-2xl ring-1 ring-black/5 hidden"
@@ -234,43 +196,9 @@
           id="imageForm"
           class="flex-1 overflow-y-auto custom-scroll p-6 space-y-5"
         >
-          <div class="rounded-xl border border-gray-200 p-2 bg-gray-50">
-            <div class="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                data-tab="url"
-                class="tab-btn px-3 py-2 rounded-lg bg-white ring-1 ring-gray-200 text-gray-800 font-medium"
-              >
-                From URL
-              </button>
-              <button
-                type="button"
-                data-tab="file"
-                class="tab-btn px-3 py-2 rounded-lg bg-transparent hover:bg-white ring-1 ring-transparent text-gray-700"
-              >
-                Upload File
-              </button>
-            </div>
-          </div>
-
-          <!-- URL mode -->
-          <div id="tab-url" class="space-y-3">
+          <div class="space-y-3">
             <label class="block text-sm font-medium text-gray-700"
-              >Image URL</label
-            >
-            <input
-              type="url"
-              id="imageURL"
-              name="imageURL"
-              placeholder="https://example.com/slider.jpg"
-              class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition"
-            />
-          </div>
-
-          <!-- File mode -->
-          <div id="tab-file" class="space-y-3 hidden">
-            <label class="block text-sm font-medium text-gray-700"
-              >Select an image</label
+              >Select images</label
             >
             <input
               type="file"
@@ -280,17 +208,15 @@
               multiple
               class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm"
             />
-          </div>
-
-          <!-- Preview -->
-          <div
-            id="preview"
-            class="rounded-xl border border-gray-200 overflow-hidden"
-          >
             <div
-              class="aspect-[16/9] bg-gray-100 flex items-center justify-center"
+              id="preview"
+              class="rounded-xl overflow-hidden ring-1 ring-gray-200"
             >
-              <span class="text-gray-400 text-sm">Preview</span>
+              <div
+                class="aspect-[16/9] bg-gray-100 flex items-center justify-center"
+              >
+                <span class="text-gray-400 text-sm">Preview</span>
+              </div>
             </div>
           </div>
         </form>
@@ -319,6 +245,7 @@
     <script>
       // ------- helpers -------
       const $ = (id) => document.getElementById(id);
+
       const FALLBACK_DATA_IMG =
         "data:image/svg+xml;utf8," +
         encodeURIComponent(
@@ -339,18 +266,7 @@
           throw new Error("No files selected.");
 
         const fd = new FormData();
-        Array.from(fileList).forEach((file, i) => {
-          fd.append(`Images`, file); // DTO-style, like Trip
-        });
-
-        // Optional: one-time sanity log
-        for (const [k, v] of fd.entries()) {
-          console.log(
-            "FD:",
-            k,
-            v instanceof File ? `${v.name} (${v.size} bytes)` : v
-          );
-        }
+        Array.from(fileList).forEach((file) => fd.append("Images", file));
 
         const res = await fetch("/api/SliderImages/AddImagesToSlider", {
           method: "POST",
@@ -361,80 +277,34 @@
         return text;
       }
 
-      function extractFilename(url) {
-        try {
-          const u = new URL(url);
-          let base =
-            u.pathname.substring(u.pathname.lastIndexOf("/") + 1) || "image";
-          if (!/\.[a-z0-9]{2,5}$/i.test(base)) base += ".jpg";
-          return base;
-        } catch {
-          return "image.jpg";
-        }
-      }
+      async function apiDeleteImages(ids) {
+        if (!Array.isArray(ids) || ids.length === 0)
+          throw new Error("No image ids.");
+        const fd = new FormData();
+        ids.forEach((id) => fd.append("ImagesIds", String(id)));
 
-      async function downloadURLtoBlob(url) {
-        // May fail due to CORS on some hosts
-        const r = await fetch(url, { mode: "cors" });
-        if (!r.ok) throw new Error("Could not download: " + url);
-        const blob = await r.blob();
-        const name = extractFilename(url);
-        // File constructor is supported widely; fallback is handled by append 3rd arg
-        return new File([blob], name, {
-          type: blob.type || "application/octet-stream",
+        const res = await fetch("/api/SliderImages/DeleteImagesFromSlider", {
+          method: "DELETE",
+          body: fd,
         });
+
+        const text = await res.text(); // API returns text/plain
+        if (!res.ok) throw new Error(text || "Delete failed.");
+        return text;
       }
 
       // ------- state -------
       let allImages = []; // { id, imageURL }[]
-      let filtered = [];
-      let currentPage = 1;
-      const pageSize = 12;
 
       // ------- UI elements -------
       const grid = $("grid");
-      const gridWrap = $("gridWrap");
-      const pagination = $("pagination");
-      const searchInput = $("searchInput");
-      const countLabel = $("countLabel");
-
       const overlay = $("sheetOverlay");
       const sheet = $("imageSheet");
       const form = $("imageForm");
-      const preview = $("preview");
-      const urlInput = $("imageURL");
       const fileInput = $("imageFile");
-      const tabURL = $("tab-url");
-      const tabFile = $("tab-file");
+      const preview = $("preview");
 
-      // ------- fetch list -------
-      async function fetchImages() {
-        try {
-          showSkeleton();
-          const res = await fetch("/api/SliderImages/GetSliderImages");
-          const data = await res.json();
-
-          if (!res.ok || !data?.succeeded) {
-            throw new Error(data?.message || "Failed to load images");
-          }
-
-          // API returns data: [{id, imageURL}]
-          allImages = Array.isArray(data.data) ? data.data : [];
-          applyFilter();
-        } catch (err) {
-          console.error(err);
-          grid.innerHTML = `
-            <div class="col-span-full">
-              <div class="px-6 py-12 text-center text-red-500">Failed to load slider images.</div>
-            </div>`;
-          pagination.innerHTML = "";
-          countLabel.textContent = "0";
-          toast("Failed to load images.", "error");
-        } finally {
-          if (window.lucide?.createIcons) lucide.createIcons();
-        }
-      }
-
+      // ------- skeleton -------
       function showSkeleton(rows = 8) {
         grid.innerHTML = "";
         for (let i = 0; i < rows; i++) {
@@ -449,29 +319,31 @@
             </div>`;
           grid.appendChild(sk);
         }
-        pagination.innerHTML = "";
       }
 
-      // ------- render -------
-      function applyFilter() {
-        const q = searchInput.value.trim().toLowerCase();
-        filtered = q
-          ? allImages.filter((i) =>
-              (i.imageURL || "").toLowerCase().includes(q)
-            )
-          : [...allImages];
-        currentPage = 1;
-        renderPage();
-      }
+      // ------- fetch + render -------
+      async function fetchImages() {
+        try {
+          showSkeleton();
+          const res = await fetch("/api/SliderImages/GetSliderImages");
+          const data = await res.json();
 
-      function renderPage() {
-        const total = filtered.length;
-        countLabel.textContent = total;
-        const totalPages = Math.max(1, Math.ceil(total / pageSize));
-        const start = (currentPage - 1) * pageSize;
-        const pageItems = filtered.slice(start, start + pageSize);
-        renderGrid(pageItems);
-        renderPagination(currentPage, totalPages);
+          if (!res.ok || !data?.succeeded) {
+            throw new Error(data?.message || "Failed to load images");
+          }
+
+          allImages = Array.isArray(data.data) ? data.data : [];
+          renderGrid(allImages);
+        } catch (err) {
+          console.error(err);
+          grid.innerHTML = `
+            <div class="col-span-full">
+              <div class="px-6 py-12 text-center text-red-500">Failed to load slider images.</div>
+            </div>`;
+          toast("Failed to load images.", "error");
+        } finally {
+          if (window.lucide?.createIcons) lucide.createIcons();
+        }
       }
 
       function renderGrid(items) {
@@ -523,10 +395,12 @@
               ${idBadge}
               ${actions}
               <div class="absolute bottom-2 right-2 hidden group-hover:block">
-                <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium shadow"
-                        onclick="deleteSliderImage(${item.id})">
-                  <i data-lucide="trash-2" class="h-4 w-4"></i> Delete
+                <button
+                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium shadow"
+                    onclick="deleteSliderImage(${item.id}, this)">
+                    <i data-lucide="trash-2" class="h-4 w-4"></i> Delete
                 </button>
+
               </div>
             </div>
             <div class="px-4 py-3 flex items-center justify-between gap-3">
@@ -542,44 +416,6 @@
         if (window.lucide?.createIcons) lucide.createIcons();
       }
 
-      function renderPagination(current, totalPages) {
-        pagination.innerHTML = "";
-        const group = document.createElement("div");
-        group.className =
-          "inline-flex overflow-hidden rounded-xl ring-1 ring-gray-200 bg-white shadow-sm";
-
-        const prevBtn = document.createElement("button");
-        prevBtn.textContent = "Previous";
-        prevBtn.disabled = current === 1;
-        prevBtn.className = "px-4 py-2 disabled:opacity-50 hover:bg-gray-50";
-        prevBtn.onclick = () => {
-          if (current > 1) {
-            currentPage--;
-            renderPage();
-          }
-        };
-
-        const info = document.createElement("span");
-        info.className = "px-4 py-2 text-gray-600 border-x border-gray-200";
-        info.textContent = `Page ${current} of ${totalPages}`;
-
-        const nextBtn = document.createElement("button");
-        nextBtn.textContent = "Next";
-        nextBtn.disabled = current === totalPages;
-        nextBtn.className = "px-4 py-2 disabled:opacity-50 hover:bg-gray-50";
-        nextBtn.onclick = () => {
-          if (current < totalPages) {
-            currentPage++;
-            renderPage();
-          }
-        };
-
-        group.appendChild(prevBtn);
-        group.appendChild(info);
-        group.appendChild(nextBtn);
-        pagination.appendChild(group);
-      }
-
       // ------- actions -------
       window.copyURL = async function (encoded) {
         const url = decodeURIComponent(encoded || "");
@@ -591,33 +427,52 @@
         }
       };
 
-      window.deleteSliderImage = async function (id) {
-        // PLACEHOLDER: we'll wire to your DELETE endpoint in the next step
+      window.deleteSliderImage = async function (id, btnEl) {
         const ok = confirm(`Delete image #${id}?`);
         if (!ok) return;
-        toast(
-          "Delete endpoint not wired yet. Share it and I'll plug it in.",
-          "warning"
-        );
-      };
 
-      function openAddSheet() {
-        openSheet("Add Image");
-        // default to URL tab
-        setActiveTab("url");
-        urlInput.focus();
-      }
+        // disable the clicked button while deleting
+        if (btnEl) {
+          btnEl.disabled = true;
+          btnEl.classList.add("opacity-60", "cursor-not-allowed");
+        }
+
+        try {
+          await apiDeleteImages([id]);
+          toast("Image deleted.", "success");
+
+          // Optimistic UI: remove the card locally and re-render
+          allImages = allImages.filter((x) => x.id !== id);
+          // remove card from DOM if we have the button element
+          const card = btnEl?.closest(".group");
+          if (card) card.remove();
+
+          // If you prefer a full refresh instead, uncomment:
+          // await fetchImages();
+        } catch (err) {
+          console.error(err);
+          toast(err.message || "Failed to delete image.", "error");
+        } finally {
+          if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.classList.remove("opacity-60", "cursor-not-allowed");
+          }
+        }
+      };
 
       // ------- sheet/overlay -------
       let lastFocused = null;
+      function openAddSheet() {
+        openSheet("Add Image");
+        fileInput?.focus();
+      }
+
       function openSheet(titleText) {
         $("sheetTitle").textContent = titleText || "Add Image";
         lastFocused = document.activeElement;
         overlay.classList.remove("hidden");
         sheet.classList.remove("hidden");
-        requestAnimationFrame(() => {
-          overlay.classList.remove("opacity-0");
-        });
+        requestAnimationFrame(() => overlay.classList.remove("opacity-0"));
         document.addEventListener("keydown", onEscClose);
       }
       function closeSheet() {
@@ -637,29 +492,38 @@
         if (e.target.closest(".btn-cancel")) closeSheet();
       });
 
-      // tabs
-      function setActiveTab(which) {
-        document.querySelectorAll(".tab-btn").forEach((btn) => {
-          const active = btn.dataset.tab === which;
-          btn.classList.toggle("bg-white", active);
-          btn.classList.toggle("ring-gray-200", active);
-          btn.classList.toggle("bg-transparent", !active);
-          btn.classList.toggle("text-gray-700", !active);
-        });
-        tabURL.classList.toggle("hidden", which !== "url");
-        tabFile.classList.toggle("hidden", which !== "file");
-        updatePreview();
+      // ------- preview -------
+      function updatePreview() {
+        const files = fileInput.files;
+        let src = "";
+        if (files && files.length) {
+          const first = files[0];
+          if (files.length > 1) {
+            preview.innerHTML = `
+              <div class="p-4 text-sm text-gray-600 border-b">Selected ${
+                files.length
+              } files. First shown below.</div>
+              <img src="${URL.createObjectURL(
+                first
+              )}" class="w-full h-auto object-cover aspect-[16/9]" />`;
+            return;
+          }
+          src = URL.createObjectURL(first);
+        }
+        if (!src) {
+          preview.innerHTML = `
+            <div class="aspect-[16/9] bg-gray-100 flex items-center justify-center">
+              <span class="text-gray-400 text-sm">Preview</span>
+            </div>`;
+          return;
+        }
+        preview.innerHTML = `<img src="${src}" alt="preview" class="w-full h-auto object-cover aspect-[16/9]" onerror="this.src='${FALLBACK_DATA_IMG}'" />`;
       }
-      document.querySelectorAll(".tab-btn").forEach((btn) => {
-        btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
-      });
-
-      urlInput.addEventListener("input", updatePreview);
       fileInput.addEventListener("change", updatePreview);
 
+      // ------- form submit -------
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-
         const saveBtn = sheet.querySelector(
           'button[type="submit"][form="imageForm"]'
         );
@@ -667,49 +531,10 @@
         saveBtn.classList.add("opacity-50", "cursor-not-allowed");
 
         try {
-          const usingURLTab = !tabURL.classList.contains("hidden");
-
-          if (usingURLTab) {
-            const raw = urlInput.value.trim();
-            if (!raw) throw new Error("Please enter at least one image URL.");
-
-            // allow multiple, separated by newline or comma
-            const urls = raw
-              .split(/[\n,]+/)
-              .map((s) => s.trim())
-              .filter(Boolean);
-            if (!urls.length)
-              throw new Error("Please enter at least one image URL.");
-
-            const fd = new FormData();
-            for (const u of urls) {
-              try {
-                const file = await downloadURLtoBlob(u);
-                fd.append(`Images`, file);
-              } catch (err) {
-                console.warn("Skipping URL due to CORS:", u, err);
-                toast(
-                  "Couldn’t fetch one URL (CORS). Try uploading the file instead.",
-                  "warning"
-                );
-              }
-            }
-            if (!Array.from(fd.keys()).some((k) => k.startsWith("Images["))) {
-              throw new Error("No valid images to upload.");
-            }
-
-            const res = await fetch("/api/SliderImages/AddImagesToSlider", {
-              method: "POST",
-              body: fd,
-            });
-            const text = await res.text();
-            if (!res.ok) throw new Error(text || "Upload failed.");
-          } else {
-            const files = fileInput.files;
-            if (!files || files.length === 0)
-              throw new Error("Please choose at least one file.");
-            await addImagesFromFiles(files);
-          }
+          const files = fileInput.files;
+          if (!files || files.length === 0)
+            throw new Error("Please choose at least one file.");
+          await addImagesFromFiles(files);
 
           toast("Image(s) added to slider.", "success");
           closeSheet();
@@ -725,39 +550,8 @@
         }
       });
 
-      // Optional: show something sensible when multiple files chosen
-      function updatePreview() {
-        const url = urlInput.value.trim();
-        const file = imageFile.files?.[0];
-        let src = "";
-        if (!tabURL.classList.contains("hidden") && url) {
-          src = url;
-        } else if (!tabFile.classList.contains("hidden") && file) {
-          if (imageFile.files.length > 1) {
-            preview.innerHTML = `
-          <div class="p-4 text-sm text-gray-600 border-b">Selected ${
-            imageFile.files.length
-          } files. First shown below.</div>
-          <img src="${URL.createObjectURL(
-            file
-          )}" class="w-full h-auto object-cover aspect-[16/9]" />
-        `;
-            return;
-          }
-          src = URL.createObjectURL(file);
-        }
-        if (!src) {
-          preview.innerHTML =
-            '<div class="aspect-[16/9] bg-gray-100 flex items-center justify-center"><span class="text-gray-400 text-sm">Preview</span></div>';
-          return;
-        }
-        preview.innerHTML = `<img src="${src}" alt="preview" class="w-full h-auto object-cover aspect-[16/9]" onerror="this.src='${FALLBACK_DATA_IMG}'" />`;
-      }
-
-      // header actions
+      // header action
       $("addImageBtn").addEventListener("click", openAddSheet);
-      $("refreshBtn").addEventListener("click", fetchImages);
-      searchInput.addEventListener("input", applyFilter);
 
       // boot
       function boot() {
