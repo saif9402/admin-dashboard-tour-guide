@@ -340,7 +340,7 @@
 
         const fd = new FormData();
         Array.from(fileList).forEach((file, i) => {
-          fd.append(`Images[${i}].Image`, file); // DTO-style, like Trip
+          fd.append(`Images`, file); // DTO-style, like Trip
         });
 
         // Optional: one-time sanity log
@@ -685,7 +685,6 @@
             for (const u of urls) {
               try {
                 const file = await downloadURLtoBlob(u);
-                const idx = fd.getAll("Images[0].Image").length; // count so far (works because getAll returns only matching key)
                 fd.append(`Images`, file);
               } catch (err) {
                 console.warn("Skipping URL due to CORS:", u, err);
