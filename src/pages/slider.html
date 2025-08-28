@@ -275,6 +275,7 @@
             <input
               type="file"
               id="imageFile"
+              name="Images"
               accept="image/*"
               multiple
               class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm"
@@ -336,13 +337,22 @@
       async function addImagesFromFiles(fileList) {
         if (!fileList || fileList.length === 0)
           throw new Error("No files selected.");
-        const formData = new FormData();
-        Array.from(fileList).forEach((f) =>
-          formData.append("Images", f, f.name)
-        );
+
+        const fd = new FormData();
+        for (const f of Array.from(fileList)) fd.append("Images", f); // exact key
+
+        // DEBUG: confirm the parts look right in the console
+        for (const [k, v] of fd.entries()) {
+          console.log(
+            "FD:",
+            k,
+            v instanceof File ? `${v.name} (${v.size} bytes)` : v
+          );
+        }
+
         const res = await fetch("/api/SliderImages/AddImagesToSlider", {
           method: "POST",
-          body: formData, // let browser set Content-Type + boundary
+          body: fd, // DO NOT set Content-Type yourself
         });
         const text = await res.text(); // API returns text/plain
         if (!res.ok) throw new Error(text || "Upload failed.");
@@ -669,29 +679,25 @@
             if (!urls.length)
               throw new Error("Please enter at least one image URL.");
 
-            const formData = new FormData();
+            const fd = new FormData();
             for (const u of urls) {
               try {
-                const file = await downloadURLtoBlob(u); // may warn on CORS
-                formData.append("Images", file, file.name);
+                const file = await downloadURLtoBlob(u); // may fail due to CORS
+                fd.append("Images", file); // exact key again
               } catch (err) {
-                console.warn(
-                  "Skipping URL due to CORS or fetch error:",
-                  u,
-                  err
-                );
+                console.warn("Skipping URL:", u, err);
                 toast(
                   "Couldn’t fetch one URL (CORS). Try uploading the file instead.",
                   "warning"
                 );
               }
             }
-            if (!formData.has("Images"))
+            if (!fd.has("Images"))
               throw new Error("No valid images to upload.");
 
             const res = await fetch("/api/SliderImages/AddImagesToSlider", {
               method: "POST",
-              body: formData,
+              body: fd,
             });
             const text = await res.text();
             if (!res.ok) throw new Error(text || "Upload failed.");
