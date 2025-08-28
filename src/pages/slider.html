@@ -686,7 +686,7 @@
               try {
                 const file = await downloadURLtoBlob(u);
                 const idx = fd.getAll("Images[0].Image").length; // count so far (works because getAll returns only matching key)
-                fd.append(`Images[${idx}].Image`, file);
+                fd.append(`Images`, file);
               } catch (err) {
                 console.warn("Skipping URL due to CORS:", u, err);
                 toast(
