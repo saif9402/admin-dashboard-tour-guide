@@ -339,9 +339,11 @@
           throw new Error("No files selected.");
 
         const fd = new FormData();
-        for (const f of Array.from(fileList)) fd.append("Images", f); // exact key
+        Array.from(fileList).forEach((file, i) => {
+          fd.append(`Images[${i}].Image`, file); // DTO-style, like Trip
+        });
 
-        // DEBUG: confirm the parts look right in the console
+        // Optional: one-time sanity log
         for (const [k, v] of fd.entries()) {
           console.log(
             "FD:",
@@ -352,7 +354,7 @@
 
         const res = await fetch("/api/SliderImages/AddImagesToSlider", {
           method: "POST",
-          body: fd, // DO NOT set Content-Type yourself
+          body: fd,
         });
         const text = await res.text(); // API returns text/plain
         if (!res.ok) throw new Error(text || "Upload failed.");
@@ -682,18 +684,20 @@
             const fd = new FormData();
             for (const u of urls) {
               try {
-                const file = await downloadURLtoBlob(u); // may fail due to CORS
-                fd.append("Images", file); // exact key again
+                const file = await downloadURLtoBlob(u);
+                const idx = fd.getAll("Images[0].Image").length; // count so far (works because getAll returns only matching key)
+                fd.append(`Images[${idx}].Image`, file);
               } catch (err) {
-                console.warn("Skipping URL:", u, err);
+                console.warn("Skipping URL due to CORS:", u, err);
                 toast(
                   "Couldn’t fetch one URL (CORS). Try uploading the file instead.",
                   "warning"
                 );
               }
             }
-            if (!fd.has("Images"))
+            if (!Array.from(fd.keys()).some((k) => k.startsWith("Images["))) {
               throw new Error("No valid images to upload.");
+            }
 
             const res = await fetch("/api/SliderImages/AddImagesToSlider", {
               method: "POST",
