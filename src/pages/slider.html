@@ -241,6 +241,7 @@
     </div>
 
     <script src="../js/logout.js" defer></script>
+    <script src="../js/ui.js" defer></script>
 
     <script>
       // ------- helpers -------
@@ -255,11 +256,6 @@
             "<rect width='100%' height='100%' fill='url(#g)'/>" +
             "<text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' font-size='36' fill='#9ca3af' font-family='system-ui,Segoe UI,Roboto'>No image</text></svg>"
         );
-
-      function toast(msg, variant = "info") {
-        if (typeof tgToast === "function") tgToast({ variant, message: msg });
-        else alert(msg);
-      }
 
       async function addImagesFromFiles(fileList) {
         if (!fileList || fileList.length === 0)
@@ -288,7 +284,7 @@
           body: fd,
         });
 
-        const text = await res.text(); // API returns text/plain
+        const text = await res.text(); // text/plain
         if (!res.ok) throw new Error(text || "Delete failed.");
         return text;
       }
@@ -340,7 +336,7 @@
             <div class="col-span-full">
               <div class="px-6 py-12 text-center text-red-500">Failed to load slider images.</div>
             </div>`;
-          toast("Failed to load images.", "error");
+          tgToast({ variant: "error", message: "Failed to load images." });
         } finally {
           if (window.lucide?.createIcons) lucide.createIcons();
         }
@@ -378,19 +374,11 @@
               <a href="${safeURL}" target="_blank" rel="noopener" title="Open" class="p-2 rounded-lg bg-white/90 hover:bg-white ring-1 ring-gray-200 shadow-sm">
                 <i data-lucide="external-link" class="h-4 w-4"></i>
               </a>
-              <button title="Copy URL" class="p-2 rounded-lg bg-white/90 hover:bg-white ring-1 ring-gray-200 shadow-sm"
-                      onclick="copyURL('${encodeURIComponent(
-                        safeURL
-                      )}'); return false;">
-                <i data-lucide="copy" class="h-4 w-4"></i>
-              </button>
             </div>`;
 
           card.innerHTML = `
             <div class="relative aspect-[16/9] bg-gray-100 overflow-hidden">
-              <img src="${safeURL}" alt="slider image ${
-            item.id
-          }" class="h-full w-full object-cover"
+              <img src="${safeURL}" alt="slider image ${item.id}" class="h-full w-full object-cover"
                    onerror="this.src='${FALLBACK_DATA_IMG}'" />
               ${idBadge}
               ${actions}
@@ -401,15 +389,10 @@
                     <i data-lucide="trash-2" class="h-4 w-4"></i> Delete
                 </button>
 
+
               </div>
             </div>
-            <div class="px-4 py-3 flex items-center justify-between gap-3">
-              <div class="truncate text-gray-700 text-xs" title="${safeURL}">${safeURL}</div>
-              <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white ring-1 ring-gray-200 hover:bg-gray-50 text-gray-700 text-xs shadow-sm"
-                      onclick="copyURL('${encodeURIComponent(safeURL)}')">
-                <i data-lucide="clipboard" class="h-4 w-4"></i> Copy
-              </button>
-            </div>`;
+            `;
           grid.appendChild(card);
         });
 
@@ -417,18 +400,15 @@
       }
 
       // ------- actions -------
-      window.copyURL = async function (encoded) {
-        const url = decodeURIComponent(encoded || "");
-        try {
-          await navigator.clipboard.writeText(url);
-          toast("Image URL copied.", "success");
-        } catch {
-          toast("Failed to copy.", "error");
-        }
-      };
 
       window.deleteSliderImage = async function (id, btnEl) {
-        const ok = confirm(`Delete image #${id}?`);
+        const ok = await tgConfirm({
+          title: "Delete this image?",
+          body: "This action cannot be undone.",
+          confirmText: "Delete",
+          cancelText: "Cancel",
+          danger: true,
+        });
         if (!ok) return;
 
         // disable the clicked button while deleting
@@ -439,19 +419,18 @@
 
         try {
           await apiDeleteImages([id]);
-          toast("Image deleted.", "success");
+          tgToast({ variant: "success", message: "Image deleted." });
 
-          // Optimistic UI: remove the card locally and re-render
+          // Optimistic UI
           allImages = allImages.filter((x) => x.id !== id);
-          // remove card from DOM if we have the button element
-          const card = btnEl?.closest(".group");
-          if (card) card.remove();
-
-          // If you prefer a full refresh instead, uncomment:
-          // await fetchImages();
+          btnEl?.closest(".group")?.remove();
+          if (!allImages.length) renderGrid(allImages); // show 'No images' state
         } catch (err) {
           console.error(err);
-          toast(err.message || "Failed to delete image.", "error");
+          tgToast({
+            variant: "error",
+            message: err.message || "Failed to delete image.",
+          });
         } finally {
           if (btnEl) {
             btnEl.disabled = false;
@@ -536,14 +515,17 @@
             throw new Error("Please choose at least one file.");
           await addImagesFromFiles(files);
 
-          toast("Image(s) added to slider.", "success");
+          tgToast({ variant: "success", message: "Image(s) added to slider." });
           closeSheet();
           form.reset();
           updatePreview();
           await fetchImages(); // refresh grid
         } catch (err) {
           console.error(err);
-          toast(err.message || "Failed to add images.", "error");
+          tgToast({
+            variant: "error",
+            message: err.message || "Failed to add images.",
+          });
         } finally {
           saveBtn.disabled = false;
           saveBtn.classList.remove("opacity-50", "cursor-not-allowed");
