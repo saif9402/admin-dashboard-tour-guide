@@ -276,6 +276,7 @@
               type="file"
               id="imageFile"
               accept="image/*"
+              multiple
               class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm"
             />
           </div>
@@ -330,6 +331,46 @@
       function toast(msg, variant = "info") {
         if (typeof tgToast === "function") tgToast({ variant, message: msg });
         else alert(msg);
+      }
+
+      async function addImagesFromFiles(fileList) {
+        if (!fileList || fileList.length === 0)
+          throw new Error("No files selected.");
+        const formData = new FormData();
+        Array.from(fileList).forEach((f) =>
+          formData.append("Images", f, f.name)
+        );
+        const res = await fetch("/api/SliderImages/AddImagesToSlider", {
+          method: "POST",
+          body: formData, // let browser set Content-Type + boundary
+        });
+        const text = await res.text(); // API returns text/plain
+        if (!res.ok) throw new Error(text || "Upload failed.");
+        return text;
+      }
+
+      function extractFilename(url) {
+        try {
+          const u = new URL(url);
+          let base =
+            u.pathname.substring(u.pathname.lastIndexOf("/") + 1) || "image";
+          if (!/\.[a-z0-9]{2,5}$/i.test(base)) base += ".jpg";
+          return base;
+        } catch {
+          return "image.jpg";
+        }
+      }
+
+      async function downloadURLtoBlob(url) {
+        // May fail due to CORS on some hosts
+        const r = await fetch(url, { mode: "cors" });
+        if (!r.ok) throw new Error("Could not download: " + url);
+        const blob = await r.blob();
+        const name = extractFilename(url);
+        // File constructor is supported widely; fallback is handled by append 3rd arg
+        return new File([blob], name, {
+          type: blob.type || "application/octet-stream",
+        });
       }
 
       // ------- state -------
@@ -601,58 +642,108 @@
         btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
       });
 
-      // preview
+      urlInput.addEventListener("input", updatePreview);
+      fileInput.addEventListener("change", updatePreview);
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const saveBtn = sheet.querySelector(
+          'button[type="submit"][form="imageForm"]'
+        );
+        saveBtn.disabled = true;
+        saveBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+        try {
+          const usingURLTab = !tabURL.classList.contains("hidden");
+
+          if (usingURLTab) {
+            const raw = urlInput.value.trim();
+            if (!raw) throw new Error("Please enter at least one image URL.");
+
+            // allow multiple, separated by newline or comma
+            const urls = raw
+              .split(/[\n,]+/)
+              .map((s) => s.trim())
+              .filter(Boolean);
+            if (!urls.length)
+              throw new Error("Please enter at least one image URL.");
+
+            const formData = new FormData();
+            for (const u of urls) {
+              try {
+                const file = await downloadURLtoBlob(u); // may warn on CORS
+                formData.append("Images", file, file.name);
+              } catch (err) {
+                console.warn(
+                  "Skipping URL due to CORS or fetch error:",
+                  u,
+                  err
+                );
+                toast(
+                  "Couldn’t fetch one URL (CORS). Try uploading the file instead.",
+                  "warning"
+                );
+              }
+            }
+            if (!formData.has("Images"))
+              throw new Error("No valid images to upload.");
+
+            const res = await fetch("/api/SliderImages/AddImagesToSlider", {
+              method: "POST",
+              body: formData,
+            });
+            const text = await res.text();
+            if (!res.ok) throw new Error(text || "Upload failed.");
+          } else {
+            const files = imageFile.files;
+            if (!files || files.length === 0)
+              throw new Error("Please choose at least one file.");
+            await addImagesFromFiles(files);
+          }
+
+          toast("Image(s) added to slider.", "success");
+          closeSheet();
+          form.reset();
+          updatePreview();
+          await fetchImages(); // refresh grid
+        } catch (err) {
+          console.error(err);
+          toast(err.message || "Failed to add images.", "error");
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+      });
+
+      // Optional: show something sensible when multiple files chosen
       function updatePreview() {
         const url = urlInput.value.trim();
-        const file = fileInput.files?.[0];
+        const file = imageFile.files?.[0];
         let src = "";
         if (!tabURL.classList.contains("hidden") && url) {
           src = url;
         } else if (!tabFile.classList.contains("hidden") && file) {
+          if (imageFile.files.length > 1) {
+            preview.innerHTML = `
+          <div class="p-4 text-sm text-gray-600 border-b">Selected ${
+            imageFile.files.length
+          } files. First shown below.</div>
+          <img src="${URL.createObjectURL(
+            file
+          )}" class="w-full h-auto object-cover aspect-[16/9]" />
+        `;
+            return;
+          }
           src = URL.createObjectURL(file);
         }
         if (!src) {
-          preview.innerHTML = `<div class="aspect-[16/9] bg-gray-100 flex items-center justify-center">
-                                 <span class="text-gray-400 text-sm">Preview</span></div>`;
+          preview.innerHTML =
+            '<div class="aspect-[16/9] bg-gray-100 flex items-center justify-center"><span class="text-gray-400 text-sm">Preview</span></div>';
           return;
         }
         preview.innerHTML = `<img src="${src}" alt="preview" class="w-full h-auto object-cover aspect-[16/9]" onerror="this.src='${FALLBACK_DATA_IMG}'" />`;
       }
-      urlInput.addEventListener("input", updatePreview);
-      fileInput.addEventListener("change", updatePreview);
-
-      // form submit (ADD)
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const useURL = !tabURL.classList.contains("hidden");
-        if (useURL) {
-          const imageURL = urlInput.value.trim();
-          if (!imageURL) {
-            toast("Please enter an image URL.", "error");
-            return;
-          }
-          // PLACEHOLDER POST (URL)
-          console.log("READY TO POST (URL):", { imageURL });
-          toast(
-            "Add (URL) not wired yet. Share the POST endpoint & payload.",
-            "warning"
-          );
-          // After wiring: closeSheet(); await fetchImages();
-        } else {
-          const file = fileInput.files?.[0];
-          if (!file) {
-            toast("Please choose a file.", "error");
-            return;
-          }
-          // PLACEHOLDER POST (FILE upload)
-          console.log("READY TO POST (FILE):", file);
-          toast(
-            "Add (file) not wired yet. Share the upload endpoint.",
-            "warning"
-          );
-          // After wiring: closeSheet(); await fetchImages();
-        }
-      });
 
       // header actions
       $("addImageBtn").addEventListener("click", openAddSheet);
