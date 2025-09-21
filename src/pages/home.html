@@ -763,6 +763,41 @@
         };
       }
 
+      function setLoading(btn, isLoading, text = "Uploading…") {
+        if (!btn) return;
+        if (isLoading) {
+          // remember original
+          if (!btn.dataset._orig) btn.dataset._orig = btn.innerHTML;
+
+          // lock width to avoid layout shift
+          const { width } = btn.getBoundingClientRect();
+          btn.style.width = `${width}px`;
+
+          // visuals + a11y
+          btn.disabled = true;
+          btn.setAttribute("aria-disabled", "true");
+          btn.classList.add(
+            "opacity-60",
+            "cursor-not-allowed",
+            "inline-flex",
+            "items-center",
+            "gap-2"
+          );
+
+          // spinner + label
+          btn.innerHTML = `<i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i><span>${text}</span>`;
+          if (window.lucide?.createIcons) lucide.createIcons();
+        } else {
+          // restore
+          btn.disabled = false;
+          btn.removeAttribute("aria-disabled");
+          btn.classList.remove("opacity-60", "cursor-not-allowed");
+          if (btn.dataset._orig) btn.innerHTML = btn.dataset._orig;
+          btn.style.width = "";
+          if (window.lucide?.createIcons) lucide.createIcons();
+        }
+      }
+
       function formatDateCairo(iso) {
         if (!iso) return "";
         try {
@@ -2196,12 +2231,16 @@
               message:
                 "No trip selected. Create a trip first or open an existing one.",
             });
-
             return;
           }
 
-          const fileInput = document.getElementById("tripImages");
-          const files = Array.from(fileInput.files);
+          const formEl = e.target;
+          const fileInput = formEl.querySelector("#tripImages");
+          const submitBtn =
+            e.submitter || formEl.querySelector('button[type="submit"]');
+          const delBtn = document.getElementById("deleteSelectedImagesBtn");
+
+          const files = Array.from(fileInput.files || []);
           if (!files.length) {
             tgToast({
               variant: "info",
@@ -2210,10 +2249,16 @@
             return;
           }
 
-          // Build payload: one (and only one) image can be marked as main
+          // UI: lock things while uploading
+          formEl.setAttribute("aria-busy", "true");
+          fileInput.disabled = true;
+          if (delBtn) delBtn.disabled = true;
+          setLoading(submitBtn, true, "Uploading…");
+
+          // Build payload: only one "main"
           const formData = new FormData();
           files.forEach((file, index) => {
-            const isMain = file.name === mainImageName; // checkbox you already wired in preview
+            const isMain = file.name === mainImageName;
             formData.append(`images[${index}].Image`, file);
             formData.append(`images[${index}].IsMainImage`, String(isMain));
           });
@@ -2249,7 +2294,7 @@
               document.getElementById("imagePreview").innerHTML = "";
               mainImageName = null;
 
-              // Refresh existing images — backend will have set the new main
+              // Refresh existing images — backend may have changed the main
               await fetchAndRenderTripMedia(currentTripId);
 
               // Clear any pending delete selections
@@ -2270,6 +2315,12 @@
               variant: "error",
               message: "An error occurred while uploading images.",
             });
+          } finally {
+            // Always restore UI
+            setLoading(submitBtn, false);
+            fileInput.disabled = false;
+            if (delBtn) updateDeleteButtonState(); // re-enable based on selections
+            formEl.removeAttribute("aria-busy");
           }
         });
 
