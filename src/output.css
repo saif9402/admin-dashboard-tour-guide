@@ -433,6 +433,9 @@
   .hidden {
     display: none;
   }
+  .inline {
+    display: inline;
+  }
   .inline-block {
     display: inline-block;
   }
@@ -1326,6 +1329,9 @@
   }
   .ring-indigo-200 {
     --tw-ring-color: var(--color-indigo-200);
+  }
+  .ring-red-100 {
+    --tw-ring-color: var(--color-red-100);
   }
   .ring-red-400 {
     --tw-ring-color: var(--color-red-400);
