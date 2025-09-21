@@ -1,4 +1,4 @@
-/*! tailwindcss v4.1.12 | MIT License | https://tailwindcss.com */
+/*! tailwindcss v4.1.13 | MIT License | https://tailwindcss.com */
 @layer properties;
 @layer theme, base, components, utilities;
 @layer theme {
@@ -261,7 +261,7 @@
     padding: 0;
     margin: -1px;
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
     white-space: nowrap;
     border-width: 0;
   }
@@ -432,9 +432,6 @@
   }
   .hidden {
     display: none;
-  }
-  .inline {
-    display: inline;
   }
   .inline-block {
     display: inline-block;
@@ -752,11 +749,6 @@
       border-color: var(--color-gray-100);
     }
   }
-  .truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
   .overflow-hidden {
     overflow: hidden;
   }
@@ -912,9 +904,6 @@
   .bg-rose-600 {
     background-color: var(--color-rose-600);
   }
-  .bg-transparent {
-    background-color: transparent;
-  }
   .bg-violet-50 {
     background-color: var(--color-violet-50);
   }
@@ -941,9 +930,6 @@
   }
   .bg-yellow-100 {
     background-color: var(--color-yellow-100);
-  }
-  .bg-yellow-400 {
-    background-color: var(--color-yellow-400);
   }
   .bg-gradient-to-r {
     --tw-gradient-position: to right in oklab;
@@ -1166,9 +1152,6 @@
   .text-amber-800 {
     color: var(--color-amber-800);
   }
-  .text-black {
-    color: var(--color-black);
-  }
   .text-blue-600 {
     color: var(--color-blue-600);
   }
@@ -1237,9 +1220,6 @@
   }
   .text-white {
     color: var(--color-white);
-  }
-  .text-yellow-600 {
-    color: var(--color-yellow-600);
   }
   .text-yellow-800 {
     color: var(--color-yellow-800);
@@ -1347,9 +1327,6 @@
   .ring-indigo-200 {
     --tw-ring-color: var(--color-indigo-200);
   }
-  .ring-red-100 {
-    --tw-ring-color: var(--color-red-100);
-  }
   .ring-red-400 {
     --tw-ring-color: var(--color-red-400);
   }
@@ -1361,9 +1338,6 @@
   }
   .ring-rose-300 {
     --tw-ring-color: var(--color-rose-300);
-  }
-  .ring-transparent {
-    --tw-ring-color: transparent;
   }
   .ring-violet-100 {
     --tw-ring-color: var(--color-violet-100);
@@ -1405,7 +1379,7 @@
     backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
   }
   .transition {
-    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, visibility, content-visibility, overlay, pointer-events;
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
@@ -1586,13 +1560,6 @@
       }
     }
   }
-  .hover\:bg-yellow-500 {
-    &:hover {
-      @media (hover: hover) {
-        background-color: var(--color-yellow-500);
-      }
-    }
-  }
   .hover\:text-blue-700 {
     &:hover {
       @media (hover: hover) {
@@ -1618,13 +1585,6 @@
     &:hover {
       @media (hover: hover) {
         color: var(--color-red-600);
-      }
-    }
-  }
-  .hover\:text-yellow-700 {
-    &:hover {
-      @media (hover: hover) {
-        color: var(--color-yellow-700);
       }
     }
   }
